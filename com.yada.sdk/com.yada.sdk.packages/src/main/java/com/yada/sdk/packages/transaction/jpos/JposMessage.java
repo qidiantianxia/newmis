@@ -7,9 +7,9 @@ import org.jpos.iso.ISOException;
 import org.jpos.iso.ISOMsg;
 
 import com.yada.sdk.packages.PackagingException;
-import com.yada.sdk.packages.transaction.IFinancialTransactionCardOriginatedMessages;
+import com.yada.sdk.packages.transaction.IMessages;
 
-public class JposMessage implements IFinancialTransactionCardOriginatedMessages {
+public class JposMessage implements IMessages {
 	/**
 	 * JPOS的包对象
 	 */

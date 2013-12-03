@@ -18,7 +18,7 @@ public interface IPacker {
 	 * @param pkgs
 	 * @return
 	 */
-	public ByteBuffer pack(IFinancialTransactionCardOriginatedMessages message) throws PackagingException;
+	public ByteBuffer pack(IMessages message) throws PackagingException;
 
 	/**
 	 * 解包
@@ -26,6 +26,6 @@ public interface IPacker {
 	 * @param byteBuffer
 	 * @return
 	 */
-	public IFinancialTransactionCardOriginatedMessages unpack(ByteBuffer byteBuffer) throws PackagingException;
+	public IMessages unpack(ByteBuffer byteBuffer) throws PackagingException;
 
 }

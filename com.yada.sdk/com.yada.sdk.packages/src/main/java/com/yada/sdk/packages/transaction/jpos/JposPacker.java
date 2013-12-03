@@ -16,7 +16,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import com.yada.sdk.packages.PackagingException;
-import com.yada.sdk.packages.transaction.IFinancialTransactionCardOriginatedMessages;
+import com.yada.sdk.packages.transaction.IMessages;
 import com.yada.sdk.packages.transaction.IPacker;
 
 /**
@@ -103,7 +103,7 @@ public class JposPacker implements IPacker {
 	}
 
 	@Override
-	public ByteBuffer pack(IFinancialTransactionCardOriginatedMessages message) throws PackagingException {
+	public ByteBuffer pack(IMessages message) throws PackagingException {
 		try {
 			JposMessage msg = (JposMessage) message;
 			ISOPackager tempPacker = msg.getIsoMsg().getPackager();
@@ -118,7 +118,7 @@ public class JposPacker implements IPacker {
 	}
 
 	@Override
-	public IFinancialTransactionCardOriginatedMessages unpack(ByteBuffer byteBuffer) throws PackagingException {
+	public IMessages unpack(ByteBuffer byteBuffer) throws PackagingException {
 		try {
 			byte[] bts = new byte[byteBuffer.remaining()];
 			byteBuffer.get(bts);

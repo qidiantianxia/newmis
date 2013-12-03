@@ -1,6 +1,6 @@
 package com.yada.sdk.device.pos;
 
-import com.yada.sdk.packages.transaction.IFinancialTransactionCardOriginatedMessages;
+import com.yada.sdk.packages.transaction.IMessages;
 
 public class VirtualPos {
 	public VirtualPos()
@@ -8,7 +8,7 @@ public class VirtualPos {
 		
 	}
 	
-	public IFinancialTransactionCardOriginatedMessages send(IFinancialTransactionCardOriginatedMessages message)
+	public IMessages send(IMessages message)
 	{
 		return null;
 	}

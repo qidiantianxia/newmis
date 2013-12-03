@@ -5,7 +5,7 @@ import java.nio.ByteBuffer;
 import java.nio.charset.Charset;
 
 import com.yada.sdk.packages.PackagingException;
-import com.yada.sdk.packages.transaction.IFinancialTransactionCardOriginatedMessages;
+import com.yada.sdk.packages.transaction.IMessages;
 
 public class JposPackerRunTest {
 
@@ -16,7 +16,7 @@ public class JposPackerRunTest {
 		receMsg = receMsg.replaceAll(" ", "");
 //		receMsg = receMsg.substring(8);
 		try {
-			IFinancialTransactionCardOriginatedMessages message = packer.unpack(ByteBuffer.wrap(hexDecode(receMsg)));
+			IMessages message = packer.unpack(ByteBuffer.wrap(hexDecode(receMsg)));
 			Charset charset = Charset.forName("ASCII");
 			message.setField(49, ByteBuffer.wrap("157".getBytes()));
 			packer.pack(message);
