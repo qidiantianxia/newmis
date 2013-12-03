@@ -1,6 +1,6 @@
 package com.yada.sdk.device.pos;
 
-import com.yada.sdk.packages.transaction.IMessages;
+import com.yada.sdk.packages.transaction.IMessage;
 
 public class VirtualPos {
 	public VirtualPos()
@@ -8,7 +8,7 @@ public class VirtualPos {
 		
 	}
 	
-	public IMessages send(IMessages message)
+	public IMessage send(IMessage message)
 	{
 		return null;
 	}

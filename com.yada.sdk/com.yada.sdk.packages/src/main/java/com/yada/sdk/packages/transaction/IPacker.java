@@ -18,7 +18,7 @@ public interface IPacker {
 	 * @param pkgs
 	 * @return
 	 */
-	public ByteBuffer pack(IMessages message) throws PackagingException;
+	public ByteBuffer pack(IMessage message) throws PackagingException;
 
 	/**
 	 * 解包
@@ -26,6 +26,6 @@ public interface IPacker {
 	 * @param byteBuffer
 	 * @return
 	 */
-	public IMessages unpack(ByteBuffer byteBuffer) throws PackagingException;
+	public IMessage unpack(ByteBuffer byteBuffer) throws PackagingException;
 
 }

@@ -10,7 +10,7 @@ import com.yada.sdk.packages.PackagingException;
  * @author jiangfengming
  * 
  */
-public interface IMessages {
+public interface IMessage {
 	/**
 	 * 判断域是否存在
 	 * 

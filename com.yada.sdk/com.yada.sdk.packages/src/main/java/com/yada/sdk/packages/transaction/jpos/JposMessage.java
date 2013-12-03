@@ -7,9 +7,9 @@ import org.jpos.iso.ISOException;
 import org.jpos.iso.ISOMsg;
 
 import com.yada.sdk.packages.PackagingException;
-import com.yada.sdk.packages.transaction.IMessages;
+import com.yada.sdk.packages.transaction.IMessage;
 
-public class JposMessage implements IMessages {
+public class JposMessage implements IMessage {
 	/**
 	 * JPOS的包对象
 	 */
