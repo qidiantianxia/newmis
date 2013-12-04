@@ -107,7 +107,7 @@ public class DataTransceivers {
 	 *             当线程被中断时抛出
 	 */
 	public void send(ByteBuffer buffer) throws InterruptedException {
-		bufferQueue.put(buffer);
+		bufferQueue.put(splitter.pack(buffer));
 	}
 
 	/**

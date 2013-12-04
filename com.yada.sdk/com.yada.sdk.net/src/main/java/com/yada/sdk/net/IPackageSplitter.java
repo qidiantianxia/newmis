@@ -9,4 +9,5 @@ import java.nio.ByteBuffer;
  */
 public interface IPackageSplitter {
 	ByteBuffer getPackage(ByteBuffer newData);
+	ByteBuffer pack(ByteBuffer newData);
 }

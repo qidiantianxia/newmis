@@ -60,6 +60,11 @@ public class TcpServiceTest extends TestCase {
 					buffer.put(newData);
 					buffer.flip();
 					return buffer;
+				}
+
+				@Override
+				public ByteBuffer pack(ByteBuffer newData) {
+					return newData;
 				}};
 			return splitter;
 		}
