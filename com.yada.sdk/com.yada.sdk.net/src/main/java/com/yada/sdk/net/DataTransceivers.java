@@ -73,7 +73,7 @@ public class DataTransceivers {
 		// 构建阻塞队列
 		bufferQueue = new LinkedBlockingQueue<ByteBuffer>();
 
-		pool = Executors.newFixedThreadPool(500);
+		pool = Executors.newFixedThreadPool(50);
 		pool.execute(new Runnable() {
 
 			@Override
