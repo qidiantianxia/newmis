@@ -106,12 +106,12 @@ public class JposMessage extends ISOMsg implements IMessage {
 
 	@Override
 	public String getTranId() {
-		return tranIdParser == null ? null : tranIdParser.getTranId();
+		return tranIdParser == null ? null : tranIdParser.getTranId(this);
 	}
 
 	@Override
 	public String getOrgTranId() {
-		return tranIdParser == null ? null : tranIdParser.getOrgTranId();
+		return tranIdParser == null ? null : tranIdParser.getOrgTranId(this);
 	}
 
 }

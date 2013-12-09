@@ -26,13 +26,13 @@ public class PospPacker extends JposPacker {
 	{
 
 		@Override
-		public String getTranId() {
+		public String getTranId(JposMessage message) {
 			// TODO Auto-generated method stub
 			return null;
 		}
 
 		@Override
-		public String getOrgTranId() {
+		public String getOrgTranId(JposMessage message) {
 			// TODO Auto-generated method stub
 			return null;
 		}
