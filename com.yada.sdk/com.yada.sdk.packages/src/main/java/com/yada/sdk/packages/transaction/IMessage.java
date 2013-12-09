@@ -89,4 +89,16 @@ public interface IMessage {
 	 * @throws PackagingException
 	 */
 	public void setTpduToAddress(ByteBuffer tpduFromAddress) throws PackagingException;
+	
+	/**
+	 * 获取交易信息的唯一标识
+	 * @return 交易标识
+	 */
+	public String getTranId();
+	
+	/**
+	 * 获取交易信息原始交易的唯一标识
+	 * @return 原始交易的唯一标识
+	 */
+	public String getOrgTranId();
 }

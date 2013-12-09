@@ -13,7 +13,7 @@ import org.slf4j.Logger;
  * @author jiangfengming
  * 
  */
-public class JposLogDebugListener implements LogListener {
+class JposLogDebugListener implements LogListener {
 	private Logger logger;
 
 	public JposLogDebugListener(Logger logger) {

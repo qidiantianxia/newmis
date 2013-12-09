@@ -100,32 +100,32 @@
       id="37"
       length="12"
       name="Retrieval Reference Number"
-      class="com.yada.package8583.jpos.extend.IF_GBK_CHAR"/>
+      class="com.yada.sdk.packages.transaction.jpos.extend.IF_GBK_CHAR"/>
   <isofield
       id="38"
       length="6"
       name="Authorization Identification Response"
-      class="com.yada.package8583.jpos.extend.IF_GBK_CHAR"/>
+      class="com.yada.sdk.packages.transaction.jpos.extend.IF_GBK_CHAR"/>
   <isofield
       id="39"
       length="2"
       name="Response Code"
-      class="com.yada.package8583.jpos.extend.IF_GBK_CHAR"/>
+      class="com.yada.sdk.packages.transaction.jpos.extend.IF_GBK_CHAR"/>
   <isofield
       id="41"
       length="8"
       name="Card Acceptor Terminal Identification"
-      class="com.yada.package8583.jpos.extend.IF_GBK_CHAR"/>
+      class="com.yada.sdk.packages.transaction.jpos.extend.IF_GBK_CHAR"/>
   <isofield
       id="42"
       length="15"
       name="Card Acceptor Identification Code"
-      class="com.yada.package8583.jpos.extend.IF_GBK_CHAR"/>
+      class="com.yada.sdk.packages.transaction.jpos.extend.IF_GBK_CHAR"/>
   <isofield
       id="44"
       length="25"
       name="Additional Response Data"
-      class="com.yada.package8583.jpos.extend.IFB_GBK_LLCHAR"/>
+      class="com.yada.sdk.packages.transaction.jpos.extend.IFB_GBK_LLCHAR"/>
   <isofield
       id="48"
       length="512"
@@ -136,7 +136,7 @@
       length="3"
       name="Currency Code, Transaction"
       pad="true"
-      class="com.yada.package8583.jpos.extend.IF_GBK_CHAR"/>
+      class="com.yada.sdk.packages.transaction.jpos.extend.IF_GBK_CHAR"/>
   <isofield
       id="52"
       length="8"
@@ -151,7 +151,7 @@
       id="54"
       length="20"
       name="Additional Amounts"
-      class="com.yada.package8583.jpos.extend.IFB_GBK_LLLCHAR"/>
+      class="com.yada.sdk.packages.transaction.jpos.extend.IFB_GBK_LLLCHAR"/>
   <isofield
       id="55"
       length="255"
@@ -161,7 +161,7 @@
       id="58"
       length="100"
       name="IC(PBOC) Data Reserved"
-      class="com.yada.package8583.jpos.extend.IFA_GBK_LLLCHAR"/>   
+      class="com.yada.sdk.packages.transaction.jpos.extend.IFA_GBK_LLLCHAR"/>   
   <isofield
       id="60"
       length="17"
@@ -181,7 +181,7 @@
       id="63"
       length="163"
       name="Finacial Network Data"
-      class="com.yada.package8583.jpos.extend.IFB_GBK_LLLCHAR"/>
+      class="com.yada.sdk.packages.transaction.jpos.extend.IFB_GBK_LLLCHAR"/>
   <isofield
       id="64"
       length="8"

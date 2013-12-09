@@ -9,35 +9,29 @@ import org.jpos.iso.ISOMsg;
 import com.yada.sdk.packages.PackagingException;
 import com.yada.sdk.packages.transaction.IMessage;
 
-public class JposMessage implements IMessage {
-	/**
-	 * JPOS的包对象
-	 */
-	private ISOMsg isoMsg;
+public class JposMessage extends ISOMsg implements IMessage {
 
-	public JposMessage() {
-		this.isoMsg = new ISOMsg();
+	private ITranIdParser tranIdParser;
+	
+	void setTranIdParser(ITranIdParser tranIdParser)
+	{
+		this.tranIdParser = tranIdParser;
 	}
-
-	@Override
-	public boolean hasField(int fieldId) {
-		return this.isoMsg.hasField(fieldId);
-	}
-
+	
 	@Override
 	public ByteBuffer getField(int fieldId) {
-		return ByteBuffer.wrap(isoMsg.getBytes(fieldId));
+		return ByteBuffer.wrap(this.getBytes(fieldId));
 	}
 
 	@Override
 	public String getFieldString(int fieldId) {
-		return isoMsg.getString(fieldId);
+		return this.getString(fieldId);
 	}
 
 	@Override
 	public void setFieldString(int fieldId, String fieldValue) throws PackagingException {
 		try {
-			isoMsg.set(fieldId, fieldValue);
+			this.set(fieldId, fieldValue);
 		} catch (ISOException e) {
 			throw new PackagingException(e);
 		}
@@ -48,25 +42,21 @@ public class JposMessage implements IMessage {
 		byte[] bts = new byte[fieldValue.remaining()];
 		fieldValue.get(bts);
 		try {
-			isoMsg.set(fieldId, bts);
+			this.set(fieldId, bts);
 		} catch (ISOException e) {
 			throw new PackagingException(e);
 		}
 	}
 
-	public ISOMsg getIsoMsg() {
-		return isoMsg;
-	}
-
 	@Override
 	public int getFieldMaxLen(int fieldId) {
-		ISOBasePackager packer = (ISOBasePackager) isoMsg.getPackager();
+		ISOBasePackager packer = (ISOBasePackager) this.getPackager();
 		return packer.getFieldPackager(fieldId).getLength();
 	}
 
 	@Override
 	public ByteBuffer getTpduFromAddress() throws PackagingException {
-		byte[] header = isoMsg.getHeader();
+		byte[] header = this.getHeader();
 		if (header == null || header.length < 5) {
 			throw new PackagingException("There is not TPDU header in this message");
 		}
@@ -77,7 +67,7 @@ public class JposMessage implements IMessage {
 
 	@Override
 	public ByteBuffer getTpduToAddress() throws PackagingException {
-		byte[] header = isoMsg.getHeader();
+		byte[] header = this.getHeader();
 		if (header == null || header.length < 5) {
 			throw new PackagingException("There is not TPDU header in this message");
 		}
@@ -88,7 +78,7 @@ public class JposMessage implements IMessage {
 
 	@Override
 	public void setTpduFromAddress(ByteBuffer tpduFromAddress) throws PackagingException {
-		byte[] header = isoMsg.getHeader();
+		byte[] header = this.getHeader();
 		if (header == null || header.length < 5) {
 			throw new PackagingException("You can`t do that. Because TPDU head is null or its len less than 5");
 		}
@@ -97,12 +87,12 @@ public class JposMessage implements IMessage {
 		}
 		header[3] = tpduFromAddress.get();
 		header[4] = tpduFromAddress.get();
-		isoMsg.setHeader(header);
+		this.setHeader(header);
 	}
 
 	@Override
 	public void setTpduToAddress(ByteBuffer tpduFromAddress) throws PackagingException {
-		byte[] header = isoMsg.getHeader();
+		byte[] header = this.getHeader();
 		if (header == null || header.length < 5) {
 			throw new PackagingException("You can`t do that. Because TPDU head is null or its len less than 5");
 		}
@@ -111,7 +101,17 @@ public class JposMessage implements IMessage {
 		}
 		header[1] = tpduFromAddress.get();
 		header[2] = tpduFromAddress.get();
-		isoMsg.setHeader(header);
+		this.setHeader(header);
+	}
+
+	@Override
+	public String getTranId() {
+		return tranIdParser == null ? null : tranIdParser.getTranId();
+	}
+
+	@Override
+	public String getOrgTranId() {
+		return tranIdParser == null ? null : tranIdParser.getOrgTranId();
 	}
 
 }

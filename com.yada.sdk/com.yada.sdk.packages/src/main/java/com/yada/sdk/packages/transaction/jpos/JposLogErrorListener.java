@@ -13,7 +13,7 @@ import org.slf4j.Logger;
  * @author jiangfengming
  * 
  */
-public class JposLogErrorListener implements LogListener {
+class JposLogErrorListener implements LogListener {
 	private Logger logger;
 
 	public JposLogErrorListener(Logger logger) {

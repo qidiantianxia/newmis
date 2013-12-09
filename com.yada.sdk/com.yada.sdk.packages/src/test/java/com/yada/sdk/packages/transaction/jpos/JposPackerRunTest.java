@@ -4,12 +4,14 @@ import java.io.InputStream;
 import java.nio.ByteBuffer;
 import java.nio.charset.Charset;
 
+import org.jpos.iso.ISOException;
+
 import com.yada.sdk.packages.PackagingException;
 import com.yada.sdk.packages.transaction.IMessage;
 
 public class JposPackerRunTest {
 
-	public static void main(String[] args) {
+	public static void main(String[] args) throws ISOException {
 		InputStream is = JposPackerRunTest.class.getResourceAsStream(JposPackerRunTest.class.getSimpleName() + ".xml");
 		JposPacker packer = new JposPacker(4, is);
 		String receMsg = "00 00 00 D6 30 31 31 30 37 32 33 41 38 30 38 31 38 45 43 30 38 30 31 30 31 36 35 31 34 39 35 38 37 37 30 37 33 35 36 38 34 33 30 30 30 30 30 30 30 30 30 30 30 30 30 30 30 31 32 33 30 37 31 39 31 30 35 31 30 30 31 32 33 34 32 31 31 30 35 31 30 30 30 37 31 39 30 37 31 39 30 37 31 39 30 38 30 38 30 31 30 34 31 31 30 30 30 36 31 38 33 30 30 31 33 31 39 39 31 30 31 32 33 34 32 31 37 38 35 37 38 37 30 30 36 35 30 31 30 30 32 34 31 30 34 36 35 30 30 35 33 31 31 30 30 31 31 31 35 36 30 35 35 50 44 30 35 30 30 30 30 30 30 30 30 30 30 30 30 30 30 30 30 30 30 30 30 30 30 30 30 30 30 30 30 30 30 30 30 30 30 30 30 30 30 30 30 30 30 30 30 30 30 30 30 30 30 30";

@@ -4,14 +4,12 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.nio.ByteBuffer;
 import java.nio.file.Files;
-import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.nio.file.StandardOpenOption;
 
 import org.jpos.iso.ISOException;
 import org.jpos.iso.ISOPackager;
 import org.jpos.iso.packager.GenericPackager;
-import org.jpos.util.SimpleLogListener;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -48,16 +46,11 @@ public class JposPacker implements IPacker {
 	 *            头长度
 	 * @param filePath
 	 *            配置文件路径
+	 * @throws IOException 
+	 * @throws ISOException 
 	 */
-	public JposPacker(int headLength, String filePath) {
-		try {
-			Path path = Paths.get(filePath);
-			instance(headLength, Files.newInputStream(path, StandardOpenOption.READ));
-			fileName = path.getFileName().toString();
-			logger = LoggerFactory.getLogger(JposPacker.class);
-		} catch (IOException e) {
-			throw new RuntimeException("JposPacker initialize failed.", e);
-		}
+	public JposPacker(int headLength, String filePath) throws ISOException, IOException {
+		this(headLength, Files.newInputStream(Paths.get(filePath), StandardOpenOption.READ));
 	}
 
 	/**
@@ -66,52 +59,27 @@ public class JposPacker implements IPacker {
 	 *            头长度
 	 * @param inputStream
 	 *            配置文件输入流
+	 * @throws ISOException 
 	 */
-	public JposPacker(int headLength, InputStream inputStream) {
-		instance(headLength, inputStream);
-	}
-
-	/**
-	 * 通过流初始化
-	 * 
-	 * @param inputStream
-	 */
-	private void instance(int headLength, InputStream inputStream) {
-		try {
-			packer = new GenericPackager(inputStream);
-			packer.setHeaderLength(headLength);
-			if (logger != null) {
-				if (logger.isDebugEnabled()) {
-					// DEBUG级别
-					org.jpos.util.Logger l = new org.jpos.util.Logger();
-					l.addListener(new JposLogDebugListener(logger));
-					packer.setLogger(l, fileName);
-				} else {
-					// ERROR级别
-					org.jpos.util.Logger l = new org.jpos.util.Logger();
-					l.addListener(new JposLogErrorListener(logger));
-					packer.setLogger(l, fileName);
-				}
-			} else {
-				org.jpos.util.Logger l = new org.jpos.util.Logger();
-				l.addListener(new SimpleLogListener());
-				packer.setLogger(l, "Test");
-			}
-		} catch (ISOException e) {
-			throw new RuntimeException("JposPacker initialize failed.", e);
-		}
+	public JposPacker(int headLength, InputStream inputStream) throws ISOException {
+		packer = new GenericPackager(inputStream);
+		packer.setHeaderLength(headLength);
+		logger = LoggerFactory.getLogger(JposPacker.class);
+		org.jpos.util.Logger l = new org.jpos.util.Logger();
+		l.addListener(new JposLogDebugListener(logger));
+		packer.setLogger(l, fileName);
 	}
 
 	@Override
 	public ByteBuffer pack(IMessage message) throws PackagingException {
 		try {
 			JposMessage msg = (JposMessage) message;
-			ISOPackager tempPacker = msg.getIsoMsg().getPackager();
+			ISOPackager tempPacker = msg.getPackager();
 			if (tempPacker == null) {
 				// 如果为null，则为手工创建的message，设置默认的packer。
-				msg.getIsoMsg().setPackager(packer);
+				msg.setPackager(packer);
 			}
-			return ByteBuffer.wrap(msg.getIsoMsg().pack());
+			return ByteBuffer.wrap(msg.pack());
 		} catch (Exception e) {
 			throw new PackagingException(e);
 		}
@@ -124,8 +92,8 @@ public class JposPacker implements IPacker {
 			byteBuffer.get(bts);
 			JposMessage message = new JposMessage();
 			// packer.unpack(message.getIsoMsg(), bts);
-			message.getIsoMsg().setPackager(packer);
-			message.getIsoMsg().unpack(bts);
+			message.setPackager(packer);
+			message.unpack(bts);
 			return message;
 		} catch (Exception e) {
 			throw new PackagingException(e);
