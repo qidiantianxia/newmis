@@ -1,34 +1,12 @@
 package com.yada.sdk.packages.transaction.jpos;
 
 import java.io.IOException;
-import java.util.List;
 
 import junit.framework.TestCase;
 
 import com.yada.sdk.packages.comm.Tlv;
-import com.yada.sdk.packages.comm.TlvParser;
-import com.yada.sdk.packages.comm.TlvParser.TLVException;
 
 public class TlvTester extends TestCase {
-	public void test() throws TLVException {
-		byte[] buffer = new byte[] { 0x01, 0x01, 0x30, 0x02, 0x02, 0x31 };
-		TlvParser tlv = new TlvParser(buffer);
-		byte[] result = tlv.getValue();
-
-		for (int i = 0; i < buffer.length; i++) {
-			assertTrue(buffer[i] == result[i]);
-		}
-
-		List<TlvParser> listTlv = tlv.getChildren();
-
-		assertTrue(listTlv.size() == 2);
-
-		result = listTlv.get(0).getValue();
-
-		for (int i = 0; i < result.length; i++) {
-			assertTrue(buffer[i + 2] == result[i]);
-		}
-	}
 
 	public void testTlv() throws IOException {
 		Tlv testTlv = new Tlv();
