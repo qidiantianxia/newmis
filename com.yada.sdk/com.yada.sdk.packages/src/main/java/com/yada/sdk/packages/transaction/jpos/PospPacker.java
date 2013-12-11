@@ -25,7 +25,7 @@ public class PospPacker extends JposPacker {
 
 		@Override
 		public String getTranId(JposMessage message) {
-			String termId = message.getFieldString(42);
+			String termId = message.getFieldString(41);
 			String tranDate = message.getFieldString(13);
 			if (tranDate == null) {
 				tranDate = "";
