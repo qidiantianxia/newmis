@@ -1,0 +1,136 @@
+package com.yada.sdk.packages.comm;
+
+import java.util.LinkedList;
+import java.util.List;
+
+public class TlvParser {
+
+	public class TLVException extends Exception {
+
+		private static final long serialVersionUID = -2427261641980591073L;
+	}
+
+	private static final int TAG_TOPLEVEL = 0xFFFF;
+
+	private byte[] mValue;
+
+	private int mIndex;
+
+	private int mLength;
+
+	private int mTag;
+
+	private List<TlvParser> mChildren;
+
+	public TlvParser(byte[] value) throws TLVException {
+		this(value, 0, value.length, TAG_TOPLEVEL);
+	}
+
+	private TlvParser(byte[] value, int index, int length, int tag)
+			throws TLVException {
+		if (value == null)
+			throw new IllegalArgumentException("value must not be null");
+
+		mValue = value;
+		mIndex = index;
+		mLength = length;
+		mTag = tag;
+		mChildren = new LinkedList<TlvParser>();
+
+		if (isConstructed()) {
+			parse();
+		}
+	}
+
+	public int getTag() {
+		return mTag;
+	}
+
+	public byte[] getValue() {
+		byte[] newArray = new byte[mLength];
+		System.arraycopy(mValue, mIndex, newArray, 0, mLength);
+		return newArray;
+	}
+
+	public List<TlvParser> getChildren() {
+		return mChildren;
+	}
+
+	public boolean isConstructed() {
+		final int CONSTRUCTED_BIT = 0x20;
+		return (getFirstTagByte(mTag) & CONSTRUCTED_BIT) != 0;
+	}
+
+	private void parse() throws TLVException {
+		int index = mIndex;
+		int endIndex = mIndex + mLength;
+
+		while (index < endIndex) {
+			int tag = getNext(index++);
+
+			if (tag == 0x00 || tag == 0xFF)
+				continue;
+
+			if (tagHasMultipleBytes(tag)) {
+				tag <<= 8;
+				tag |= getNext(index++);
+
+				if (tagHasAnotherByte(tag)) {
+					tag <<= 8;
+					tag |= getNext(index++);
+				}
+
+				if (tagHasAnotherByte(tag))
+					throw new TLVException();
+			}
+
+			int length = getNext(index++);
+
+			if (length >= 0x80) {
+				int numLengthBytes = (length & 0x7F);
+
+				if (numLengthBytes > 3)
+					throw new TLVException();
+
+				length = 0;
+
+				for (int i = 0; i < numLengthBytes; i++) {
+					length <<= 8;
+					length |= getNext(index++);
+				}
+			}
+
+			TlvParser tlv = new TlvParser(mValue, index, length, tag);
+			mChildren.add(tlv);
+			index += tlv.getLength();
+		}
+	}
+
+	private int getLength() {
+		return mLength;
+	}
+
+	private int getNext(int index) throws TLVException {
+		if (index < mIndex || index >= mIndex + mLength)
+			throw new TLVException();
+
+		return (mValue[index] & 0xFF);
+	}
+
+	private static int getFirstTagByte(int tag) {
+		while (tag > 0xFF)
+			tag >>= 8;
+
+		return tag;
+	}
+
+	private static boolean tagHasMultipleBytes(int tag) {
+		final int MULTIBYTE_TAG_MASK = 0x1F;
+		return (tag & MULTIBYTE_TAG_MASK) == MULTIBYTE_TAG_MASK;
+	}
+
+	private static boolean tagHasAnotherByte(int tag) {
+		final int NEXT_BYTE = 0x80;
+		return (tag & NEXT_BYTE) != 0;
+	}
+}
