@@ -27,8 +27,12 @@ public class PospPacker extends JposPacker {
 		public String getTranId(JposMessage message) {
 			String termId = message.getFieldString(42);
 			String tranDate = message.getFieldString(13);
+			if (tranDate == null) {
+				tranDate = "";
+			}
 			String traceNo = message.getFieldString(11);
-			return new StringBuilder().append(termId).append(tranDate).append(traceNo).toString();
+			// 返回日期+终端号+跟踪号
+			return new StringBuilder().append(tranDate).append(termId).append(traceNo).toString();
 		}
 
 	}
