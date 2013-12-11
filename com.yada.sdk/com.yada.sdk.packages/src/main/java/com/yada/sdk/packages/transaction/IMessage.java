@@ -96,9 +96,4 @@ public interface IMessage {
 	 */
 	public String getTranId();
 	
-	/**
-	 * 获取交易信息原始交易的唯一标识
-	 * @return 原始交易的唯一标识
-	 */
-	public String getOrgTranId();
 }

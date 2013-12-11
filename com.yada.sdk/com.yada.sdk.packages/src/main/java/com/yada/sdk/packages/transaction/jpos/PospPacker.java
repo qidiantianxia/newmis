@@ -9,33 +9,27 @@ import com.yada.sdk.packages.transaction.IMessage;
 
 public class PospPacker extends JposPacker {
 	PospTranIdParser tranIdParser = new PospTranIdParser();
-	
-	public PospPacker(int headLength) throws ISOException
-	{
+
+	public PospPacker(int headLength) throws ISOException {
 		super(headLength, PospPacker.class.getResourceAsStream("/8583posp.xml"));
 	}
-	
+
 	@Override
 	public IMessage unpack(ByteBuffer byteBuffer) throws PackagingException {
 		IMessage message = super.unpack(byteBuffer);
-		((JposMessage)message).setTranIdParser(tranIdParser);
+		((JposMessage) message).setTranIdParser(tranIdParser);
 		return message;
 	}
-	
-	private class PospTranIdParser implements ITranIdParser
-	{
+
+	private class PospTranIdParser implements ITranIdParser {
 
 		@Override
 		public String getTranId(JposMessage message) {
-			// TODO Auto-generated method stub
-			return null;
+			String termId = message.getFieldString(42);
+			String tranDate = message.getFieldString(13);
+			String traceNo = message.getFieldString(11);
+			return new StringBuilder().append(termId).append(tranDate).append(traceNo).toString();
 		}
 
-		@Override
-		public String getOrgTranId(JposMessage message) {
-			// TODO Auto-generated method stub
-			return null;
-		}
-		
 	}
 }
