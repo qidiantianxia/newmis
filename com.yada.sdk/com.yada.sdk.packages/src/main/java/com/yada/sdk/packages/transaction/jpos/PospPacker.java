@@ -25,14 +25,15 @@ public class PospPacker extends JposPacker {
 
 		@Override
 		public String getTranId(JposMessage message) {
+			// posp + [terminal id] + [批次号] + [trance no] + [mti]
+			// 4+8+6+6+4=28
+			StringBuilder sb = new StringBuilder();
 			String termId = message.getFieldString(41);
-			String tranDate = message.getFieldString(13);
-			if (tranDate == null) {
-				tranDate = "";
-			}
+			String field61 = message.getFieldString(61);
+			String batchNo = field61.substring(0, 6);
 			String traceNo = message.getFieldString(11);
-			// 返回日期+终端号+跟踪号
-			return new StringBuilder().append(tranDate).append(termId).append(traceNo).toString();
+			String mti = message.getFieldString(0);
+			return sb.append("posp").append(termId).append(batchNo).append(traceNo).append(mti).toString();
 		}
 
 	}
