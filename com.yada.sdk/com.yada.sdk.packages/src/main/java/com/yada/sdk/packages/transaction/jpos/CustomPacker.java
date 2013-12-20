@@ -17,8 +17,30 @@ import com.yada.sdk.packages.transaction.IMessage;
 public abstract class CustomPacker<T extends JposMessage> extends JposPacker {
 	CustomTranIdParser tranIdParser = new CustomTranIdParser();
 
+	/**
+	 * 
+	 * @param headLength
+	 *            头长度
+	 * @param path
+	 *            文件路径
+	 * @throws ISOException
+	 */
 	public CustomPacker(int headLength, String path) throws ISOException {
-		super(headLength, CustomPacker.class.getResourceAsStream(path));
+		super(headLength, CustomPacker.class.getResourceAsStream(path), "");
+	}
+
+	/**
+	 * 
+	 * @param headLength
+	 *            头长度
+	 * @param path
+	 *            文件路径
+	 * @param realmName
+	 *            解析8583时日志中的realm名称
+	 * @throws ISOException
+	 */
+	public CustomPacker(int headLength, String path, String realmName) throws ISOException {
+		super(headLength, CustomPacker.class.getResourceAsStream(path), realmName);
 	}
 
 	@Override

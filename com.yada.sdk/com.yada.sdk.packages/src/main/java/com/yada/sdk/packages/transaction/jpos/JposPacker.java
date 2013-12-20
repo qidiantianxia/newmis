@@ -10,8 +10,6 @@ import java.nio.file.StandardOpenOption;
 import org.jpos.iso.ISOException;
 import org.jpos.iso.ISOPackager;
 import org.jpos.iso.packager.GenericPackager;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 
 import com.yada.sdk.packages.PackagingException;
 import com.yada.sdk.packages.transaction.IMessage;
@@ -26,16 +24,6 @@ import com.yada.sdk.packages.transaction.IPacker;
 public class JposPacker implements IPacker {
 
 	/**
-	 * 日志
-	 */
-	private Logger logger;
-
-	/**
-	 * 配置文件名称
-	 */
-	private String fileName;
-
-	/**
 	 * JPOS提供的标准的8583解析器
 	 */
 	private GenericPackager packer = null;
@@ -46,11 +34,11 @@ public class JposPacker implements IPacker {
 	 *            头长度
 	 * @param filePath
 	 *            配置文件路径
-	 * @throws IOException 
-	 * @throws ISOException 
+	 * @throws IOException
+	 * @throws ISOException
 	 */
 	public JposPacker(int headLength, String filePath) throws ISOException, IOException {
-		this(headLength, Files.newInputStream(Paths.get(filePath), StandardOpenOption.READ));
+		this(headLength, Files.newInputStream(Paths.get(filePath), StandardOpenOption.READ), "");
 	}
 
 	/**
@@ -59,15 +47,16 @@ public class JposPacker implements IPacker {
 	 *            头长度
 	 * @param inputStream
 	 *            配置文件输入流
-	 * @throws ISOException 
+	 * @param realmName
+	 *            解析8583日志中的realm的名称
+	 * @throws ISOException
 	 */
-	public JposPacker(int headLength, InputStream inputStream) throws ISOException {
+	public JposPacker(int headLength, InputStream inputStream, String realmName) throws ISOException {
 		packer = new GenericPackager(inputStream);
 		packer.setHeaderLength(headLength);
-		logger = LoggerFactory.getLogger(JposPacker.class);
 		org.jpos.util.Logger l = new org.jpos.util.Logger();
-		l.addListener(new JposLogDebugListener(logger));
-		packer.setLogger(l, fileName);
+		l.addListener(new JposLogListener());
+		packer.setLogger(l, realmName);
 	}
 
 	@Override
@@ -99,8 +88,11 @@ public class JposPacker implements IPacker {
 			throw new PackagingException(e);
 		}
 	}
-	
-	protected JposMessage newJposMessage(){
+
+	/**
+	 * 构建JposMessage的方法。为了可以让子类自由构建JposMessage的子信息
+	 */
+	protected JposMessage newJposMessage() {
 		return new JposMessage();
 	}
 }

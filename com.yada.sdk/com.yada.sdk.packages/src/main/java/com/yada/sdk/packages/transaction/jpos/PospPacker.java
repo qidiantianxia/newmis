@@ -11,7 +11,7 @@ public class PospPacker extends JposPacker {
 	PospTranIdParser tranIdParser = new PospTranIdParser();
 
 	public PospPacker(int headLength) throws ISOException {
-		super(headLength, PospPacker.class.getResourceAsStream("/8583posp.xml"));
+		super(headLength, PospPacker.class.getResourceAsStream("/8583posp.xml"), "posp");
 	}
 
 	@Override
