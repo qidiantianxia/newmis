@@ -7,6 +7,13 @@ import org.jpos.iso.ISOException;
 import com.yada.sdk.packages.PackagingException;
 import com.yada.sdk.packages.transaction.IMessage;
 
+/**
+ * 一个可定制的packer。
+ * 
+ * @author jiangfengming
+ * 
+ * @param <T>
+ */
 public abstract class CustomPacker<T extends JposMessage> extends JposPacker {
 	CustomTranIdParser tranIdParser = new CustomTranIdParser();
 
@@ -26,8 +33,19 @@ public abstract class CustomPacker<T extends JposMessage> extends JposPacker {
 		return generateJposMessage();
 	}
 
+	/**
+	 * 构建一个T类型的message。用于储存定制信息。
+	 * 
+	 * @return
+	 */
 	protected abstract T generateJposMessage();
 
+	/**
+	 * 生成一个交易唯一标志的方法
+	 * 
+	 * @param message
+	 * @return
+	 */
 	protected abstract String generateTranId(JposMessage message);
 
 	private class CustomTranIdParser implements ITranIdParser {
@@ -35,13 +53,6 @@ public abstract class CustomPacker<T extends JposMessage> extends JposPacker {
 		@Override
 		public String getTranId(JposMessage message) {
 			return generateTranId(message);
-			// EndPoint + termId + tranDate + traceNo + mti
-//			StringBuilder sb = new StringBuilder();
-//			String termId = message.getFieldString(41);
-//			String tranDate = message.getFieldString(13);
-//			String traceNo = message.getFieldString(11);
-//			String mti = message.getFieldString(0);
-//			return sb.append("EndPoint").append(termId).append(tranDate).append(traceNo).append(mti).toString();
 		}
 	}
 
