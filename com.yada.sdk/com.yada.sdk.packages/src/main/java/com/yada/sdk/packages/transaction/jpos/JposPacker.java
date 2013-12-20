@@ -90,7 +90,7 @@ public class JposPacker implements IPacker {
 		try {
 			byte[] bts = new byte[byteBuffer.remaining()];
 			byteBuffer.get(bts);
-			JposMessage message = new JposMessage();
+			JposMessage message = newJposMessage();
 			// packer.unpack(message.getIsoMsg(), bts);
 			message.setPackager(packer);
 			message.unpack(bts);
@@ -98,5 +98,9 @@ public class JposPacker implements IPacker {
 		} catch (Exception e) {
 			throw new PackagingException(e);
 		}
+	}
+	
+	protected JposMessage newJposMessage(){
+		return new JposMessage();
 	}
 }
