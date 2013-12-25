@@ -51,7 +51,7 @@ public abstract class CustomPacker<T extends JposMessage> extends JposPacker {
 	}
 
 	@Override
-	protected JposMessage newJposMessage() {
+	public JposMessage createEmpty() {
 		return generateJposMessage();
 	}
 

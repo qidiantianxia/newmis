@@ -28,4 +28,5 @@ public interface IPacker {
 	 */
 	public IMessage unpack(ByteBuffer byteBuffer) throws PackagingException;
 
+	public IMessage createEmpty();
 }

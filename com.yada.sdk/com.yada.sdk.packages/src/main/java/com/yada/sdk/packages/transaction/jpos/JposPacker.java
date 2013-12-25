@@ -79,7 +79,7 @@ public class JposPacker implements IPacker {
 		try {
 			byte[] bts = new byte[byteBuffer.remaining()];
 			byteBuffer.get(bts);
-			JposMessage message = newJposMessage();
+			JposMessage message = createEmpty();
 			// packer.unpack(message.getIsoMsg(), bts);
 			message.setPackager(packer);
 			message.unpack(bts);
@@ -89,10 +89,8 @@ public class JposPacker implements IPacker {
 		}
 	}
 
-	/**
-	 * 构建JposMessage的方法。为了可以让子类自由构建JposMessage的子信息
-	 */
-	protected JposMessage newJposMessage() {
+	@Override
+	public JposMessage createEmpty() {
 		return new JposMessage();
 	}
 }
