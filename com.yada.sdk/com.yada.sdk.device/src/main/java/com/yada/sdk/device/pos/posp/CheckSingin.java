@@ -13,6 +13,7 @@ class CheckSingin {
 	{
 		String processCode = responseMessage.getFieldString(3);
 		char c = processCode.charAt(5);
+		String respCode = responseMessage.getFieldString(39);
 		
 		switch(c)
 		{
@@ -22,6 +23,13 @@ class CheckSingin {
 		case '4':
 		case '5':
 		case '6':
+			vp.resetSingin();
+			break;
+		}
+		
+		switch(respCode)
+		{
+		case "Z1":
 			vp.resetSingin();
 			break;
 		}
