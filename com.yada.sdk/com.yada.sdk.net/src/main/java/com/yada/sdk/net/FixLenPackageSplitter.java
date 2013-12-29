@@ -31,8 +31,8 @@ public class FixLenPackageSplitter implements IPackageSplitter {
 					byte[] raw = headSizeBuffer.array();
 					for (int i = 0; i < packagHeadByteSize; i++) {
 						len = needReverse ? (len << 8)
-								+ getUnbyte(raw[packagHeadByteSize - 1 - i]) : (len << 8)
-								+ getUnbyte(raw[i]);
+								+ getUbyte(raw[packagHeadByteSize - 1 - i]) : (len << 8)
+								+ getUbyte(raw[i]);
 					}
 
 					buffer = ByteBuffer.allocate(len);
@@ -97,7 +97,7 @@ public class FixLenPackageSplitter implements IPackageSplitter {
 		return buffer;
 	}
 
-	private int getUnbyte(byte b)
+	private int getUbyte(byte b)
 	{
 		return b & 0xFF;
 	}
