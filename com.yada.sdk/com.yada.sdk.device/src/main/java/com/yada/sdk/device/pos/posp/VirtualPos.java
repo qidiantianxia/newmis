@@ -8,6 +8,7 @@ import com.yada.sdk.device.encryption.IEncryption;
 import com.yada.sdk.device.encryption.TerminalAuth;
 import com.yada.sdk.device.pos.IVirtualPos;
 import com.yada.sdk.device.pos.SequenceGenerator;
+import com.yada.sdk.packages.PackagingException;
 
 public class VirtualPos implements IVirtualPos<Traner> {
 	private static final String DEFAULT_TELLER_NO = "000";
@@ -49,7 +50,7 @@ public class VirtualPos implements IVirtualPos<Traner> {
 	}
 
 	@Override
-	public Traner createTraner() throws IOException, ISOException {
+	public Traner createTraner() throws IOException, ISOException, PackagingException {
 		checkSingin();
 		Traner traner = new Traner(merchantId, terminalId, tellerNo, batchNo,
 				serverIp, serverPort, timeout, new CheckSignin(this),
@@ -57,7 +58,7 @@ public class VirtualPos implements IVirtualPos<Traner> {
 		return traner;
 	}
 
-	private synchronized void checkSingin() throws IOException, ISOException {
+	private synchronized void checkSingin() throws IOException, ISOException, PackagingException {
 		if (needSignin) {
 			Traner traner = new Traner(merchantId, terminalId, tellerNo,
 					batchNo, serverIp, serverPort, timeout, new CheckSignin(
