@@ -18,15 +18,17 @@ public abstract class AbsTraner {
 	private TcpClient client;
 	private String merchantId;
 	private String terminalId;
+	private String batchNo;
 	private TerminalAuth terminalAuth;
 	private String tellerNo;
 
 	public AbsTraner(String merchantId, String terminalId, String tellerNo,
-			IPackageSplitterFactory pkgSplitterFactory, IPacker packer,
-			String serverIp, int serverPort, int timeout,
+			String batchNo, IPackageSplitterFactory pkgSplitterFactory,
+			IPacker packer, String serverIp, int serverPort, int timeout,
 			TerminalAuth terminalAuth) throws IOException {
 		this.merchantId = merchantId;
 		this.terminalId = terminalId;
+		this.batchNo = batchNo;
 		this.tellerNo = tellerNo;
 		traceNoSeqGenerator = new SequenceGenerator(terminalId + "_traceNo");
 		cerNoSeqGenerator = new SequenceGenerator(terminalId + "_cerNo");
@@ -56,6 +58,10 @@ public abstract class AbsTraner {
 
 	protected String getTellerNo() {
 		return tellerNo;
+	}
+
+	protected String getBatchNo() {
+		return batchNo;
 	}
 
 	protected String getPin(String accountNo, String pin) {

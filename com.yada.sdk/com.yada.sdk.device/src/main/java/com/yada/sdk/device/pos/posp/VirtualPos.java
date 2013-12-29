@@ -10,6 +10,7 @@ import com.yada.sdk.device.pos.IVirtualPos;
 
 public class VirtualPos implements IVirtualPos<Traner> {
 	private static final String DEFAULT_TELLER_NO = "000";
+	private static final String DEFAULT_BATCH_NO = "000000";
 	private String merchantId;
 	private String terminalId;
 	private String tellerNo;
@@ -19,6 +20,7 @@ public class VirtualPos implements IVirtualPos<Traner> {
 	private volatile boolean needSignin = true;
 	private volatile boolean needParamDownload = true;
 	private TerminalAuth terminalAuth;
+	private String batchNo;
 
 	public VirtualPos(String merchantId, String terminalId, String serverIp,
 			int serverPort, String zmkTmk, int timeout,
@@ -38,12 +40,13 @@ public class VirtualPos implements IVirtualPos<Traner> {
 		this.timeout = timeout;
 		this.terminalAuth = new TerminalAuth(encryptionMachine);
 		terminalAuth.setTmk(zmkTmk);
+		batchNo = DEFAULT_BATCH_NO;
 	}
 
 	@Override
 	public Traner createTraner() throws IOException, ISOException {
 		checkSingin();
-		Traner traner = new Traner(merchantId, terminalId, tellerNo,
+		Traner traner = new Traner(merchantId, terminalId, tellerNo, batchNo,
 				serverIp, serverPort, timeout, new CheckSignin(this),
 				terminalAuth);
 		return traner;
@@ -52,10 +55,11 @@ public class VirtualPos implements IVirtualPos<Traner> {
 	private synchronized void checkSingin() throws IOException, ISOException {
 		if (needSignin) {
 			Traner traner = new Traner(merchantId, terminalId,
-					tellerNo, serverIp, serverPort, timeout,
+					tellerNo, batchNo, serverIp, serverPort, timeout,
 					new CheckSignin(this), terminalAuth);
 
 			SigninInfo si = traner.singin();
+			batchNo = si.batchNo;
 			terminalAuth.setTak(si.tmkTak);
 			terminalAuth.setTpk(si.tmkTpk);
 			traner.close();
@@ -64,7 +68,7 @@ public class VirtualPos implements IVirtualPos<Traner> {
 
 		if (needParamDownload) {
 			Traner traner = new Traner(merchantId, terminalId,
-					tellerNo, serverIp, serverPort, timeout,
+					tellerNo, batchNo, serverIp, serverPort, timeout,
 					new CheckSignin(this), terminalAuth);
 			traner.paramDownload();
 			traner.close();
