@@ -29,6 +29,10 @@ public class EncryptionMachine implements IEncryption {
 			return new String(respBuffer.array());
 		} catch (IOException e) {
 			throw new RuntimeException(e);
+		} finally {
+			if (client.isOpen()) {
+				client.close();
+			}
 		}
 	}
 
