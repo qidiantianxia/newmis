@@ -9,9 +9,8 @@ public class TerminalAuth {
 	public TerminalAuth(IEncryption encryptionMachine) {
 		this.encryptionMachine = encryptionMachine;
 	}
-	
-	public void setTmk(String zmkTmk)
-	{
+
+	public void setTmk(String zmkTmk) {
 		lmkTmk = encryptionMachine.getLmkTmk(zmkTmk);
 	}
 
@@ -24,7 +23,7 @@ public class TerminalAuth {
 	}
 
 	public String getPin(String accountNo, String pin) {
-		// TODO 卡号12位的截取方式
+		
 		return encryptionMachine.getTpkPin(accountNo, pin, lmkTpk);
 	}
 

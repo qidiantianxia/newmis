@@ -7,6 +7,7 @@ import org.jpos.iso.ISOException;
 import com.yada.sdk.device.encryption.IEncryption;
 import com.yada.sdk.device.encryption.TerminalAuth;
 import com.yada.sdk.device.pos.IVirtualPos;
+import com.yada.sdk.device.pos.SequenceGenerator;
 
 public class VirtualPos implements IVirtualPos<Traner> {
 	private static final String DEFAULT_TELLER_NO = "000";
@@ -21,6 +22,8 @@ public class VirtualPos implements IVirtualPos<Traner> {
 	private volatile boolean needParamDownload = true;
 	private TerminalAuth terminalAuth;
 	private String batchNo;
+	private SequenceGenerator traceNoSeqGenerator;
+	private SequenceGenerator cerNoSeqGenerator;
 
 	public VirtualPos(String merchantId, String terminalId, String serverIp,
 			int serverPort, String zmkTmk, int timeout,
@@ -41,6 +44,8 @@ public class VirtualPos implements IVirtualPos<Traner> {
 		this.terminalAuth = new TerminalAuth(encryptionMachine);
 		terminalAuth.setTmk(zmkTmk);
 		batchNo = DEFAULT_BATCH_NO;
+		this.traceNoSeqGenerator = new SequenceGenerator("termNo_" + terminalId);
+		this.cerNoSeqGenerator = new SequenceGenerator("cerNo_" + terminalId);
 	}
 
 	@Override
@@ -48,15 +53,16 @@ public class VirtualPos implements IVirtualPos<Traner> {
 		checkSingin();
 		Traner traner = new Traner(merchantId, terminalId, tellerNo, batchNo,
 				serverIp, serverPort, timeout, new CheckSignin(this),
-				terminalAuth);
+				terminalAuth, traceNoSeqGenerator, cerNoSeqGenerator);
 		return traner;
 	}
 
 	private synchronized void checkSingin() throws IOException, ISOException {
 		if (needSignin) {
-			Traner traner = new Traner(merchantId, terminalId,
-					tellerNo, batchNo, serverIp, serverPort, timeout,
-					new CheckSignin(this), terminalAuth);
+			Traner traner = new Traner(merchantId, terminalId, tellerNo,
+					batchNo, serverIp, serverPort, timeout, new CheckSignin(
+							this), terminalAuth, traceNoSeqGenerator,
+					cerNoSeqGenerator);
 
 			SigninInfo si = traner.singin();
 			batchNo = si.batchNo;
@@ -67,9 +73,10 @@ public class VirtualPos implements IVirtualPos<Traner> {
 		}
 
 		if (needParamDownload) {
-			Traner traner = new Traner(merchantId, terminalId,
-					tellerNo, batchNo, serverIp, serverPort, timeout,
-					new CheckSignin(this), terminalAuth);
+			Traner traner = new Traner(merchantId, terminalId, tellerNo,
+					batchNo, serverIp, serverPort, timeout, new CheckSignin(
+							this), terminalAuth, traceNoSeqGenerator,
+					cerNoSeqGenerator);
 			traner.paramDownload();
 			traner.close();
 			needParamDownload = false;

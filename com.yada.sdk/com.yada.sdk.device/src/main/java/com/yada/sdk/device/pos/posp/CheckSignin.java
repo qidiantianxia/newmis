@@ -4,19 +4,17 @@ import com.yada.sdk.packages.transaction.IMessage;
 
 class CheckSignin {
 	private VirtualPos vp;
-	public CheckSignin(VirtualPos vp)
-	{
+
+	public CheckSignin(VirtualPos vp) {
 		this.vp = vp;
 	}
-	
-	void checkMessage(IMessage responseMessage)
-	{
+
+	void checkMessage(IMessage responseMessage) {
 		String processCode = responseMessage.getFieldString(3);
 		char c = processCode.charAt(5);
 		String respCode = responseMessage.getFieldString(39);
-		
-		switch(c)
-		{
+
+		switch (c) {
 		case '1':
 			vp.resetParamDownload();
 			break;
@@ -26,9 +24,8 @@ class CheckSignin {
 			vp.resetSingin();
 			break;
 		}
-		
-		switch(respCode)
-		{
+
+		switch (respCode) {
 		case "Z1":
 			vp.resetSingin();
 			break;

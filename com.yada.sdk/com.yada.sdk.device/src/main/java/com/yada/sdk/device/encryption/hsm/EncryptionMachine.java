@@ -11,7 +11,6 @@ import com.yada.sdk.net.TcpClient;
 public class EncryptionMachine implements IEncryption {
 
 	private String lmkZmk;
-	private TcpClient client;
 	private InetSocketAddress endPoint;
 
 	public EncryptionMachine(String serverIp, int port, String lmkZmk) {
@@ -38,8 +37,31 @@ public class EncryptionMachine implements IEncryption {
 
 	@Override
 	public String getLmkTmk(String zmkTmk) {
-		// TODO Auto-generated method stub
-		return null;
+		StringBuilder sb = new StringBuilder();
+		/**************************************************************
+		 * 1.消息头
+		 * 2.命令代码
+		 * 3.zmk加密方案
+		 * 4.lmkZmk
+		 * 5.tmk加密方案
+		 * 6.zmkTmk
+		 * 7.Atalla变量
+		 * 8.分隔符
+		 * 9.密钥方案（ZMK）
+		 * 10.密钥方案（LMK）
+		 * 11.密钥校验值类型
+		 * 12.终止信息分隔符
+		 * 13.消息尾
+		 */
+		sb.append("-------").append("FC").append("X").append(lmkZmk)
+				.append("X").append(zmkTmk).append("").append(";").append("X")
+				.append("X").append("0").append("").append("");
+		
+		String respMessage = send(sb.toString());
+		int startIndex = 7 + 2 + 2 + 1;
+		//String respCode = respMessage.substring(startIndex, startIndex + 2);
+		String lmkTmk = respMessage.substring(startIndex, startIndex + 32);
+		return lmkTmk;
 	}
 
 	@Override
@@ -56,8 +78,33 @@ public class EncryptionMachine implements IEncryption {
 
 	@Override
 	public String getTpkPin(String accountNo, String pin, String lmkTpk) {
-		// TODO Auto-generated method stub
-		return null;
+		String subAccountNo = accountNo.substring(accountNo.length() - 13, accountNo.length() - 1);
+		StringBuilder sb = new StringBuilder();
+		sb.append("-------");
+		sb.append("BA");
+		sb.append(String.format("%-7s", pin).replace(' ', 'F'));
+		sb.append(subAccountNo);
+		sb.append("");
+		sb.append("");
+		
+		String respMessage = send(sb.toString());
+		int startIndex = 7 + 2 + 2;
+		String lmkPin = respMessage.substring(startIndex);
+		
+		sb = new StringBuilder();
+		sb.append("-------");
+		sb.append("JG");
+		sb.append("X");
+		sb.append(lmkTpk);
+		sb.append("01");
+		sb.append(subAccountNo);
+		sb.append(lmkPin);
+		sb.append("");
+		sb.append("");
+		
+		respMessage = send(sb.toString());
+		String tmkPin = respMessage.substring(startIndex);
+		return tmkPin;
 	}
 
 	@Override
