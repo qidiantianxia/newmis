@@ -2,9 +2,9 @@ package com.yada.sdk.device.pos.posp;
 
 import com.yada.sdk.packages.transaction.IMessage;
 
-class CheckSingin {
+class CheckSignin {
 	private VirtualPos vp;
-	public CheckSingin(VirtualPos vp)
+	public CheckSignin(VirtualPos vp)
 	{
 		this.vp = vp;
 	}

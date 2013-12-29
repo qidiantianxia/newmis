@@ -11,13 +11,22 @@ import com.yada.sdk.net.FixLenPackageSplitterFactory;
 import com.yada.sdk.packages.transaction.jpos.PospPacker;
 
 public class Traner extends AbsTraner {
-	private CheckSingin cs;
+	private CheckSignin cs;
 	public Traner(String merchantId, String terminalId, String serverIp,
-			int serverPort, int timeout, CheckSingin cs, TerminalAuth terminalAuth) throws IOException, ISOException {
-		super(merchantId, terminalId,
+			String tellerNo, int serverPort, int timeout, CheckSignin cs, TerminalAuth terminalAuth) throws IOException, ISOException {
+		super(merchantId, terminalId, tellerNo,
 				new FixLenPackageSplitterFactory(2, false), new PospPacker(7),
 				serverIp, serverPort, timeout, terminalAuth);
 		this.cs = cs;
 	}
+	
+	SigninInfo singin()
+	{
+		return null;
+	}
 
+	void paramDownload()
+	{
+		
+	}
 }

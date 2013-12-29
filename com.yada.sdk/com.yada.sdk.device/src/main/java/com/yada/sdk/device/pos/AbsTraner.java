@@ -19,19 +19,22 @@ public abstract class AbsTraner {
 	private String merchantId;
 	private String terminalId;
 	private TerminalAuth terminalAuth;
+	private String tellerNo;
 
-	public AbsTraner(String merchantId, String terminalId,
+	public AbsTraner(String merchantId, String terminalId, String tellerNo,
 			IPackageSplitterFactory pkgSplitterFactory, IPacker packer,
-			String serverIp, int serverPort, int timeout, TerminalAuth terminalAuth) throws IOException {
+			String serverIp, int serverPort, int timeout,
+			TerminalAuth terminalAuth) throws IOException {
 		this.merchantId = merchantId;
 		this.terminalId = terminalId;
+		this.tellerNo = tellerNo;
 		traceNoSeqGenerator = new SequenceGenerator(terminalId + "_traceNo");
 		cerNoSeqGenerator = new SequenceGenerator(terminalId + "_cerNo");
 		InetSocketAddress serverEndPoint = new InetSocketAddress(serverIp,
 				serverPort);
 		client = new TcpClient(serverEndPoint, pkgSplitterFactory, timeout);
 		client.open();
-		
+
 		this.terminalAuth = terminalAuth;
 	}
 
@@ -50,14 +53,16 @@ public abstract class AbsTraner {
 	protected String getTerminalId() {
 		return terminalId;
 	}
-	
-	protected String getPin(String accountNo, String pin)
-	{
+
+	protected String getTellerNo() {
+		return tellerNo;
+	}
+
+	protected String getPin(String accountNo, String pin) {
 		return terminalAuth.getPin(accountNo, pin);
 	}
-	
-	protected String getMac(String macData)
-	{
+
+	protected String getMac(String macData) {
 		return terminalAuth.getMac(macData);
 	}
 
