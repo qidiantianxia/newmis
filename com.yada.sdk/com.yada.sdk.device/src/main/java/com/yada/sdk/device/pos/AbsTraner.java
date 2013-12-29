@@ -4,6 +4,7 @@ import java.io.IOException;
 import java.net.InetSocketAddress;
 import java.nio.ByteBuffer;
 
+import com.yada.sdk.device.encryption.TerminalAuth;
 import com.yada.sdk.net.IPackageSplitterFactory;
 import com.yada.sdk.net.TcpClient;
 import com.yada.sdk.packages.PackagingException;
@@ -17,10 +18,11 @@ public abstract class AbsTraner {
 	private TcpClient client;
 	private String merchantId;
 	private String terminalId;
+	private TerminalAuth terminalAuth;
 
 	public AbsTraner(String merchantId, String terminalId,
 			IPackageSplitterFactory pkgSplitterFactory, IPacker packer,
-			String serverIp, int serverPort, int timeout) throws IOException {
+			String serverIp, int serverPort, int timeout, TerminalAuth terminalAuth) throws IOException {
 		this.merchantId = merchantId;
 		this.terminalId = terminalId;
 		traceNoSeqGenerator = new SequenceGenerator(terminalId + "_traceNo");
@@ -29,6 +31,8 @@ public abstract class AbsTraner {
 				serverPort);
 		client = new TcpClient(serverEndPoint, pkgSplitterFactory, timeout);
 		client.open();
+		
+		this.terminalAuth = terminalAuth;
 	}
 
 	protected int getTraceNo() {
@@ -45,6 +49,16 @@ public abstract class AbsTraner {
 
 	protected String getTerminalId() {
 		return terminalId;
+	}
+	
+	protected String getPin(String accountNo, String pin)
+	{
+		return terminalAuth.getPin(accountNo, pin);
+	}
+	
+	protected String getMac(String macData)
+	{
+		return terminalAuth.getMac(macData);
 	}
 
 	protected IMessage sendTran(IMessage requestMessage)
