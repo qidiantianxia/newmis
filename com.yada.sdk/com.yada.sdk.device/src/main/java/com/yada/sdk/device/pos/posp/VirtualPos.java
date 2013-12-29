@@ -59,6 +59,7 @@ public class VirtualPos implements IVirtualPos<Traner> {
 			terminalAuth.setTak(si.tmkTak);
 			terminalAuth.setTpk(si.tmkTpk);
 			traner.close();
+			needSignin = false;
 		}
 
 		if (needParamDownload) {
@@ -67,6 +68,7 @@ public class VirtualPos implements IVirtualPos<Traner> {
 					new CheckSignin(this), terminalAuth);
 			traner.paramDownload();
 			traner.close();
+			needParamDownload = false;
 		}
 	}
 
