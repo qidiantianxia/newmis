@@ -41,12 +41,12 @@ public abstract class AbsTraner {
 		this.terminalAuth = terminalAuth;
 	}
 
-	protected int getTraceNo() {
-		return traceNoSeqGenerator.getSequence();
+	protected String getTraceNo() {
+		return String.format("%06d", traceNoSeqGenerator.getSequence());
 	}
 
-	protected int getCerNo() {
-		return cerNoSeqGenerator.getSequence();
+	protected String getCerNo() {
+		return String.format("%06d", cerNoSeqGenerator.getSequence());
 	}
 
 	protected String getMerchantId() {

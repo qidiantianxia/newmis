@@ -35,12 +35,12 @@ public class Traner extends AbsTraner {
 		IMessage reqMessage = createMessage();
 		reqMessage.setFieldString(0, "0800");
 		reqMessage.setFieldString(3, "990000");
-		reqMessage.setFieldString(11, getTellerNo());
-		Date currentDate = new Date(System.currentTimeMillis());
-		reqMessage.setFieldString(12, String.format("%tH%tM%tS", currentDate,
-				currentDate, currentDate));
-		reqMessage.setFieldString(13,
-				String.format("%tm%td", currentDate, currentDate));
+		reqMessage.setFieldString(11, getTraceNo());
+//		Date currentDate = new Date(System.currentTimeMillis());
+//		reqMessage.setFieldString(12, String.format("%tH%tM%tS", currentDate,
+//				currentDate, currentDate));
+//		reqMessage.setFieldString(13,
+//				String.format("%tm%td", currentDate, currentDate));
 		reqMessage.setFieldString(24, "009");
 		reqMessage.setFieldString(41, getTerminalId());
 		reqMessage.setFieldString(42, getMerchantId());
@@ -52,17 +52,19 @@ public class Traner extends AbsTraner {
 		Tlv tlv = new Tlv(raw);
 
 		SigninInfo si = new SigninInfo();
-
+		String batchNo = respMessage.getFieldString(61).substring(0, 6);
+		si.batchNo = batchNo;
+		
 		for (Tlv childTlv : tlv.getChildren()) {
 			byte[] tg = childTlv.getTag();
 			byte[] value = childTlv.getValue();
 			String key = getStringKey(value);
 
-			if (tg[0] == 9 && tg[1] == 8) {
+			if (tg[0] == 0x98) {
 				si.tmkTpk = key;
 			}
 
-			if (tg[0] == 9 && tg[1] == 9) {
+			if (tg[0] == 0x99) {
 				si.tmkTak = key;
 			}
 		}
@@ -86,5 +88,31 @@ public class Traner extends AbsTraner {
 
 	void paramDownload() {
 
+	}
+	
+	public String stagesPay(String cardNo, String validity, String amt, String stagesId, String stagesCount) throws PackagingException, IOException
+	{
+		IMessage reqMessage = createMessage();
+		reqMessage.setFieldString(2, cardNo);
+		reqMessage.setFieldString(3, "000000");
+		reqMessage.setFieldString(4, String.format("%12s", amt).replace(' ', '0'));
+		reqMessage.setFieldString(11, getTraceNo());
+		reqMessage.setFieldString(14, validity);
+		reqMessage.setFieldString(22, "011");
+		reqMessage.setFieldString(24, "009");
+		reqMessage.setFieldString(25, "14");
+		reqMessage.setFieldString(41, getTerminalId());
+		reqMessage.setFieldString(42, getMerchantId());
+		Tlv tlv48 = new Tlv();
+		Tlv tlv48_90 = new Tlv();
+		tlv48_90.setTag(new byte[]{(byte) 0x90});
+		tlv48_90.setStringValue("");;
+		// TODO 48域TLV确认
+		return null;
+	}
+	
+	public String pay()
+	{
+		return null;
 	}
 }
