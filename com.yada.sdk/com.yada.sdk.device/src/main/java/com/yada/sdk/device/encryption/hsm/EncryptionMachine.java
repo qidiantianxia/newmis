@@ -109,6 +109,14 @@ public class EncryptionMachine implements IEncryption {
 
 	@Override
 	public String getTakMac(String macData, String lmkTak) {
+		int padZeroCount = macData.length() % 16;
+		StringBuilder sb = new StringBuilder();
+		sb.append(macData);
+		for(int i = 0; i < padZeroCount; i++)
+		{
+			sb.append("0");
+		}
+				
 		// TODO Auto-generated method stub
 		return null;
 	}

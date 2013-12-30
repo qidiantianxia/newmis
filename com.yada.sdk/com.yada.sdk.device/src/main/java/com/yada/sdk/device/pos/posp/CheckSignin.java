@@ -27,6 +27,8 @@ class CheckSignin {
 
 		switch (respCode) {
 		case "Z1":
+		case "88":
+		case "89":
 			vp.resetSingin();
 			break;
 		}
