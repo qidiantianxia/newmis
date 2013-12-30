@@ -28,6 +28,12 @@ public class Traner extends AbsTraner {
 		this.cs = cs;
 	}
 
+	/**
+	 * 签到
+	 * @return
+	 * @throws PackagingException
+	 * @throws IOException
+	 */
 	SigninInfo singin() throws PackagingException, IOException {
 		IMessage reqMessage = createMessage();
 		reqMessage.setFieldString(0, "0800");
@@ -38,7 +44,14 @@ public class Traner extends AbsTraner {
 		reqMessage.setFieldString(61, getBatchNo() + "001");
 		
 		reqMessage.setFieldString(11, getTraceNo());
+		
+		
 		IMessage respMessage = sendTran(reqMessage);
+		
+		//返回参数数据继续发送签到交易直到返回密钥为止
+		while(respMessage.getFieldString(48).substring(0,2).equals("97")){
+			respMessage = sendTran(reqMessage);
+		}
 		
 		SigninInfo si = new SigninInfo();
 		String batchNo = respMessage.getFieldString(61).substring(0, 6);
@@ -68,7 +81,7 @@ public class Traner extends AbsTraner {
 		
 		return si;
 	}
-
+	//解48域密钥
 	private String getStringKey(String value) {
 		String key;
 		if (value.length() == 23) {
@@ -78,108 +91,171 @@ public class Traner extends AbsTraner {
 		}
 		return key;
 	}
-
+	//参数下载
 	void paramDownload() {
-
+		
 	}
-	
-	public String stagesPay(String cardNo, String validity, String amt, String pin, String stagesId, int stagesCount) throws PackagingException, IOException
+	/**
+	 * 
+	 * @param cardNo
+	 * 			卡号
+	 * @param validity
+	 * 			效期
+	 * @param amt
+	 * 			金额
+	 * @param pin
+	 * 			PIN码
+	 * @param stagesId
+	 * 			分期交易ID
+	 * @param stagesCount
+	 * 			分期期数
+	 * @return
+	 */
+	public String stagesPay(String cardNo, String validity, String amt, String pin, String stagesId, int stagesCount)
 	{
 		String processCode = "000000";
 		String formatAmt = String.format("%12s", amt).replace(' ', '0');
 		String traceNo = getTraceNo();
 		String currency = "156";
 		
-		IMessage reqMessage = createMessage();
-		reqMessage.setFieldString(2, cardNo);
-		reqMessage.setFieldString(3, processCode);
-		reqMessage.setFieldString(4, formatAmt);
-		reqMessage.setFieldString(11, traceNo);
-		reqMessage.setFieldString(14, validity);
-		reqMessage.setFieldString(22, "011");
-		reqMessage.setFieldString(24, "009");
-		reqMessage.setFieldString(25, "14");
-		reqMessage.setFieldString(41, getTerminalId());
-		reqMessage.setFieldString(42, getMerchantId());
-		
-		String field48 = "9003905" + "9006" + stagesId + String.format("%02d", stagesCount);
-		reqMessage.setFieldString(48, field48);
-		reqMessage.setFieldString(49, currency);
-		reqMessage.setFieldString(52, getPin(cardNo, pin));
-		reqMessage.setFieldString(61, getBatchNo() + getTellerNo() + getCerNo());
-		
-		StringBuilder macData = new StringBuilder();
-		macData.append(cardNo.length() % 2 == 0 ? cardNo : "0" + cardNo);
-		macData.append(processCode);
-		macData.append(formatAmt);
-		macData.append(traceNo);
-		macData.append("0" + currency);
-		macData.append(getTerminalId());
-		String mac = getMac(macData.toString());
-		reqMessage.setFieldString(64, mac);
-		
-		IMessage respMessage = sendTran(reqMessage);
+		try {
+			IMessage reqMessage = createMessage();
+			reqMessage.setFieldString(0,"0200");
+			reqMessage.setFieldString(2, cardNo);
+			reqMessage.setFieldString(3, processCode);
+			reqMessage.setFieldString(4, formatAmt);
+			reqMessage.setFieldString(11, traceNo);
+			reqMessage.setFieldString(14, validity);
+			reqMessage.setFieldString(22, "011");
+			reqMessage.setFieldString(24, "009");
+			reqMessage.setFieldString(25, "14");
+			reqMessage.setFieldString(41, getTerminalId());
+			reqMessage.setFieldString(42, getMerchantId());
+			
+			String field48 = "9003905" + "9106" + stagesId + String.format("%02d", stagesCount);
+			reqMessage.setFieldString(48, field48);
+			reqMessage.setFieldString(49, currency);
+			reqMessage.setFieldString(52, getPin(cardNo, pin));
+			reqMessage.setFieldString(61, getBatchNo() + getTellerNo() + getCerNo());
+			
+			StringBuilder macData = new StringBuilder();
+			macData.append(cardNo.length() % 2 == 0 ? cardNo : "0" + cardNo);
+			macData.append(processCode);
+			macData.append(formatAmt);
+			macData.append(traceNo);
+			macData.append("0" + currency);
+			macData.append(getTerminalId());
+			String mac = getMac(macData.toString());
+			reqMessage.setFieldString(64, mac);
+			
+			IMessage respMessage = sendTran(reqMessage);
+			
+			//检查是否需要签到或参数下载
+			cs.checkMessage(respMessage);
+		} catch (PackagingException e) {
+			//TODO LOG
+			e.printStackTrace();
+		} catch (IOException e) {
+			//TODO 存储转发
+			e.printStackTrace();
+		}
 		return null;
 	}
 	
 	/**
-	 * 普通消费交易
-	 * @throws IOException 
-	 * **/
-	public String pay(String cardNo,String validity,String amt) throws PackagingException, IOException
+	 * 
+	 * @param cardNo
+	 * 			卡号
+	 * @param validity
+	 * 			效期
+	 * @param amt
+	 * 			金额
+	 * @param pin
+	 * 			pinma
+	 * @return
+	 */
+	public String pay(String cardNo,String validity,String amt,String pin)
 	{
-		IMessage reqMessage = createMessage();
-		reqMessage.setFieldString(2, cardNo);//主账号
-		reqMessage.setFieldString(3, "000000");//处理码
-		reqMessage.setFieldString(4, String.format("%12s", amt).replace(' ', '0'));//交易金额
-		reqMessage.setFieldString(11, getTraceNo());//POS流水号
-		reqMessage.setFieldString(14, validity);//卡有效期
-		reqMessage.setFieldString(22, "011");//POS输入方式      011--手工有pin 
-		reqMessage.setFieldString(24, "009");//NII
-		reqMessage.setFieldString(25, "14");//服务点条件码
-		reqMessage.setFieldString(41, getTerminalId());//终端号
-		reqMessage.setFieldString(42, getMerchantId());//商户号
-		reqMessage.setFieldString(49, "156");//货币代码
-		
-		String batchNo = getBatchNo();//批次号
-		String operNo = getTellerNo();//操作员号
-		String cerNo = getCerNo();//票据号
-		
-		StringBuilder filed61 = new StringBuilder();
-	    filed61.append(batchNo).append(operNo).append(cerNo);
-		
-		reqMessage.setFieldString(61,filed61.toString());//自定义域
-		
-		IMessage respMessage = sendTran(reqMessage);
+		String processCode = "000000";
+		String formatAmt = String.format("%12s", amt).replace(' ', '0');
+		String traceNo = getTraceNo();
+		String currency = "156";
+		try {
+			IMessage reqMessage = createMessage();
+			reqMessage.setFieldString(0, "0200");
+			reqMessage.setFieldString(2, cardNo);//主账号
+			reqMessage.setFieldString(3, processCode);//处理码
+			reqMessage.setFieldString(4, formatAmt);//交易金额
+			reqMessage.setFieldString(11, traceNo);//POS流水号
+			reqMessage.setFieldString(14, validity);//卡有效期
+			reqMessage.setFieldString(22, "011");//POS输入方式      011--手工有pin 
+			reqMessage.setFieldString(24, "009");//NII
+			reqMessage.setFieldString(25, "14");//服务点条件码
+			reqMessage.setFieldString(41, getTerminalId());//终端号
+			reqMessage.setFieldString(42, getMerchantId());//商户号
+			reqMessage.setFieldString(49, currency);//货币代码
+			reqMessage.setFieldString(52, getPin(cardNo, pin));//pin码
+			
+			StringBuilder filed61 = new StringBuilder();
+			filed61.append(getBatchNo()).append(getTellerNo()).append(getCerNo());
+			
+			reqMessage.setFieldString(61,filed61.toString());//自定义域
+			
+			StringBuilder macData = new StringBuilder();
+			macData.append(cardNo.length() % 2 == 0 ? cardNo : "0" + cardNo);
+			macData.append(processCode);
+			macData.append(formatAmt);
+			macData.append(traceNo);
+			macData.append("0" + currency);
+			macData.append(getTerminalId());
+			String mac = getMac(macData.toString());
+			reqMessage.setFieldString(64, mac);
+			
+			IMessage respMessage = sendTran(reqMessage);
+			
+			//检查是否需要签到或参数下载
+			cs.checkMessage(respMessage);
+		} catch (PackagingException e) {
+			//TODO LOG
+			e.printStackTrace();
+		} catch (IOException e) {
+			//TODO 存储转发
+			e.printStackTrace();
+		}
 		return null;
 	}
 	
-	private void reversal(IMessage orgMessage) throws PackagingException{
+	private void reversal(IMessage orgMessage) throws PackagingException, IOException{
 		IMessage reqMessage = createMessage();
 		reqMessage.setFieldString(0, "0400");
 		reqMessage.setFieldString(2, orgMessage.getFieldString(2));
 		reqMessage.setFieldString(3, orgMessage.getFieldString(3));
 		reqMessage.setFieldString(4, orgMessage.getFieldString(4));
 		reqMessage.setFieldString(11, getTraceNo());
-		reqMessage.setFieldString(14, orgMessage.getFieldString(14));
+		if(orgMessage.getFieldString(14) != null){
+			reqMessage.setFieldString(14, orgMessage.getFieldString(14));
+		}
 		reqMessage.setFieldString(22, orgMessage.getFieldString(22));
 		if(orgMessage.getFieldString(23) != null){
 			reqMessage.setFieldString(23, orgMessage.getFieldString(23));
 		}
 		reqMessage.setFieldString(24, "009");
 		reqMessage.setFieldString(25, orgMessage.getFieldString(25));
+		if(orgMessage.getFieldString(38) != null){
+			reqMessage.setFieldString(38, orgMessage.getFieldString(38));
+		}
 		reqMessage.setFieldString(41, orgMessage.getFieldString(41));
 		reqMessage.setFieldString(42, orgMessage.getFieldString(42));
-		
-		reqMessage.setFieldString(44, orgMessage.getFieldString(44));
-		reqMessage.setFieldString(48, orgMessage.getFieldString(48));
+		if(orgMessage.getFieldString(44) != null){
+			reqMessage.setFieldString(44, orgMessage.getFieldString(44));
+		}
+		if(orgMessage.getFieldString(48) != null){
+			reqMessage.setFieldString(48, orgMessage.getFieldString(48));
+		}
 		reqMessage.setFieldString(49, orgMessage.getFieldString(49));
-		reqMessage.setFieldString(54, orgMessage.getFieldString(54));
-		reqMessage.setFieldString(55, orgMessage.getFieldString(55));
-		
 		reqMessage.setFieldString(61, getBatchNo()+getTellerNo()+getCerNo());
+		reqMessage.setFieldString(62, orgMessage.getFieldString(0)+orgMessage.getFieldString(11)+"0000000000");
 		
-		reqMessage.setFieldString(62, orgMessage.getFieldString(0)+orgMessage.getFieldString(11));
-		
+		sendTran(reqMessage);
 	}
 }
