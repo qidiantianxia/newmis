@@ -124,8 +124,9 @@ public class Traner extends AbsTraner {
 	
 	/**
 	 * 普通消费交易
+	 * @throws IOException 
 	 * **/
-	public String pay(String cardNo,String validity,String amt) throws PackagingException
+	public String pay(String cardNo,String validity,String amt) throws PackagingException, IOException
 	{
 		IMessage reqMessage = createMessage();
 		reqMessage.setFieldString(2, cardNo);//主账号
@@ -148,6 +149,8 @@ public class Traner extends AbsTraner {
 	    filed61.append(batchNo).append(operNo).append(cerNo);
 		
 		reqMessage.setFieldString(61,filed61.toString());//自定义域
+		
+		IMessage respMessage = sendTran(reqMessage);
 		return null;
 	}
 }
