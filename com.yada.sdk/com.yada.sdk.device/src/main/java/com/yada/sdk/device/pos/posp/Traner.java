@@ -36,52 +36,47 @@ public class Traner extends AbsTraner {
 		reqMessage.setFieldString(0, "0800");
 		reqMessage.setFieldString(3, "990000");
 		reqMessage.setFieldString(11, getTraceNo());
-//		Date currentDate = new Date(System.currentTimeMillis());
-//		reqMessage.setFieldString(12, String.format("%tH%tM%tS", currentDate,
-//				currentDate, currentDate));
-//		reqMessage.setFieldString(13,
-//				String.format("%tm%td", currentDate, currentDate));
 		reqMessage.setFieldString(24, "009");
 		reqMessage.setFieldString(41, getTerminalId());
 		reqMessage.setFieldString(42, getMerchantId());
 		reqMessage.setFieldString(61, getBatchNo() + "001");
 		IMessage respMessage = sendTran(reqMessage);
-		ByteBuffer field48 = respMessage.getField(48);
-		byte[] raw = new byte[field48.remaining()];
-		field48.get(raw);
-		Tlv tlv = new Tlv(raw);
-
+		
 		SigninInfo si = new SigninInfo();
 		String batchNo = respMessage.getFieldString(61).substring(0, 6);
 		si.batchNo = batchNo;
 		
-		for (Tlv childTlv : tlv.getChildren()) {
-			byte[] tg = childTlv.getTag();
-			byte[] value = childTlv.getValue();
-			String key = getStringKey(value);
-
-			if (tg[0] == 0x98) {
-				si.tmkTpk = key;
+		String field48 = respMessage.getFieldString(48);
+		String tag, len, value;
+		int index = 0;
+		
+		while(index < field48.length())
+		{
+			tag = field48.substring(index, index + 2);
+			len = field48.substring(index + 2, index + 2 + 2);
+			int ilen = Integer.parseInt(len);
+			value = field48.substring(index + 2 + 2, index + 2 + 2 + ilen);
+			index = index + 2 + 2 + ilen;
+			if(tag.equals("98"))
+			{
+				si.tmkTpk = getStringKey(value);
 			}
-
-			if (tg[0] == 0x99) {
-				si.tmkTak = key;
+			
+			if(tag.equals("99"))
+			{
+				si.tmkTak = getStringKey(value);
 			}
 		}
-
+		
 		return si;
 	}
 
-	private String getStringKey(byte[] value) {
+	private String getStringKey(String value) {
 		String key;
-		if (value.length == 23) {
-			byte[] rawKey = new byte[16];
-			System.arraycopy(value, 1, rawKey, 0, 16);
-			key = new String(rawKey);
+		if (value.length() == 23) {
+			key = value.substring(0, 16);
 		} else {
-			byte[] rawKey = new byte[32];
-			System.arraycopy(value, 1, rawKey, 0, 32);
-			key = new String(rawKey);
+			key = value.substring(0, 32);
 		}
 		return key;
 	}
@@ -90,24 +85,42 @@ public class Traner extends AbsTraner {
 
 	}
 	
-	public String stagesPay(String cardNo, String validity, String amt, String stagesId, String stagesCount) throws PackagingException, IOException
+	public String stagesPay(String cardNo, String validity, String amt, String pin, String stagesId, int stagesCount) throws PackagingException, IOException
 	{
+		String processCode = "000000";
+		String formatAmt = String.format("%12s", amt).replace(' ', '0');
+		String traceNo = getTraceNo();
+		String currency = "156";
+		
 		IMessage reqMessage = createMessage();
 		reqMessage.setFieldString(2, cardNo);
-		reqMessage.setFieldString(3, "000000");
-		reqMessage.setFieldString(4, String.format("%12s", amt).replace(' ', '0'));
-		reqMessage.setFieldString(11, getTraceNo());
+		reqMessage.setFieldString(3, processCode);
+		reqMessage.setFieldString(4, formatAmt);
+		reqMessage.setFieldString(11, traceNo);
 		reqMessage.setFieldString(14, validity);
 		reqMessage.setFieldString(22, "011");
 		reqMessage.setFieldString(24, "009");
 		reqMessage.setFieldString(25, "14");
 		reqMessage.setFieldString(41, getTerminalId());
 		reqMessage.setFieldString(42, getMerchantId());
-		Tlv tlv48 = new Tlv();
-		Tlv tlv48_90 = new Tlv();
-		tlv48_90.setTag(new byte[]{(byte) 0x90});
-		tlv48_90.setStringValue("");;
-		// TODO 48域TLV确认
+		
+		String field48 = "9003905" + "9006" + stagesId + String.format("%02d", stagesCount);
+		reqMessage.setFieldString(48, field48);
+		reqMessage.setFieldString(49, currency);
+		reqMessage.setFieldString(52, getPin(cardNo, pin));
+		reqMessage.setFieldString(61, getBatchNo() + getTellerNo() + getCerNo());
+		
+		StringBuilder macData = new StringBuilder();
+		macData.append(cardNo.length() % 2 == 0 ? cardNo : "0" + cardNo);
+		macData.append(processCode);
+		macData.append(formatAmt);
+		macData.append(traceNo);
+		macData.append("0" + currency);
+		macData.append(getTerminalId());
+		String mac = getMac(macData.toString());
+		reqMessage.setFieldString(64, mac);
+		
+		IMessage respMessage = sendTran(reqMessage);
 		return null;
 	}
 	
