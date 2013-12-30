@@ -1,8 +1,6 @@
 package com.yada.sdk.device.pos.posp;
 
 import java.io.IOException;
-import java.nio.ByteBuffer;
-import java.util.Date;
 
 import org.jpos.iso.ISOException;
 
@@ -11,7 +9,6 @@ import com.yada.sdk.device.pos.AbsTraner;
 import com.yada.sdk.device.pos.SequenceGenerator;
 import com.yada.sdk.net.FixLenPackageSplitterFactory;
 import com.yada.sdk.packages.PackagingException;
-import com.yada.sdk.packages.comm.Tlv;
 import com.yada.sdk.packages.transaction.IMessage;
 import com.yada.sdk.packages.transaction.jpos.PospPacker;
 
@@ -35,11 +32,12 @@ public class Traner extends AbsTraner {
 		IMessage reqMessage = createMessage();
 		reqMessage.setFieldString(0, "0800");
 		reqMessage.setFieldString(3, "990000");
-		reqMessage.setFieldString(11, getTraceNo());
 		reqMessage.setFieldString(24, "009");
 		reqMessage.setFieldString(41, getTerminalId());
 		reqMessage.setFieldString(42, getMerchantId());
 		reqMessage.setFieldString(61, getBatchNo() + "001");
+		
+		reqMessage.setFieldString(11, getTraceNo());
 		IMessage respMessage = sendTran(reqMessage);
 		
 		SigninInfo si = new SigninInfo();
