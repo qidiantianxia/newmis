@@ -128,4 +128,33 @@ public class Traner extends AbsTraner {
 	{
 		return null;
 	}
+	
+	private void reversal(IMessage orgMessage) throws PackagingException{
+		IMessage reqMessage = createMessage();
+		reqMessage.setFieldString(0, "0400");
+		reqMessage.setFieldString(2, orgMessage.getFieldString(2));
+		reqMessage.setFieldString(3, orgMessage.getFieldString(3));
+		reqMessage.setFieldString(4, orgMessage.getFieldString(4));
+		reqMessage.setFieldString(11, getTraceNo());
+		reqMessage.setFieldString(14, orgMessage.getFieldString(14));
+		reqMessage.setFieldString(22, orgMessage.getFieldString(22));
+		if(orgMessage.getFieldString(23) != null){
+			reqMessage.setFieldString(23, orgMessage.getFieldString(23));
+		}
+		reqMessage.setFieldString(24, "009");
+		reqMessage.setFieldString(25, orgMessage.getFieldString(25));
+		reqMessage.setFieldString(41, orgMessage.getFieldString(41));
+		reqMessage.setFieldString(42, orgMessage.getFieldString(42));
+		
+		reqMessage.setFieldString(44, orgMessage.getFieldString(44));
+		reqMessage.setFieldString(48, orgMessage.getFieldString(48));
+		reqMessage.setFieldString(49, orgMessage.getFieldString(49));
+		reqMessage.setFieldString(54, orgMessage.getFieldString(54));
+		reqMessage.setFieldString(55, orgMessage.getFieldString(55));
+		
+		reqMessage.setFieldString(61, getBatchNo()+getTellerNo()+getCerNo());
+		
+		reqMessage.setFieldString(62, orgMessage.getFieldString(0)+orgMessage.getFieldString(11));
+		
+	}
 }
