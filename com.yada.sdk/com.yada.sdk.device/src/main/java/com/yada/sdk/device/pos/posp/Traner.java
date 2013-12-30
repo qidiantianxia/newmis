@@ -1,8 +1,6 @@
 package com.yada.sdk.device.pos.posp;
 
 import java.io.IOException;
-import java.nio.ByteBuffer;
-import java.util.Date;
 
 import org.jpos.iso.ISOException;
 
@@ -11,7 +9,6 @@ import com.yada.sdk.device.pos.AbsTraner;
 import com.yada.sdk.device.pos.SequenceGenerator;
 import com.yada.sdk.net.FixLenPackageSplitterFactory;
 import com.yada.sdk.packages.PackagingException;
-import com.yada.sdk.packages.comm.Tlv;
 import com.yada.sdk.packages.transaction.IMessage;
 import com.yada.sdk.packages.transaction.jpos.PospPacker;
 
@@ -35,11 +32,12 @@ public class Traner extends AbsTraner {
 		IMessage reqMessage = createMessage();
 		reqMessage.setFieldString(0, "0800");
 		reqMessage.setFieldString(3, "990000");
-		reqMessage.setFieldString(11, getTraceNo());
 		reqMessage.setFieldString(24, "009");
 		reqMessage.setFieldString(41, getTerminalId());
 		reqMessage.setFieldString(42, getMerchantId());
 		reqMessage.setFieldString(61, getBatchNo() + "001");
+		
+		reqMessage.setFieldString(11, getTraceNo());
 		IMessage respMessage = sendTran(reqMessage);
 		
 		SigninInfo si = new SigninInfo();
@@ -124,8 +122,35 @@ public class Traner extends AbsTraner {
 		return null;
 	}
 	
-	public String pay()
+	/**
+	 * 普通消费交易
+	 * @throws IOException 
+	 * **/
+	public String pay(String cardNo,String validity,String amt) throws PackagingException, IOException
 	{
+		IMessage reqMessage = createMessage();
+		reqMessage.setFieldString(2, cardNo);//主账号
+		reqMessage.setFieldString(3, "000000");//处理码
+		reqMessage.setFieldString(4, String.format("%12s", amt).replace(' ', '0'));//交易金额
+		reqMessage.setFieldString(11, getTraceNo());//POS流水号
+		reqMessage.setFieldString(14, validity);//卡有效期
+		reqMessage.setFieldString(22, "011");//POS输入方式      011--手工有pin 
+		reqMessage.setFieldString(24, "009");//NII
+		reqMessage.setFieldString(25, "14");//服务点条件码
+		reqMessage.setFieldString(41, getTerminalId());//终端号
+		reqMessage.setFieldString(42, getMerchantId());//商户号
+		reqMessage.setFieldString(49, "156");//货币代码
+		
+		String batchNo = getBatchNo();//批次号
+		String operNo = getTellerNo();//操作员号
+		String cerNo = getCerNo();//票据号
+		
+		StringBuilder filed61 = new StringBuilder();
+	    filed61.append(batchNo).append(operNo).append(cerNo);
+		
+		reqMessage.setFieldString(61,filed61.toString());//自定义域
+		
+		IMessage respMessage = sendTran(reqMessage);
 		return null;
 	}
 	
