@@ -111,13 +111,13 @@ public class Traner extends AbsTraner {
 	 * 			分期期数
 	 * @return
 	 */
-	public String stagesPay(String cardNo, String validity, String amt, String pin, String stagesId, int stagesCount)
+	public IMessage stagesPay(String cardNo, String validity, String amt, String pin, String stagesId, int stagesCount)
 	{
 		String processCode = "000000";
 		String formatAmt = String.format("%12s", amt).replace(' ', '0');
 		String traceNo = getTraceNo();
 		String currency = "156";
-		
+		IMessage respMessage = null;
 		try {
 			IMessage reqMessage = createMessage();
 			reqMessage.setFieldString(0,"0200");
@@ -148,7 +148,7 @@ public class Traner extends AbsTraner {
 			String mac = getMac(macData.toString());
 			reqMessage.setFieldString(64, mac);
 			
-			IMessage respMessage = sendTran(reqMessage);
+			respMessage = sendTran(reqMessage);
 			
 			//检查是否需要签到或参数下载
 			cs.checkMessage(respMessage);
@@ -159,7 +159,7 @@ public class Traner extends AbsTraner {
 			//TODO 存储转发
 			e.printStackTrace();
 		}
-		return null;
+		return respMessage;
 	}
 	
 	/**
