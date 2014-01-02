@@ -12,6 +12,7 @@ public class EncryptionMachine implements IEncryption {
 
 	private String lmkZmk;
 	private InetSocketAddress endPoint;
+	private String messageGead = "-------";
 
 	public EncryptionMachine(String serverIp, int port, String lmkZmk) {
 		this.lmkZmk = lmkZmk;
@@ -38,35 +39,31 @@ public class EncryptionMachine implements IEncryption {
 	@Override
 	public String getLmkTmk(String zmkTmk) {
 		StringBuilder sb = new StringBuilder();
-		/**************************************************************
-		 * 1.消息头
-		 * 2.命令代码
-		 * 3.zmk加密方案
-		 * 4.lmkZmk
-		 * 5.tmk加密方案
-		 * 6.zmkTmk
-		 * 7.Atalla变量
-		 * 8.分隔符
-		 * 9.密钥方案（ZMK）
-		 * 10.密钥方案（LMK）
-		 * 11.密钥校验值类型
-		 * 12.终止信息分隔符
-		 * 13.消息尾
-		 */
-		sb.append("-------").append("FC").append("X").append(lmkZmk)
-				.append("X").append(zmkTmk).append("").append(";").append("X")
-				.append("X").append("0").append("").append("");
+	
+		//1.消息头 2.命令代码 3.密钥类型  4.lmkZmk
+		sb.append(messageGead).append("A6").append("000").append(lmkZmk);
+		//是否需要增加1A
+		if(zmkTmk.length() != 16){
+			sb.append("-");
+		}
+		//5.zmkTmk  6.tmk加密方案   7.Atalla变量    8.终止信息分隔符    9.消息尾
+		sb.append(zmkTmk).append("X").append("").append("").append("");
 		
 		String respMessage = send(sb.toString());
-		int startIndex = 7 + 2 + 2 + 1;
-		//String respCode = respMessage.substring(startIndex, startIndex + 2);
-		String lmkTmk = respMessage.substring(startIndex, startIndex + 32);
+		//1.消息头长度  2.响应码长度  3.错误代码长度
+		int startIndex = messageGead.length() + 2 + 2;
+		//返回密钥是否存在1A
+		if(zmkTmk.length() != 16){
+			startIndex = startIndex+1;
+		}
+		String lmkTmk = respMessage.substring(startIndex, startIndex + zmkTmk.length());
 		return lmkTmk;
 	}
 
 	@Override
 	public String getLmkTak(String lmkTmk, String tmkTak) {
-		// TODO Auto-generated method stub
+		StringBuilder sb = new StringBuilder();
+		sb.append(messageGead);
 		return null;
 	}
 
@@ -80,7 +77,7 @@ public class EncryptionMachine implements IEncryption {
 	public String getTpkPin(String accountNo, String pin, String lmkTpk) {
 		String subAccountNo = accountNo.substring(accountNo.length() - 13, accountNo.length() - 1);
 		StringBuilder sb = new StringBuilder();
-		sb.append("-------");
+		sb.append(messageGead);
 		sb.append("BA");
 		sb.append(String.format("%-7s", pin).replace(' ', 'F'));
 		sb.append(subAccountNo);
@@ -88,11 +85,11 @@ public class EncryptionMachine implements IEncryption {
 		sb.append("");
 		
 		String respMessage = send(sb.toString());
-		int startIndex = 7 + 2 + 2;
+		int startIndex = messageGead.length() + 2 + 2;
 		String lmkPin = respMessage.substring(startIndex);
 		
 		sb = new StringBuilder();
-		sb.append("-------");
+		sb.append(messageGead);
 		sb.append("JG");
 		sb.append("X");
 		sb.append(lmkTpk);

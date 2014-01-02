@@ -163,68 +163,11 @@ public class Traner extends AbsTraner {
 	}
 	
 	/**
-	 * 
-	 * @param cardNo
-	 * 			卡号
-	 * @param validity
-	 * 			效期
-	 * @param amt
-	 * 			金额
-	 * @param pin
-	 * 			pinma
-	 * @return
+	 * 冲正交易
+	 * @param orgMessage
+	 * @throws PackagingException
+	 * @throws IOException
 	 */
-	public String pay(String cardNo,String validity,String amt,String pin)
-	{
-		String processCode = "000000";
-		String formatAmt = String.format("%12s", amt).replace(' ', '0');
-		String traceNo = getTraceNo();
-		String currency = "156";
-		try {
-			IMessage reqMessage = createMessage();
-			reqMessage.setFieldString(0, "0200");
-			reqMessage.setFieldString(2, cardNo);//主账号
-			reqMessage.setFieldString(3, processCode);//处理码
-			reqMessage.setFieldString(4, formatAmt);//交易金额
-			reqMessage.setFieldString(11, traceNo);//POS流水号
-			reqMessage.setFieldString(14, validity);//卡有效期
-			reqMessage.setFieldString(22, "011");//POS输入方式      011--手工有pin 
-			reqMessage.setFieldString(24, "009");//NII
-			reqMessage.setFieldString(25, "14");//服务点条件码
-			reqMessage.setFieldString(41, getTerminalId());//终端号
-			reqMessage.setFieldString(42, getMerchantId());//商户号
-			reqMessage.setFieldString(49, currency);//货币代码
-			reqMessage.setFieldString(52, getPin(cardNo, pin));//pin码
-			
-			StringBuilder filed61 = new StringBuilder();
-			filed61.append(getBatchNo()).append(getTellerNo()).append(getCerNo());
-			
-			reqMessage.setFieldString(61,filed61.toString());//自定义域
-			
-			StringBuilder macData = new StringBuilder();
-			macData.append(cardNo.length() % 2 == 0 ? cardNo : "0" + cardNo);
-			macData.append(processCode);
-			macData.append(formatAmt);
-			macData.append(traceNo);
-			macData.append("0" + currency);
-			macData.append(getTerminalId());
-			String mac = getMac(macData.toString());
-			reqMessage.setFieldString(64, mac);
-			
-			IMessage respMessage = sendTran(reqMessage);
-			
-			//检查是否需要签到或参数下载
-			cs.checkMessage(respMessage);
-		} catch (PackagingException e) {
-			//TODO LOG
-			e.printStackTrace();
-		} catch (IOException e) {
-			//TODO 存储转发
-			e.printStackTrace();
-		}
-		return null;
-	}
-	
 	private void reversal(IMessage orgMessage) throws PackagingException, IOException{
 		IMessage reqMessage = createMessage();
 		reqMessage.setFieldString(0, "0400");
