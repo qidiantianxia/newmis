@@ -48,10 +48,10 @@ public class TcpClient {
 
 	public ByteBuffer send(ByteBuffer sendBuffer) throws IOException {
 		ByteBuffer rawBuffer = pkgSplitter.pack(sendBuffer);
-
+		
 		while (rawBuffer.hasRemaining()) {
 			byte[] raw = new byte[rawBuffer.remaining()];
-			rawBuffer.put(raw);
+			rawBuffer.get(raw);
 			socket.getOutputStream().write(raw);
 		}
 
