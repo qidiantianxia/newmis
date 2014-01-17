@@ -12,7 +12,7 @@ public class EncryptionMachine implements IEncryption {
 
 	private String lmkZmk;
 	private InetSocketAddress endPoint;
-	private String messageGead = "-------";
+	private String messageHead = "-------";
 
 	public EncryptionMachine(String serverIp, int port, String lmkZmk) {
 		this.lmkZmk = lmkZmk;
@@ -41,21 +41,22 @@ public class EncryptionMachine implements IEncryption {
 		StringBuilder sb = new StringBuilder();
 	
 		//1.消息头 2.命令代码 3.密钥类型  4.lmkZmk
-		sb.append(messageGead).append("A6").append("000").append(lmkZmk);
+		sb.append(messageHead).append("A6").append("000").append(lmkZmk);
 		//是否需要增加1A
 		if(zmkTmk.length() != 16){
-			sb.append("-");
+			sb.append("X");
 		}
-		//5.zmkTmk  6.tmk加密方案   7.Atalla变量    8.终止信息分隔符    9.消息尾
-		sb.append(zmkTmk).append("X").append("").append("").append("");
-		
+		//5.zmkTmk  6.tmk加密方案 
+		sb.append(zmkTmk).append("X");
+		System.out.println(sb.toString());
 		String respMessage = send(sb.toString());
 		//1.消息头长度  2.响应码长度  3.错误代码长度
-		int startIndex = messageGead.length() + 2 + 2;
+		int startIndex = messageHead.length() + 2 + 2;
 		//返回密钥是否存在1A
 		if(zmkTmk.length() != 16){
 			startIndex = startIndex+1;
 		}
+		System.out.println(respMessage);
 		String lmkTmk = respMessage.substring(startIndex, startIndex + zmkTmk.length());
 		return lmkTmk;
 	}
@@ -65,21 +66,21 @@ public class EncryptionMachine implements IEncryption {
 		
 		StringBuilder sb = new StringBuilder();
 		//1.消息头 2.命令代码 
-		sb.append(messageGead).append("MI");
+		sb.append(messageHead).append("MI");
 		//是否需要增加1A
 		if(lmkTmk.length() != 16){
-			sb.append("-");
+			sb.append("X");
 		}
 		sb.append(lmkTmk);
 		//是否需要增加1A
 		if(tmkTak.length() != 16){
-			sb.append("-");
+			sb.append("X");
 		}
 		sb.append(tmkTak);
 		
 		String respMessage = send(sb.toString());
 		//1.消息头长度  2.响应码长度  3.错误代码长度
-		int startIndex = messageGead.length() + 2 + 2;
+		int startIndex = messageHead.length() + 2 + 2;
 		//返回密钥是否存在1A
 		if(tmkTak.length() != 16){
 			startIndex = startIndex+1;
@@ -93,21 +94,23 @@ public class EncryptionMachine implements IEncryption {
 		
 		StringBuilder sb = new StringBuilder();
 		//1.消息头 2.命令代码 
-		sb.append(messageGead).append("FA");
+		sb.append(messageHead).append("FA");
 		//是否需要增加1A
 		if(lmkTmk.length() != 16){
-			sb.append("-");
+			sb.append("X");
 		}
 		sb.append(lmkTmk);
 		//是否需要增加1A
 		if(tmkTpk.length() != 16){
-			sb.append("-");
+			sb.append("X");
 		}
-		sb.append(tmkTpk);
-		
+		sb.append(tmkTpk).append(";XX0");
+		System.out.println("send="+sb.toString());
 		String respMessage = send(sb.toString());
+
+		System.out.println("resp="+respMessage);
 		//1.消息头长度  2.响应码长度  3.错误代码长度
-		int startIndex = messageGead.length() + 2 + 2;
+		int startIndex = messageHead.length() + 2 + 2;
 		//返回密钥是否存在1A
 		if(tmkTpk.length() != 16){
 			startIndex = startIndex+1;
@@ -120,7 +123,7 @@ public class EncryptionMachine implements IEncryption {
 	public String getTpkPin(String accountNo, String pin, String lmkTpk) {
 		String subAccountNo = accountNo.substring(accountNo.length() - 13, accountNo.length() - 1);
 		StringBuilder sb = new StringBuilder();
-		sb.append(messageGead);
+		sb.append(messageHead);
 		sb.append("BA");
 		sb.append(String.format("%-7s", pin).replace(' ', 'F'));
 		sb.append(subAccountNo);
@@ -128,11 +131,11 @@ public class EncryptionMachine implements IEncryption {
 		sb.append("");
 		
 		String respMessage = send(sb.toString());
-		int startIndex = messageGead.length() + 2 + 2;
+		int startIndex = messageHead.length() + 2 + 2;
 		String lmkPin = respMessage.substring(startIndex);
 		
 		sb = new StringBuilder();
-		sb.append(messageGead);
+		sb.append(messageHead);
 		sb.append("JG");
 		if(lmkTpk.length() != 16){
 			sb.append("X");
@@ -154,10 +157,10 @@ public class EncryptionMachine implements IEncryption {
 		
 		StringBuilder sb = new StringBuilder();
 		//1.消息头  2.指令名称
-		sb.append(messageGead).append("MA");
+		sb.append(messageHead).append("MA");
 		//是否需要增加1A
 		if(lmkTak.length() != 16){
-			sb.append("-");
+			sb.append("X");
 		}
 		//LmkTak
 		sb.append(lmkTak);
@@ -166,7 +169,7 @@ public class EncryptionMachine implements IEncryption {
 		String respMessage = send(sb.toString());
 
 		//1.消息头长度  2.响应码长度  3.错误代码长度
-		int startIndex = messageGead.length() + 2 + 2;
+		int startIndex = messageHead.length() + 2 + 2;
 		//返回密钥是否存在1A
 		if(lmkTak.length() != 16){
 			startIndex = startIndex+1;
