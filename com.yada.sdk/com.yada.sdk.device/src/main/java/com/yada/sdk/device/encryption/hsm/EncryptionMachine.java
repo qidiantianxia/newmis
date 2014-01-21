@@ -48,7 +48,6 @@ public class EncryptionMachine implements IEncryption {
 		}
 		//5.zmkTmk  6.tmk加密方案 
 		sb.append(zmkTmk).append("X");
-		System.out.println(sb.toString());
 		String respMessage = send(sb.toString());
 		//1.消息头长度  2.响应码长度  3.错误代码长度
 		int startIndex = messageHead.length() + 2 + 2;
@@ -56,7 +55,6 @@ public class EncryptionMachine implements IEncryption {
 		if(zmkTmk.length() != 16){
 			startIndex = startIndex+1;
 		}
-		System.out.println(respMessage);
 		String lmkTmk = respMessage.substring(startIndex, startIndex + zmkTmk.length());
 		return lmkTmk;
 	}
@@ -76,8 +74,7 @@ public class EncryptionMachine implements IEncryption {
 		if(tmkTak.length() != 16){
 			sb.append("X");
 		}
-		sb.append(tmkTak);
-		
+		sb.append(tmkTak).append(";XX0");
 		String respMessage = send(sb.toString());
 		//1.消息头长度  2.响应码长度  3.错误代码长度
 		int startIndex = messageHead.length() + 2 + 2;
@@ -105,10 +102,8 @@ public class EncryptionMachine implements IEncryption {
 			sb.append("X");
 		}
 		sb.append(tmkTpk).append(";XX0");
-		System.out.println("send="+sb.toString());
 		String respMessage = send(sb.toString());
 
-		System.out.println("resp="+respMessage);
 		//1.消息头长度  2.响应码长度  3.错误代码长度
 		int startIndex = messageHead.length() + 2 + 2;
 		//返回密钥是否存在1A
@@ -167,7 +162,6 @@ public class EncryptionMachine implements IEncryption {
 		//Mac数据
 		sb.append(macData);
 		String respMessage = send(sb.toString());
-
 		//1.消息头长度  2.响应码长度  3.错误代码长度
 		int startIndex = messageHead.length() + 2 + 2;
 		//返回密钥是否存在1A
