@@ -12,7 +12,7 @@ public class Utils {
 	private static char[] encodeHex(byte[] data) {
 		final int l = data.length;
         final char[] out = new char[l << 1];
-        // two characters form the hex value.
+
         for (int i = 0, j = 0; i < l; i++) {
             out[j++] = DIGITS_UPPER[(0xF0 & data[i]) >>> 4];
             out[j++] = DIGITS_UPPER[0x0F & data[i]];
