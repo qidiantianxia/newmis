@@ -1,6 +1,7 @@
 package com.yada.sdk.device.pos.posp;
 
 import java.io.IOException;
+import java.nio.ByteBuffer;
 
 import org.jpos.iso.ISOException;
 
@@ -25,6 +26,7 @@ public class VirtualPos implements IVirtualPos<Traner> {
 	private String batchNo;
 	private SequenceGenerator traceNoSeqGenerator;
 	private SequenceGenerator cerNoSeqGenerator;
+	private ByteBuffer head;
 
 	public VirtualPos(String merchantId, String terminalId, String serverIp,
 			int serverPort, String zmkTmk, int timeout,
@@ -54,7 +56,7 @@ public class VirtualPos implements IVirtualPos<Traner> {
 		checkSingin();
 		Traner traner = new Traner(merchantId, terminalId, tellerNo, batchNo,
 				serverIp, serverPort, timeout, new CheckSignin(this),
-				terminalAuth, traceNoSeqGenerator, cerNoSeqGenerator);
+				terminalAuth, traceNoSeqGenerator, cerNoSeqGenerator,head);
 		return traner;
 	}
 
@@ -63,7 +65,7 @@ public class VirtualPos implements IVirtualPos<Traner> {
 			Traner traner = new Traner(merchantId, terminalId, tellerNo,
 					batchNo, serverIp, serverPort, timeout, new CheckSignin(
 							this), terminalAuth, traceNoSeqGenerator,
-					cerNoSeqGenerator);
+					cerNoSeqGenerator,head);
 
 			SigninInfo si = traner.singin();
 			batchNo = si.batchNo;
@@ -77,7 +79,7 @@ public class VirtualPos implements IVirtualPos<Traner> {
 			Traner traner = new Traner(merchantId, terminalId, tellerNo,
 					batchNo, serverIp, serverPort, timeout, new CheckSignin(
 							this), terminalAuth, traceNoSeqGenerator,
-					cerNoSeqGenerator);
+					cerNoSeqGenerator,head);
 			traner.paramDownload();
 			traner.close();
 			needParamDownload = false;
@@ -91,4 +93,9 @@ public class VirtualPos implements IVirtualPos<Traner> {
 	public void resetParamDownload() {
 		needParamDownload = true;
 	}
+
+	public void setHead(ByteBuffer head) {
+		this.head = head;
+	}
+	
 }

@@ -1,12 +1,16 @@
 package com.yada.sdk.device.pos.posp;
 
 import java.io.IOException;
+import java.nio.ByteBuffer;
+import java.nio.charset.Charset;
+import java.util.Arrays;
 
 import org.jpos.iso.ISOException;
 
 import com.yada.sdk.device.encryption.TerminalAuth;
 import com.yada.sdk.device.pos.AbsTraner;
 import com.yada.sdk.device.pos.SequenceGenerator;
+import com.yada.sdk.device.pos.util.Utils;
 import com.yada.sdk.net.FixLenPackageSplitterFactory;
 import com.yada.sdk.packages.PackagingException;
 import com.yada.sdk.packages.transaction.IMessage;
@@ -19,12 +23,12 @@ public class Traner extends AbsTraner {
 			String batchNo, String serverIp, int serverPort, int timeout,
 			CheckSignin cs, TerminalAuth terminalAuth,
 			SequenceGenerator traceNoSeqGenerator,
-			SequenceGenerator cerNoSeqGenerator) throws IOException,
+			SequenceGenerator cerNoSeqGenerator,ByteBuffer head) throws IOException,
 			ISOException {
 		super(merchantId, terminalId, tellerNo, batchNo,
 				new FixLenPackageSplitterFactory(2, false), new PospPacker(7),
 				serverIp, serverPort, timeout, terminalAuth,
-				traceNoSeqGenerator, cerNoSeqGenerator);
+				traceNoSeqGenerator, cerNoSeqGenerator,head);
 		this.cs = cs;
 	}
 
@@ -38,13 +42,11 @@ public class Traner extends AbsTraner {
 		IMessage reqMessage = createMessage();
 		reqMessage.setFieldString(0, "0800");
 		reqMessage.setFieldString(3, "990000");
+		reqMessage.setFieldString(11, getTraceNo());
 		reqMessage.setFieldString(24, "009");
 		reqMessage.setFieldString(41, getTerminalId());
 		reqMessage.setFieldString(42, getMerchantId());
 		reqMessage.setFieldString(61, getBatchNo() + "001");
-		
-		reqMessage.setFieldString(11, getTraceNo());
-		
 		
 		IMessage respMessage = sendTran(reqMessage);
 		
@@ -57,37 +59,45 @@ public class Traner extends AbsTraner {
 		String batchNo = respMessage.getFieldString(61).substring(0, 6);
 		si.batchNo = batchNo;
 		
-		String field48 = respMessage.getFieldString(48);
-		String tag, len, value;
-		int index = 0;
+		ByteBuffer field48 = respMessage.getField(48);
+
+		byte[] tagByte = new byte[2];
+		byte[] lenByte = new byte[2];
 		
-		while(index < field48.length())
-		{
-			tag = field48.substring(index, index + 2);
-			len = field48.substring(index + 2, index + 2 + 2);
+		int index = 0;
+		byte[] array48 = field48.array();
+		while(index < array48.length){
+			tagByte = Arrays.copyOfRange(array48, index, index+2);
+			lenByte = Arrays.copyOfRange(array48, index+2, index+4);
+			String tag = new String(tagByte,Charset.forName("GBK"));
+			String len = new String(lenByte,Charset.forName("GBK"));
 			int ilen = Integer.parseInt(len);
-			value = field48.substring(index + 2 + 2, index + 2 + 2 + ilen);
-			index = index + 2 + 2 + ilen;
+			//TODO
+			byte[] valueByte = new byte[ilen];
+			valueByte = Arrays.copyOfRange(array48, index+4, index+4+ilen);
+			
 			if(tag.equals("98"))
 			{
-				si.tmkTpk = getStringKey(value);
+				si.tmkTpk = getStringKey(valueByte);
 			}
 			
 			if(tag.equals("99"))
 			{
-				si.tmkTak = getStringKey(value);
+				si.tmkTak = getStringKey(valueByte);
 			}
+			
+			index = index + 4 + ilen;
 		}
 		
 		return si;
 	}
 	//解48域密钥
-	private String getStringKey(String value) {
-		String key;
-		if (value.length() == 23) {
-			key = value.substring(0, 16);
+	private String getStringKey(byte[] value) {
+		String key = "";
+		if (value.length == 23) {
+			key = Utils.encodeHexString(Arrays.copyOfRange(value, 1, 17));
 		} else {
-			key = value.substring(0, 32);
+			key = Utils.encodeHexString(Arrays.copyOfRange(value, 1, 33));
 		}
 		return key;
 	}
@@ -192,7 +202,7 @@ public class Traner extends AbsTraner {
 		if(orgMessage.getFieldString(44) != null){
 			reqMessage.setFieldString(44, orgMessage.getFieldString(44));
 		}
-		if(orgMessage.getFieldString(48) != null){
+		if(orgMessage.getFieldString(48) != null){ 
 			reqMessage.setFieldString(48, orgMessage.getFieldString(48));
 		}
 		reqMessage.setFieldString(49, orgMessage.getFieldString(49));

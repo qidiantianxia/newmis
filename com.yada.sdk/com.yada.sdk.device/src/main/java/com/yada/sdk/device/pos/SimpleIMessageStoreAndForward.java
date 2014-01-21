@@ -57,7 +57,7 @@ public class SimpleIMessageStoreAndForward implements IStoreAndForward<IMessage>
 	}
 
 	protected Traner createTranner(IMessage message) throws IOException, ISOException {
-		return new Traner(null, null, null, null, targetIp, targetPort, connectTimeOut, null, null, null, null);
+		return new Traner(null, null, null, null, targetIp, targetPort, connectTimeOut, null, null, null, null,null);
 	}
 
 	protected void addElementToQueue(IMessage message) {

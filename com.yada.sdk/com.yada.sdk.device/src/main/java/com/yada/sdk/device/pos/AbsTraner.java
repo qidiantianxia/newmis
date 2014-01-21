@@ -21,23 +21,27 @@ public abstract class AbsTraner {
 	private String batchNo;
 	private TerminalAuth terminalAuth;
 	private String tellerNo;
+	private ByteBuffer head;
+	
 
 	public AbsTraner(String merchantId, String terminalId, String tellerNo,
 			String batchNo, IPackageSplitterFactory pkgSplitterFactory,
 			IPacker packer, String serverIp, int serverPort, int timeout,
 			TerminalAuth terminalAuth, SequenceGenerator traceNoSeqGenerator,
-			SequenceGenerator cerNoSeqGenerator) throws IOException {
+			SequenceGenerator cerNoSeqGenerator,ByteBuffer head) throws IOException {
 		this.merchantId = merchantId;
 		this.terminalId = terminalId;
 		this.batchNo = batchNo;
 		this.tellerNo = tellerNo;
+		this.packer = packer;
 		this.traceNoSeqGenerator = traceNoSeqGenerator;
 		this.cerNoSeqGenerator = cerNoSeqGenerator;
+		this.head = head;
 		InetSocketAddress serverEndPoint = new InetSocketAddress(serverIp,
 				serverPort);
 		client = new TcpClient(serverEndPoint, pkgSplitterFactory, timeout);
 		client.open();
-
+		
 		this.terminalAuth = terminalAuth;
 	}
 
@@ -80,8 +84,23 @@ public abstract class AbsTraner {
 		return packer.unpack(responseBuffer);
 	}
 
-	protected IMessage createMessage() {
-		return packer.createEmpty();
+	protected IMessage createMessage() throws PackagingException {
+		IMessage message = packer.createEmpty();
+		//TODO 是否抽取？
+		byte[] tpduId = new byte[1];
+		head.get(tpduId);
+		byte[] tpduToAddress = new byte[2];
+		head.get(tpduToAddress);
+		byte[] tpduFromAddress = new byte[2];
+		head.get(tpduFromAddress);
+		byte[] version = new byte[2];
+		head.get(version);
+		
+		message.setTpduId(ByteBuffer.wrap(tpduId));
+		message.setTpduToAddress(ByteBuffer.wrap(tpduToAddress));
+		message.setTpduFromAddress(ByteBuffer.wrap(tpduFromAddress));
+		message.setVersion(ByteBuffer.wrap(version));
+		return message;
 	}
 
 	public void close() {
