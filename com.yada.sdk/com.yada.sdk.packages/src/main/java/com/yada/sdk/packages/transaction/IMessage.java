@@ -57,6 +57,12 @@ public interface IMessage {
 	 * @return 长度
 	 */
 	public int getFieldMaxLen(int fieldId);
+	
+	/**
+	 * 获取交易信息的唯一标识
+	 * @return 交易标识
+	 */
+	public String getTranId();
 
 	/**
 	 * 获取TPDU源地址
@@ -75,6 +81,22 @@ public interface IMessage {
 	public ByteBuffer getTpduToAddress() throws PackagingException;
 
 	/**
+	 * 设置tpduId
+	 * 
+	 * @param tpduId
+	 * @throws PackagingException
+	 */
+	public void setTpduId(ByteBuffer tpduId) throws PackagingException;
+	
+	/**
+	 * 设置认证版本号
+	 * 
+	 * @param version
+	 * @throws PackagingException
+	 */
+	public void setVersion(ByteBuffer version) throws PackagingException;
+	
+	/**
 	 * 设置TPDU源地址
 	 * 
 	 * @param tpduFromAddress
@@ -88,12 +110,6 @@ public interface IMessage {
 	 * @param tpduFromAddress
 	 * @throws PackagingException
 	 */
-	public void setTpduToAddress(ByteBuffer tpduFromAddress) throws PackagingException;
-	
-	/**
-	 * 获取交易信息的唯一标识
-	 * @return 交易标识
-	 */
-	public String getTranId();
+	public void setTpduToAddress(ByteBuffer tpduToAddress) throws PackagingException;
 	
 }

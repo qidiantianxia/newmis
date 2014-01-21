@@ -29,6 +29,10 @@ public class JposPacker implements IPacker {
 	private GenericPackager packer = null;
 
 	/**
+	 * 头长度
+	 */
+	private int headLength;
+	/**
 	 * 
 	 * @param headLength
 	 *            头长度
@@ -52,6 +56,7 @@ public class JposPacker implements IPacker {
 	 * @throws ISOException
 	 */
 	public JposPacker(int headLength, InputStream inputStream, String realmName) throws ISOException {
+		this.headLength = headLength;
 		packer = new GenericPackager(inputStream);
 		packer.setHeaderLength(headLength);
 		org.jpos.util.Logger l = new org.jpos.util.Logger();
@@ -91,6 +96,8 @@ public class JposPacker implements IPacker {
 
 	@Override
 	public JposMessage createEmpty() {
-		return new JposMessage();
+		JposMessage message = new JposMessage();
+		message.setHeader(new byte[headLength]);
+		return message;
 	}
 }
