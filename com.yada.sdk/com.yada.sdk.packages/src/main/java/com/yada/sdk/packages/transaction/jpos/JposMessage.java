@@ -129,8 +129,8 @@ public class JposMessage extends ISOMsg implements IMessage {
 		if (header == null || header.length < 5) {
 			throw new PackagingException("You can`t do that. Because TPDU head is null or its len less than 5");
 		}
-		if (version.remaining() != 1) {
-			throw new PackagingException("The length of tpduId must be 1 bytes.");
+		if (version.remaining() != 2) {
+			throw new PackagingException("The length of version must be 2 bytes.");
 		}
 		
 		header[5] = version.get();
