@@ -3,6 +3,7 @@ package com.yada.sdk.device.pos;
 import java.io.IOException;
 import java.net.InetSocketAddress;
 import java.nio.ByteBuffer;
+import java.util.Arrays;
 
 import com.yada.sdk.device.encryption.TerminalAuth;
 import com.yada.sdk.net.IPackageSplitterFactory;
@@ -69,11 +70,11 @@ public abstract class AbsTraner {
 		return batchNo;
 	}
 
-	protected String getPin(String accountNo, String pin) {
+	protected ByteBuffer getPin(String accountNo, String pin) {
 		return terminalAuth.getPin(accountNo, pin);
 	}
 
-	protected String getMac(String macData) {
+	protected ByteBuffer getMac(String macData) {
 		return terminalAuth.getMac(macData);
 	}
 
@@ -86,20 +87,20 @@ public abstract class AbsTraner {
 
 	protected IMessage createMessage() throws PackagingException {
 		IMessage message = packer.createEmpty();
+		
 		//TODO 是否抽取？
-		byte[] tpduId = new byte[1];
-		head.get(tpduId);
-		byte[] tpduToAddress = new byte[2];
-		head.get(tpduToAddress);
-		byte[] tpduFromAddress = new byte[2];
-		head.get(tpduFromAddress);
-		byte[] version = new byte[2];
-		head.get(version);
+		byte[] headBytes = head.array();
+		byte[] tpduId = Arrays.copyOfRange(headBytes, 0, 1);
+		byte[] tpduToAddress = Arrays.copyOfRange(headBytes, 1, 3);
+		byte[] tpduFromAddress = Arrays.copyOfRange(headBytes, 3, 5);
+		byte[] version = Arrays.copyOfRange(headBytes, 5, 7);
 		
 		message.setTpduId(ByteBuffer.wrap(tpduId));
 		message.setTpduToAddress(ByteBuffer.wrap(tpduToAddress));
 		message.setTpduFromAddress(ByteBuffer.wrap(tpduFromAddress));
 		message.setVersion(ByteBuffer.wrap(version));
+		
+		
 		return message;
 	}
 
