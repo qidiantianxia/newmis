@@ -70,11 +70,11 @@ public abstract class AbsTraner {
 		return batchNo;
 	}
 
-	protected ByteBuffer getPin(String accountNo, String pin) {
+	protected String getPin(String accountNo, String pin) {
 		return terminalAuth.getPin(accountNo, pin);
 	}
 
-	protected ByteBuffer getMac(String macData) {
+	protected String getMac(String macData) {
 		return terminalAuth.getMac(macData);
 	}
 
