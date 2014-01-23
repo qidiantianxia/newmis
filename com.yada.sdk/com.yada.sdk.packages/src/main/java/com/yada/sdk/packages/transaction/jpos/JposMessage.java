@@ -13,6 +13,19 @@ public class JposMessage extends ISOMsg implements IMessage {
 
 	private ITranIdParser tranIdParser;
 	
+	public JposMessage() {
+		super();
+	}
+
+	/**
+	 * 初始化头信息的构造
+	 * @param headLength
+	 */
+	public JposMessage(int headLength) {
+		super();
+		this.setHeader(new byte[headLength]);
+	}
+
 	void setTranIdParser(ITranIdParser tranIdParser)
 	{
 		this.tranIdParser = tranIdParser;

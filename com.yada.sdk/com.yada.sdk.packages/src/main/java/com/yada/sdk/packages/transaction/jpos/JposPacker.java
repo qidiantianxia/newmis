@@ -96,8 +96,7 @@ public class JposPacker implements IPacker {
 
 	@Override
 	public JposMessage createEmpty() {
-		JposMessage message = new JposMessage();
-		message.setHeader(new byte[headLength]);
+		JposMessage message = new JposMessage(headLength);
 		return message;
 	}
 }

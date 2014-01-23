@@ -249,7 +249,7 @@
       class="com.yada.sdk.packages.transaction.jpos.extend.IFB_GBK_LLLCHAR"/>
   <isofield
       id="61"
-      length="27"
+      length="35"
       name="RESERVED PRIVATE"
       class="com.yada.sdk.packages.transaction.jpos.extend.IFB_GBK_LLLCHAR"/>
   <isofield
