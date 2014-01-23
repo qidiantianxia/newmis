@@ -143,34 +143,25 @@ public class EncryptionMachine implements IEncryption {
 		sb.append("");
 		
 		respMessage = send(sb.toString());
-		String tmkPin = respMessage.substring(startIndex);
+		String tmkPin = respMessage.substring(startIndex,startIndex+8);
 		return tmkPin;
 	}
 
 	@Override
 	public String getTakMac(String macData, String lmkTak) {
-		
+
 		StringBuilder sb = new StringBuilder();
-		//1.消息头  2.指令名称
-		sb.append(messageHead).append("MA");
-		//是否需要增加1A
+		sb.append(messageHead).append("MS").append("0").append("0").append("1").append("0");
 		if(lmkTak.length() != 16){
-			sb.append("X");
+			sb.append("X").append(lmkTak);
 		}
-		//LmkTak
-		sb.append(lmkTak);
-		//Mac数据
-		sb.append(macData);
+		String len = String.format("%04X", macData.length());
+		sb.append(len).append(macData);
 		String respMessage = send(sb.toString());
-		//1.消息头长度  2.响应码长度  3.错误代码长度
+		
 		int startIndex = messageHead.length() + 2 + 2;
-		//返回密钥是否存在1A
-		if(lmkTak.length() != 16){
-			startIndex = startIndex+1;
-		}
-		//LmkTak长度
-		startIndex = startIndex + lmkTak.length();
 		String mac = respMessage.substring(startIndex, startIndex + 8);
+		
 		return mac;
 	}
 

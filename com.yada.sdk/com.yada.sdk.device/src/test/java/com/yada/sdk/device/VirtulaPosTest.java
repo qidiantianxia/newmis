@@ -19,13 +19,13 @@ public class VirtulaPosTest extends TestCase{
 	private EncryptionMachine encryptionMachine;
 	private String zmkTmk;
 	
-	private String merchantId = "104110058120036";
-	private String terminalId = "11000036";
+	private String merchantId = "104110041121014";
+	private String terminalId = "11034478";
 	private String serverIp = "21.7.2.59";
 	private int serverPort = 1000;
 	private int timeout = 9000;
 	
-	private String tpduStr = "6000120000";
+	private String tpduStr = "60001200000100";
 	
 	@Override
 	protected void setUp() throws Exception {
@@ -34,24 +34,29 @@ public class VirtulaPosTest extends TestCase{
 		zmkTmk = "620D2892F9189CA30BDA03DADB6B1B88";
 		pos = new VirtualPos(merchantId, terminalId, serverIp, serverPort, zmkTmk, timeout, encryptionMachine);
 		
-		byte[] b = new byte[5];
+		byte[] b = new byte[7];
 		for(int i=0;i<tpduStr.length()/2 ; i++){
 			b[i] = Byte.parseByte(tpduStr.substring(i*2, i*2 +2),16);
 		}
+		
 		ByteBuffer tpdu = ByteBuffer.wrap(b);
 		
 		pos.setHead(tpdu);
 	}
 
-
-
 	public void testTraner(){
 		try {
 			Traner traner = pos.createTraner();
-			
+			String cardNo = "5149587707356843";
+			String validity = "0417";
+			String amt = "1";
+			String pin = "111111";
+			String stagesId = "";
+			int stagesCount = 12;
+			traner.stagesPay(cardNo, validity, amt, pin, stagesId, stagesCount);
 		} catch (IOException | ISOException | PackagingException e) {
 			// TODO Auto-generated catch block
 			e.printStackTrace();
-		}/**/
+		}
 	}
 }

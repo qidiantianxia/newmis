@@ -42,16 +42,20 @@ public class Traner extends AbsTraner {
 		IMessage reqMessage = createMessage();
 		reqMessage.setFieldString(0, "0800");
 		reqMessage.setFieldString(3, "990000");
-		reqMessage.setFieldString(11, getTraceNo());
 		reqMessage.setFieldString(24, "009");
 		reqMessage.setFieldString(41, getTerminalId());
 		reqMessage.setFieldString(42, getMerchantId());
 		reqMessage.setFieldString(61, getBatchNo() + "001");
 		
+		reqMessage.setFieldString(11, getTraceNo());
+		
+		
 		IMessage respMessage = sendTran(reqMessage);
 		
+		String temp = new String(respMessage.getField(48).array(),Charset.forName("GBK"));
+		
 		//返回参数数据继续发送签到交易直到返回密钥为止
-		while(respMessage.getFieldString(48).substring(0,2).equals("97")){
+		while(temp.substring(0,2).equals("97")){
 			respMessage = sendTran(reqMessage);
 		}
 		
@@ -59,45 +63,37 @@ public class Traner extends AbsTraner {
 		String batchNo = respMessage.getFieldString(61).substring(0, 6);
 		si.batchNo = batchNo;
 		
-		ByteBuffer field48 = respMessage.getField(48);
-
-		byte[] tagByte = new byte[2];
-		byte[] lenByte = new byte[2];
-		
+		String field48 = new String(respMessage.getField(48).array(),Charset.forName("GBK"));
+		String tag, len, value;
 		int index = 0;
-		byte[] array48 = field48.array();
-		while(index < array48.length){
-			tagByte = Arrays.copyOfRange(array48, index, index+2);
-			lenByte = Arrays.copyOfRange(array48, index+2, index+4);
-			String tag = new String(tagByte,Charset.forName("GBK"));
-			String len = new String(lenByte,Charset.forName("GBK"));
+		
+		while(index < field48.length())
+		{
+			tag = field48.substring(index, index + 2);
+			len = field48.substring(index + 2, index + 2 + 2);
 			int ilen = Integer.parseInt(len);
-			//TODO
-			byte[] valueByte = new byte[ilen];
-			valueByte = Arrays.copyOfRange(array48, index+4, index+4+ilen);
-			
+			value = field48.substring(index + 2 + 2, index + 2 + 2 + ilen);
+			index = index + 2 + 2 + ilen;
 			if(tag.equals("98"))
 			{
-				si.tmkTpk = getStringKey(valueByte);
+				si.tmkTpk = getStringKey(value);
 			}
 			
 			if(tag.equals("99"))
 			{
-				si.tmkTak = getStringKey(valueByte);
+				si.tmkTak = getStringKey(value);
 			}
-			
-			index = index + 4 + ilen;
 		}
 		
 		return si;
 	}
 	//解48域密钥
-	private String getStringKey(byte[] value) {
-		String key = "";
-		if (value.length == 23) {
-			key = Utils.encodeHexString(Arrays.copyOfRange(value, 1, 17));
+	private String getStringKey(String value) {
+		String key;
+		if (value.length() == 23) {
+			key = value.substring(1, 17);
 		} else {
-			key = Utils.encodeHexString(Arrays.copyOfRange(value, 1, 33));
+			key = value.substring(1, 33);
 		}
 		return key;
 	}
@@ -147,7 +143,6 @@ public class Traner extends AbsTraner {
 			reqMessage.setFieldString(49, currency);
 			reqMessage.setFieldString(52, getPin(cardNo, pin));
 			reqMessage.setFieldString(61, getBatchNo() + getTellerNo() + getCerNo());
-			
 			StringBuilder macData = new StringBuilder();
 			macData.append(cardNo.length() % 2 == 0 ? cardNo : "0" + cardNo);
 			macData.append(processCode);

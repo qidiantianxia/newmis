@@ -30,7 +30,7 @@ public class EncryptionMachineTest extends TestCase {
 		zmkTmk = "620D2892F9189CA30BDA03DADB6B1B88";
 		
 	}
-	
+
 	private String send(String reqMessage) {
 		
 		ByteBuffer reqBuffer = ByteBuffer.wrap(reqMessage.getBytes());
@@ -48,12 +48,12 @@ public class EncryptionMachineTest extends TestCase {
 		}
 	}
 	
-/*	public void testGetLmkTmk(){
+	public void testGetLmkTmk(){
 		String lmkTmk = encryptionMachine.getLmkTmk(zmkTmk);
 		System.out.println(lmkTmk);
-	}*/
+	}
 	
-	public void testGetLmkTpk(){
+	/*public void testGetLmkTpk(){
 		
 		//encryptionMachine.getLmkTmk(zmkTmk)的返回值 （04-05下加密的）
 		String lmkTmk = "B6F0F9262F4C535DC45348A551EE419F";
@@ -73,8 +73,8 @@ public class EncryptionMachineTest extends TestCase {
 		String lmkTpk = encryptionMachine.getLmkTpk(lmkTmk, zmkTpk);
 		System.out.println("lmkTpk="+lmkTpk);
 		Assert.assertTrue(genLmkTpk.equals(lmkTpk));
-	}
-	/**/
+	}*/
+	/*
 	public void testGetTpkPin(){
 		//encryptionMachine.getLmkTpk(lmkTmk, zmkTpk)的返回值
 		String lmkTpk = "AD3BDA0CD45FC804CA8B57C3E034DF3D";
@@ -85,7 +85,7 @@ public class EncryptionMachineTest extends TestCase {
 		String tpkPin = encryptionMachine.getTpkPin(accountNo, pin, lmkTpk);
 		System.out.println("tpkPin="+tpkPin);
 	}
-	
+	*/
 	public void testGetLmkTak(){
 		//（04-05下加密的）
 		String lmkTmk = "B6F0F9262F4C535DC45348A551EE419F";

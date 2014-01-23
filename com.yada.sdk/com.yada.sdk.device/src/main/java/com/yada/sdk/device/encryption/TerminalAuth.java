@@ -23,8 +23,12 @@ public class TerminalAuth {
 	}
 
 	public String getPin(String accountNo, String pin) {
-		
 		return encryptionMachine.getTpkPin(accountNo, pin, lmkTpk);
+	}
+	
+	public String pin2pin(String pinBlock){
+		//TODO
+		return null;
 	}
 
 	public String getMac(String macData) {
