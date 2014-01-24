@@ -45,7 +45,7 @@ public class SimpleIMessageStoreAndForward implements IStoreAndForward<IMessage>
 		try {
 			Traner traner = createTranner(t);
 			// 发送。
-			traner.sendTran(t);
+			traner.reversal(t);
 		} catch (PackagingException e) {
 			// LOG
 		} catch (ISOException e) {
