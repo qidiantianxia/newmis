@@ -21,6 +21,10 @@ public class VirtulaPosTest extends TestCase{
 	
 	private String merchantId = "104110041121014";
 	private String terminalId = "11034478";
+//	private String merchantId = "104130070110001";
+//	private String terminalId = "13012003";
+//	private String serverIp = "22.7.16.91";
+//	private int serverPort = 3001;
 	private String serverIp = "21.7.2.59";
 	private int serverPort = 1000;
 	private int timeout = 9000;
@@ -51,9 +55,10 @@ public class VirtulaPosTest extends TestCase{
 			String validity = "0417";
 			String amt = "1";
 			String pin = "111111";
-			String stagesId = "";
-			int stagesCount = 12;
+			String stagesId = "IP01";
+			int stagesCount = 3;
 			traner.stagesPay(cardNo, validity, amt, pin, stagesId, stagesCount);
+			
 		} catch (IOException | ISOException | PackagingException e) {
 			// TODO Auto-generated catch block
 			e.printStackTrace();

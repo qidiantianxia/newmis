@@ -1,5 +1,7 @@
 package com.yada.sdk.device.encryption;
 
+import java.nio.ByteBuffer;
+
 public class TerminalAuth {
 	private String lmkTmk;
 	private String lmkTak;
@@ -31,7 +33,7 @@ public class TerminalAuth {
 		return null;
 	}
 
-	public String getMac(String macData) {
+	public ByteBuffer getMac(ByteBuffer macData) {
 		return encryptionMachine.getTakMac(macData, lmkTak);
 	}
 }

@@ -3,7 +3,6 @@ package com.yada.sdk.device.pos.posp;
 import java.io.IOException;
 import java.nio.ByteBuffer;
 import java.nio.charset.Charset;
-import java.util.Arrays;
 
 import org.jpos.iso.ISOException;
 
@@ -149,14 +148,20 @@ public class Traner extends AbsTraner {
 			macData.append(formatAmt);
 			macData.append(traceNo);
 			macData.append("0" + currency);
-			macData.append(getTerminalId());
-			String mac = getMac(macData.toString());
-			reqMessage.setFieldString(64, mac);
+			
+			byte[] bcdMacData = Utils.ASCII_To_BCD(macData.toString().getBytes());
+			byte[] terminalByte = getTerminalId().getBytes();
+			
+			ByteBuffer buf = ByteBuffer.allocate(bcdMacData.length+terminalByte.length);
+			buf.put(bcdMacData).put(terminalByte);
+			
+			reqMessage.setField(64, getMac(buf));
 			
 			respMessage = sendTran(reqMessage);
 			
 			//检查是否需要签到或参数下载
 			cs.checkMessage(respMessage);
+			
 		} catch (PackagingException e) {
 			//TODO LOG
 			e.printStackTrace();
@@ -173,7 +178,7 @@ public class Traner extends AbsTraner {
 	 * @throws PackagingException
 	 * @throws IOException
 	 */
-	private void reversal(IMessage orgMessage) throws PackagingException, IOException{
+	public void reversal(IMessage orgMessage) throws PackagingException, IOException{
 		IMessage reqMessage = createMessage();
 		reqMessage.setFieldString(0, "0400");
 		reqMessage.setFieldString(2, orgMessage.getFieldString(2));

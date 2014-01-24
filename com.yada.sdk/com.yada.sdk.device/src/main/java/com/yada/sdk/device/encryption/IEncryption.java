@@ -1,5 +1,7 @@
 package com.yada.sdk.device.encryption;
 
+import java.nio.ByteBuffer;
+
 public interface IEncryption {
 	/***
 	 * 获取受本地主密钥（LMK）保护的终端主密钥（TMK）
@@ -52,5 +54,5 @@ public interface IEncryption {
 	 *            受本地主密钥（LMK）保护的终端认证密钥（TAK）
 	 * @return MAC
 	 */
-	public String getTakMac(String macData, String lmkTak);
+	public ByteBuffer getTakMac(ByteBuffer macData, String lmkTak);
 }

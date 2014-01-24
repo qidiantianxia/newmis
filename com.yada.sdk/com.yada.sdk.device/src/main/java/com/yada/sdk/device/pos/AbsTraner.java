@@ -74,7 +74,7 @@ public abstract class AbsTraner {
 		return terminalAuth.getPin(accountNo, pin);
 	}
 
-	protected String getMac(String macData) {
+	protected ByteBuffer getMac(ByteBuffer macData) {
 		return terminalAuth.getMac(macData);
 	}
 
