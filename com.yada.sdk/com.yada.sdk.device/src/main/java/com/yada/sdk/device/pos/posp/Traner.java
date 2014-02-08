@@ -3,8 +3,11 @@ package com.yada.sdk.device.pos.posp;
 import java.io.IOException;
 import java.nio.ByteBuffer;
 import java.nio.charset.Charset;
+import java.util.concurrent.LinkedBlockingQueue;
 
 import org.jpos.iso.ISOException;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import com.yada.sdk.device.encryption.TerminalAuth;
 import com.yada.sdk.device.pos.AbsTraner;
@@ -16,18 +19,22 @@ import com.yada.sdk.packages.transaction.IMessage;
 import com.yada.sdk.packages.transaction.jpos.PospPacker;
 
 public class Traner extends AbsTraner {
+	
+	private final static Logger LOGGER = LoggerFactory.getLogger(Traner.class);
+	
 	private CheckSignin cs;
-
+	
 	public Traner(String merchantId, String terminalId, String tellerNo,
 			String batchNo, String serverIp, int serverPort, int timeout,
 			CheckSignin cs, TerminalAuth terminalAuth,
 			SequenceGenerator traceNoSeqGenerator,
-			SequenceGenerator cerNoSeqGenerator,ByteBuffer head) throws IOException,
+			SequenceGenerator cerNoSeqGenerator,ByteBuffer head,
+			LinkedBlockingQueue<IMessage> queue) throws IOException,
 			ISOException {
 		super(merchantId, terminalId, tellerNo, batchNo,
 				new FixLenPackageSplitterFactory(2, false), new PospPacker(7),
-				serverIp, serverPort, timeout, terminalAuth,
-				traceNoSeqGenerator, cerNoSeqGenerator,head);
+				serverIp, serverPort, timeout, terminalAuth,traceNoSeqGenerator,
+				cerNoSeqGenerator,head,queue);
 		this.cs = cs;
 	}
 
@@ -123,8 +130,9 @@ public class Traner extends AbsTraner {
 		String traceNo = getTraceNo();
 		String currency = "156";
 		IMessage respMessage = null;
+		IMessage reqMessage = null;
 		try {
-			IMessage reqMessage = createMessage();
+			reqMessage = createMessage();
 			reqMessage.setFieldString(0,"0200");
 			reqMessage.setFieldString(2, cardNo);
 			reqMessage.setFieldString(3, processCode);
@@ -163,11 +171,9 @@ public class Traner extends AbsTraner {
 			cs.checkMessage(respMessage);
 			
 		} catch (PackagingException e) {
-			//TODO LOG
-			e.printStackTrace();
+			LOGGER.debug("when stagesPay happen PackagingException",e);
 		} catch (IOException e) {
-			//TODO 存储转发
-			e.printStackTrace();
+			addElementToQueue(reqMessage);
 		}
 		return respMessage;
 	}

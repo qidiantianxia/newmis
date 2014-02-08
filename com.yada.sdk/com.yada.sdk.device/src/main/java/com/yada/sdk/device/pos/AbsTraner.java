@@ -4,6 +4,10 @@ import java.io.IOException;
 import java.net.InetSocketAddress;
 import java.nio.ByteBuffer;
 import java.util.Arrays;
+import java.util.concurrent.LinkedBlockingQueue;
+
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import com.yada.sdk.device.encryption.TerminalAuth;
 import com.yada.sdk.net.IPackageSplitterFactory;
@@ -13,6 +17,9 @@ import com.yada.sdk.packages.transaction.IMessage;
 import com.yada.sdk.packages.transaction.IPacker;
 
 public abstract class AbsTraner {
+	
+	private final static Logger LOGGER = LoggerFactory.getLogger(AbsTraner.class);
+	
 	private IPacker packer;
 	private SequenceGenerator traceNoSeqGenerator;
 	private SequenceGenerator cerNoSeqGenerator;
@@ -23,13 +30,14 @@ public abstract class AbsTraner {
 	private TerminalAuth terminalAuth;
 	private String tellerNo;
 	private ByteBuffer head;
+	private LinkedBlockingQueue<IMessage> queue;
 	
-
 	public AbsTraner(String merchantId, String terminalId, String tellerNo,
 			String batchNo, IPackageSplitterFactory pkgSplitterFactory,
 			IPacker packer, String serverIp, int serverPort, int timeout,
 			TerminalAuth terminalAuth, SequenceGenerator traceNoSeqGenerator,
-			SequenceGenerator cerNoSeqGenerator,ByteBuffer head) throws IOException {
+			SequenceGenerator cerNoSeqGenerator,ByteBuffer head,
+			LinkedBlockingQueue<IMessage> queue) throws IOException {
 		this.merchantId = merchantId;
 		this.terminalId = terminalId;
 		this.batchNo = batchNo;
@@ -38,6 +46,7 @@ public abstract class AbsTraner {
 		this.traceNoSeqGenerator = traceNoSeqGenerator;
 		this.cerNoSeqGenerator = cerNoSeqGenerator;
 		this.head = head;
+		this.queue = queue;
 		InetSocketAddress serverEndPoint = new InetSocketAddress(serverIp,
 				serverPort);
 		client = new TcpClient(serverEndPoint, pkgSplitterFactory, timeout);
@@ -100,10 +109,17 @@ public abstract class AbsTraner {
 		message.setTpduFromAddress(ByteBuffer.wrap(tpduFromAddress));
 		message.setVersion(ByteBuffer.wrap(version));
 		
-		
 		return message;
 	}
 
+	protected void addElementToQueue(IMessage message) {
+		try {
+			queue.put(message);
+		} catch (InterruptedException e) {
+			LOGGER.debug("when addElementToQueue happen InterruptedException",e);
+		}
+	}
+	
 	public void close() {
 		client.close();
 	}

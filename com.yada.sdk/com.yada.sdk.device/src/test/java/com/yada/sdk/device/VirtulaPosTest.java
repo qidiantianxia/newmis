@@ -27,7 +27,7 @@ public class VirtulaPosTest extends TestCase{
 //	private int serverPort = 3001;
 	private String serverIp = "21.7.2.59";
 	private int serverPort = 1000;
-	private int timeout = 9000;
+	private int timeout = 3000;
 	
 	private String tpduStr = "60001200000100";
 	
