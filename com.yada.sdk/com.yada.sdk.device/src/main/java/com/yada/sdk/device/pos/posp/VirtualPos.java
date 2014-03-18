@@ -48,14 +48,14 @@ public class VirtualPos implements IVirtualPos<Traner> {
 
 	public VirtualPos(String merchantId, String terminalId, String serverIp,
 			int serverPort, String zmkTmk, int timeout,
-			IEncryption encryptionMachine) {
+			IEncryption encryptionMachine,ByteBuffer head) {
 		this(merchantId, terminalId, DEFAULT_TELLER_NO, serverIp, serverPort,
-				zmkTmk, timeout, encryptionMachine);
+				zmkTmk, timeout, encryptionMachine,head);
 	}
 
 	public VirtualPos(String merchantId, String terminalId, String tellerNo,
 			String serverIp, int serverPort, String zmkTmk, int timeout,
-			IEncryption encryptionMachine) {
+			IEncryption encryptionMachine,ByteBuffer head) {
 		this.merchantId = merchantId;
 		this.terminalId = terminalId;
 		this.tellerNo = tellerNo;
@@ -64,7 +64,8 @@ public class VirtualPos implements IVirtualPos<Traner> {
 		this.timeout = timeout;
 		this.terminalAuth = new TerminalAuth(encryptionMachine);
 		terminalAuth.setTmk(zmkTmk);
-		batchNo = DEFAULT_BATCH_NO;
+		this.head = head;
+		this.batchNo = DEFAULT_BATCH_NO;
 		this.traceNoSeqGenerator = new SequenceGenerator("termNo_" + terminalId);
 		this.cerNoSeqGenerator = new SequenceGenerator("cerNo_" + terminalId);
 		this.queue = new LinkedBlockingQueue<IMessage>();
@@ -115,10 +116,6 @@ public class VirtualPos implements IVirtualPos<Traner> {
 
 	public void resetParamDownload() {
 		needParamDownload = true;
-	}
-
-	public void setHead(ByteBuffer head) {
-		this.head = head;
 	}
 	
 	public void forward(IMessage t) {
