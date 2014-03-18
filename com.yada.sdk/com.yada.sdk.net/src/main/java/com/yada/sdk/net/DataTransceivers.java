@@ -1,6 +1,5 @@
 package com.yada.sdk.net;
 
-import java.io.IOException;
 import java.nio.ByteBuffer;
 import java.nio.channels.AsynchronousSocketChannel;
 import java.nio.channels.CompletionHandler;
@@ -25,7 +24,7 @@ import java.util.concurrent.TimeoutException;
  * {@link #send(ByteBuffer)}即可。
  * </p>
  * <p>
- * 数据收发器包含了接收超时{@link #recvTimeout}，关闭回掉的处理{@link IChannelCloseHandler}。
+ * 数据收发器包含了接收超时{@link #recvTimeout}，关闭回掉的处理{@link IChannelNeedToCloseHandler}。
  * </p>
  * </blockquote>
  * 
@@ -39,7 +38,7 @@ public class DataTransceivers {
 	private IPackageSplitter splitter;
 	private IPackageProcessor processor;
 	private DataTransceivers owner;
-	private IChannelCloseHandler closeHandler;
+	private IChannelNeedToCloseHandler channelNeedToCloseHandler;
 	private long recvTimeout;
 	private ExecutorService pool;
 
@@ -56,24 +55,24 @@ public class DataTransceivers {
 	 *            数据包分割器
 	 * @param processor
 	 *            包处理器
-	 * @param closeHandler
+	 * @param channelNeedToCloseHandler
 	 * @param recvTimeout
 	 *            接收超时时间 <i>单位：毫秒</i>
 	 */
 	DataTransceivers(AsynchronousSocketChannel channel,
 			IPackageSplitter splitter, IPackageProcessor processor,
-			IChannelCloseHandler closeHandler, long recvTimeout) {
+			IChannelNeedToCloseHandler channelNeedToCloseHandler, long recvTimeout) {
 		this.asyncChannel = channel;
 		this.splitter = splitter;
 		this.processor = processor;
-		this.closeHandler = closeHandler;
+		this.channelNeedToCloseHandler = channelNeedToCloseHandler;
 		this.recvTimeout = recvTimeout;
 		owner = this;
 
 		// 构建阻塞队列
 		bufferQueue = new LinkedBlockingQueue<ByteBuffer>();
 
-		pool = Executors.newFixedThreadPool(50);
+		pool = Executors.newFixedThreadPool(40);
 		pool.execute(new Runnable() {
 
 			@Override
@@ -123,20 +122,20 @@ public class DataTransceivers {
 	 * 关闭数据收发器 <blockquote>
 	 * <p>
 	 * 当数据收发器有效时{@link #isValid()}，会关闭信道并通知回掉接口
-	 * {@link IChannelCloseHandler#closeCallback(DataTransceivers)}。
+	 * {@link IChannelNeedToCloseHandler#needToCloseCallback(DataTransceivers)}。
 	 * </p>
 	 * </blockquote>
 	 */
-	public void close() {
+	void close() {
 
+		close("主动断开连接");
+	}
+	
+	private void close(String message)
+	{
 		if (valid) {
 			valid = false;
-			if (asyncChannel.isOpen())
-				try {
-					asyncChannel.close();
-				} catch (IOException e) {
-				}
-			closeHandler.closeCallback(this);
+			channelNeedToCloseHandler.needToCloseCallback(this, message);
 			
 			if(!pool.isShutdown())
 				pool.shutdown();
@@ -179,7 +178,7 @@ public class DataTransceivers {
 
 			// 当result为-1时，表示客户端已经主动断开
 			if (result == -1 || Thread.interrupted()) {
-				close();
+				close("远程主机已经断开");
 				return;
 			}
 
@@ -232,16 +231,16 @@ public class DataTransceivers {
 
 						if (ret == -1) {
 							// 客户端已经主动断开
-							close();
+							close("远程主机已经断开");
 							return;
 						}
 					} catch (InterruptedException | ExecutionException e) {
 						// 线程中断
-						close();
+						close("线程中断");
 						return;
 					} catch (TimeoutException e) {
 						// 接收超时
-						close();
+						close("接收超时");
 						return;
 					}
 				}

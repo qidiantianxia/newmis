@@ -4,8 +4,9 @@ import java.io.IOException;
 import java.net.InetSocketAddress;
 import java.nio.ByteBuffer;
 import java.nio.channels.AsynchronousSocketChannel;
-import java.util.concurrent.Callable;
-import java.util.concurrent.FutureTask;
+import java.util.concurrent.ExecutorService;
+import java.util.concurrent.Executors;
+import java.util.concurrent.TimeUnit;
 
 public class AsyncTcpClient {
 	private InetSocketAddress hostAddress;
@@ -13,7 +14,7 @@ public class AsyncTcpClient {
 	private IPackageProcessorFactory processorFactory;
 	private int timeout;
 	private DataTransceivers dt;
-	private boolean autoReconnection;
+	private ExecutorService pool;
 
 	public AsyncTcpClient(InetSocketAddress hostAddress,
 			IPackageSplitterFactory pkgSplitterFactory,
@@ -23,47 +24,46 @@ public class AsyncTcpClient {
 		this.pkgSplitterFactory = pkgSplitterFactory;
 		this.timeout = timeout;
 		this.processorFactory = processorFactory;
-		this.autoReconnection = autoReconnection;
+
+		if (autoReconnection) {
+			pool = Executors.newFixedThreadPool(1);
+
+			pool.execute(new Runnable() {
+
+				@Override
+				public void run() {
+					try {
+						while (true) {
+							Thread.sleep(5000);
+							try {
+								open();
+							} catch (IOException e) {
+							}
+						}
+					} catch (InterruptedException e) {
+					}
+				}
+			});
+		}
 	}
 
-	public void open() throws IOException {
-		close();
-		AsynchronousSocketChannel socket = new TempAsynchronousSocketChannel();
+	public synchronized void open() throws IOException {
+		if (isOpen())
+			return;
+
+		final AsynchronousSocketChannel socket = new TempAsynchronousSocketChannel();
 		socket.connect(hostAddress);
 		dt = new DataTransceivers(socket, pkgSplitterFactory.create(),
-				processorFactory.create(), new IChannelCloseHandler() {
+				processorFactory.create(), new IChannelNeedToCloseHandler() {
 
 					@Override
-					public void closeCallback(DataTransceivers sender) {
-						if (autoReconnection) {
-							FutureTask<Void> task = new FutureTask<Void>(
-									new Callable<Void>() {
-
-										@Override
-										public Void call() throws Exception {
-											while (!Thread.currentThread()
-													.isInterrupted()) {
-												try {
-													if (!isOpen())
-														open();
-												} catch (IOException e) {
-													continue;
-												}
-
-												if (isOpen())
-													break;
-												else
-													try {
-														Thread.sleep(5000);
-													} catch (InterruptedException e) {
-														break;
-													}
-											}
-											return null;
-										}
-									});
-							Thread thread = new Thread(task);
-							thread.start();
+					public void needToCloseCallback(DataTransceivers sender,
+							String message) {
+						if (socket.isOpen()) {
+							try {
+								socket.close();
+							} catch (IOException e) {
+							}
 						}
 					}
 				}, timeout);
@@ -75,16 +75,27 @@ public class AsyncTcpClient {
 		}
 
 		dt = null;
+
+		if (pool != null) {
+			if (!pool.isShutdown())
+				pool.shutdown();
+
+			if (!pool.isTerminated())
+				pool.shutdownNow();
+
+			try {
+				pool.awaitTermination(10, TimeUnit.SECONDS);
+			} catch (InterruptedException e) {
+			}
+			pool = null;
+		}
 	}
 
 	public boolean isOpen() {
 		return dt == null ? false : dt.isValid();
 	}
 
-	public void send(ByteBuffer sendBuffer) throws IOException {
-		try {
-			dt.send(sendBuffer);
-		} catch (InterruptedException e) {
-		}
+	public void send(ByteBuffer sendBuffer) throws InterruptedException {
+		dt.send(sendBuffer);
 	}
 }

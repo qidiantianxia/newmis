@@ -11,11 +11,11 @@ import java.nio.channels.CompletionHandler;
 import java.nio.channels.spi.AsynchronousChannelProvider;
 import java.util.Set;
 import java.util.concurrent.Callable;
-import java.util.concurrent.ExecutionException;
+import java.util.concurrent.ExecutorService;
+import java.util.concurrent.Executors;
 import java.util.concurrent.Future;
 import java.util.concurrent.FutureTask;
 import java.util.concurrent.TimeUnit;
-import java.util.concurrent.TimeoutException;
 import java.util.concurrent.locks.ReadWriteLock;
 import java.util.concurrent.locks.ReentrantReadWriteLock;
 
@@ -30,6 +30,8 @@ import java.util.concurrent.locks.ReentrantReadWriteLock;
 class TempAsynchronousSocketChannel extends AsynchronousSocketChannel {
 	private Socket socket = null;
 	private final ReadWriteLock closeLock = new ReentrantReadWriteLock();
+	private ExecutorService readPool;
+	private ExecutorService writePool;
 
 	public TempAsynchronousSocketChannel() {
 		this(AsynchronousChannelProvider.provider());
@@ -50,6 +52,36 @@ class TempAsynchronousSocketChannel extends AsynchronousSocketChannel {
 				}
 			}
 			socket = null;
+		}
+
+		if (readPool != null) {
+			if (!readPool.isShutdown())
+				readPool.shutdown();
+
+			if (!readPool.isTerminated())
+				readPool.shutdownNow();
+
+			try {
+				readPool.awaitTermination(10, TimeUnit.SECONDS);
+			} catch (InterruptedException e) {
+			}
+			
+			readPool = null;
+		}
+		
+		if (writePool != null) {
+			if (!writePool.isShutdown())
+				writePool.shutdown();
+
+			if (!writePool.isTerminated())
+				writePool.shutdownNow();
+
+			try {
+				writePool.awaitTermination(10, TimeUnit.SECONDS);
+			} catch (InterruptedException e) {
+			}
+			
+			writePool = null;
 		}
 	}
 
@@ -83,6 +115,10 @@ class TempAsynchronousSocketChannel extends AsynchronousSocketChannel {
 	@Override
 	public Future<Void> connect(SocketAddress remote) {
 		final SocketAddress _remote = remote;
+		
+		socket = new Socket();
+		readPool = Executors.newFixedThreadPool(1);
+		writePool = Executors.newFixedThreadPool(1);
 		FutureTask<Void> task = new FutureTask<Void>(new Callable<Void>() {
 
 			@Override
@@ -91,6 +127,7 @@ class TempAsynchronousSocketChannel extends AsynchronousSocketChannel {
 				return null;
 			}
 		});
+		readPool.execute(task);
 		return task;
 	}
 
@@ -103,7 +140,11 @@ class TempAsynchronousSocketChannel extends AsynchronousSocketChannel {
 		final SocketAddress _remote = remote;
 		final A _attachment = attachment;
 		final CompletionHandler<Void, ? super A> _handler = handler;
-
+		
+		socket = new Socket();
+		readPool = Executors.newFixedThreadPool(1);
+		writePool = Executors.newFixedThreadPool(1);
+		
 		FutureTask<Void> task = new FutureTask<Void>(new Callable<Void>() {
 
 			@Override
@@ -118,11 +159,7 @@ class TempAsynchronousSocketChannel extends AsynchronousSocketChannel {
 			}
 		});
 
-		try {
-			task.get();
-		} catch (InterruptedException | ExecutionException e) {
-			_handler.failed(e, attachment);
-		}
+		readPool.execute(task);
 	}
 
 	@Override
@@ -153,6 +190,8 @@ class TempAsynchronousSocketChannel extends AsynchronousSocketChannel {
 						}
 					}
 				});
+
+		readPool.execute(task);
 
 		return task;
 	}
@@ -185,11 +224,7 @@ class TempAsynchronousSocketChannel extends AsynchronousSocketChannel {
 			}
 		});
 
-		try {
-			task.get(timeout, unit);
-		} catch (InterruptedException | ExecutionException | TimeoutException e) {
-			_handler.failed(e, attachment);
-		}
+		readPool.execute(task);
 	}
 
 	@Override
@@ -240,11 +275,7 @@ class TempAsynchronousSocketChannel extends AsynchronousSocketChannel {
 			}
 		});
 
-		try {
-			task.get(timeout, unit);
-		} catch (InterruptedException | ExecutionException | TimeoutException e) {
-			_handler.failed(e, attachment);
-		}
+		readPool.execute(task);
 	}
 
 	@Override
@@ -286,6 +317,8 @@ class TempAsynchronousSocketChannel extends AsynchronousSocketChannel {
 					}
 				});
 
+		writePool.execute(task);
+
 		return task;
 	}
 
@@ -313,11 +346,7 @@ class TempAsynchronousSocketChannel extends AsynchronousSocketChannel {
 			}
 		});
 
-		try {
-			task.get(timeout, unit);
-		} catch (InterruptedException | ExecutionException | TimeoutException e) {
-			_handler.failed(e, _attachment);
-		}
+		writePool.execute(task);
 	}
 
 	@Override
@@ -354,11 +383,7 @@ class TempAsynchronousSocketChannel extends AsynchronousSocketChannel {
 			}
 		});
 
-		try {
-			task.get(timeout, unit);
-		} catch (InterruptedException | ExecutionException | TimeoutException e) {
-			_handler.failed(e, _attachment);
-		}
+		writePool.execute(task);
 	}
 
 	final void begin() throws IOException {

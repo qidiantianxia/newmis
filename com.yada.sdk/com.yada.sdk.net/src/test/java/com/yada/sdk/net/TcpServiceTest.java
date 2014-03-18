@@ -64,7 +64,10 @@ public class TcpServiceTest extends TestCase {
 
 				@Override
 				public ByteBuffer pack(ByteBuffer newData) {
-					return newData;
+					ByteBuffer buffer = ByteBuffer.allocate(newData.remaining());
+					buffer.put(newData);
+					buffer.flip();
+					return buffer;
 				}};
 			return splitter;
 		}
