@@ -4,6 +4,7 @@ import java.io.IOException;
 import java.net.InetSocketAddress;
 import java.nio.ByteBuffer;
 import java.nio.channels.AsynchronousSocketChannel;
+import java.util.concurrent.ExecutionException;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 import java.util.concurrent.TimeUnit;
@@ -52,15 +53,21 @@ public class AsyncTcpClient {
 			return;
 
 		final AsynchronousSocketChannel socket = new TempAsynchronousSocketChannel();
-		socket.connect(hostAddress);
+		try {
+			socket.connect(hostAddress).get();
+		} catch (InterruptedException | ExecutionException e1) {
+		}
+		
 		dt = new DataTransceivers(socket, pkgSplitterFactory.create(),
 				processorFactory.create(), new IChannelNeedToCloseHandler() {
 
 					@Override
-					public void needToCloseCallback(DataTransceivers sender,
-							String message) {
+					public void needToCloseCallback(DataTransceivers sender) {
 						if (socket.isOpen()) {
 							try {
+								socket.shutdownInput();
+								socket.shutdownOutput();
+								
 								socket.close();
 							} catch (IOException e) {
 							}

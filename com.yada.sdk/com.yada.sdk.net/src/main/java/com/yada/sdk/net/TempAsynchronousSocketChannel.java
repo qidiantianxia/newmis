@@ -65,10 +65,10 @@ class TempAsynchronousSocketChannel extends AsynchronousSocketChannel {
 				readPool.awaitTermination(10, TimeUnit.SECONDS);
 			} catch (InterruptedException e) {
 			}
-			
+
 			readPool = null;
 		}
-		
+
 		if (writePool != null) {
 			if (!writePool.isShutdown())
 				writePool.shutdown();
@@ -80,7 +80,7 @@ class TempAsynchronousSocketChannel extends AsynchronousSocketChannel {
 				writePool.awaitTermination(10, TimeUnit.SECONDS);
 			} catch (InterruptedException e) {
 			}
-			
+
 			writePool = null;
 		}
 	}
@@ -115,7 +115,7 @@ class TempAsynchronousSocketChannel extends AsynchronousSocketChannel {
 	@Override
 	public Future<Void> connect(SocketAddress remote) {
 		final SocketAddress _remote = remote;
-		
+
 		socket = new Socket();
 		readPool = Executors.newFixedThreadPool(1);
 		writePool = Executors.newFixedThreadPool(1);
@@ -140,11 +140,11 @@ class TempAsynchronousSocketChannel extends AsynchronousSocketChannel {
 		final SocketAddress _remote = remote;
 		final A _attachment = attachment;
 		final CompletionHandler<Void, ? super A> _handler = handler;
-		
+
 		socket = new Socket();
 		readPool = Executors.newFixedThreadPool(1);
 		writePool = Executors.newFixedThreadPool(1);
-		
+
 		FutureTask<Void> task = new FutureTask<Void>(new Callable<Void>() {
 
 			@Override
@@ -215,8 +215,13 @@ class TempAsynchronousSocketChannel extends AsynchronousSocketChannel {
 				try {
 					int count = socket.getInputStream().read(_dst.array(),
 							_dst.position(), _dst.remaining());
-					_dst.position(_dst.position() + count);
-					_handler.completed(new Integer(count), _attachment);
+
+					if (count == -1) {
+						_handler.completed(new Integer(count), _attachment);
+					} else {
+						_dst.position(_dst.position() + count);
+						_handler.completed(new Integer(count), _attachment);
+					}
 				} catch (Exception e) {
 					_handler.failed(e, _attachment);
 				}
@@ -257,14 +262,23 @@ class TempAsynchronousSocketChannel extends AsynchronousSocketChannel {
 						int count = socket.getInputStream().read(
 								_dsts[i].array(), _dsts[i].position(),
 								_dsts[i].remaining());
-						_dsts[i].position(_dsts[i].position() + count);
 
-						totalCount += count;
+						if (count == -1) {
+							_handler.completed(new Long(totalCount),
+									_attachment);
+							break;
+						} else {
+							_dsts[i].position(_dsts[i].position() + count);
+
+							totalCount += count;
+						}
 
 						if (_dsts[i].position() != _dsts[i].capacity())
 							break;
 
 					}
+
+					_handler.completed(new Long(totalCount), _attachment);
 				} catch (Exception e) {
 					if (totalCount != 0)
 						// 当totalCount != 0, 此异常可能发生两次，因为completed里可能再次注册读数据

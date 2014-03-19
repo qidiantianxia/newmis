@@ -68,7 +68,7 @@ public class AsyncTcpClientTest {
 	}
 
 	@After
-	public void destroy() {
+	public void destroy() throws InterruptedException {
 		service.close();
 	}
 
@@ -106,6 +106,7 @@ public class AsyncTcpClientTest {
 			lock.wait();
 		}
 
+		client.close();
 	}
 	
 	@Test

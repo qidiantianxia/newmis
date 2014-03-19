@@ -108,9 +108,11 @@ public final class TcpService {
 					new IChannelNeedToCloseHandler() {
 
 						@Override
-						public void needToCloseCallback(DataTransceivers sender, String message) {
+						public void needToCloseCallback(DataTransceivers sender) {
 							if (_clientChannel.isOpen()) {
 								try {
+									_clientChannel.shutdownInput();
+									_clientChannel.shutdownOutput();
 									_clientChannel.close();
 								} catch (IOException e) {
 								}

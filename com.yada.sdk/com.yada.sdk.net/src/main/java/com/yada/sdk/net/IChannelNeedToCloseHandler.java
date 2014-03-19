@@ -6,6 +6,6 @@ package com.yada.sdk.net;
  *
  */
 interface IChannelNeedToCloseHandler {
-	void needToCloseCallback(DataTransceivers sender, String message);
+	void needToCloseCallback(DataTransceivers sender);
 }
 
