@@ -25,15 +25,12 @@ public class ZpPacker extends JposPacker {
 
 		@Override
 		public String getTranId(JposMessage message) {
-			// posp + [terminal id] + [批次号] + [trance no] + [mti]
-			// 4+8+6+6+4=28
-			StringBuilder sb = new StringBuilder();
+			// posp + [term_id] + [traceNo]
+			// 4+15+6
 			String termId = message.getFieldString(41);
-			String field61 = message.getFieldString(61);
-			String batchNo = field61.substring(0, 6);
 			String traceNo = message.getFieldString(11);
-			String mti = message.getFieldString(0);
-			return sb.append("posp").append(termId).append(batchNo).append(traceNo).append(mti).toString();
+			StringBuilder sb = new StringBuilder();
+			return sb.append("zp").append(termId).append(traceNo).toString();
 		}
 
 	}
