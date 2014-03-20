@@ -101,13 +101,22 @@ public final class TcpService {
 		public void completed(AsynchronousSocketChannel clientChannel,
 				AsynchronousServerSocketChannel serverChannel) {
 
+			final AsynchronousSocketChannel _clientChannel = clientChannel;
 			serverChannel.accept(serverChannel, this);
 			dataTransceiversQueue.add(new DataTransceivers(clientChannel,
 					splitterFactory.create(), processorFactory.create(),
-					new IChannelCloseHandler() {
+					new IChannelNeedToCloseHandler() {
 
 						@Override
-						public void closeCallback(DataTransceivers sender) {
+						public void needToCloseCallback(DataTransceivers sender) {
+							if (_clientChannel.isOpen()) {
+								try {
+									_clientChannel.shutdownInput();
+									_clientChannel.shutdownOutput();
+									_clientChannel.close();
+								} catch (IOException e) {
+								}
+							}
 							dataTransceiversQueue.remove(sender);
 						}
 					}, recvTimeout));

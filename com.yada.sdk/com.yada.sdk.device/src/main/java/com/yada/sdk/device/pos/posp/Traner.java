@@ -148,7 +148,8 @@ public class Traner extends AbsTraner {
 			String field48 = "9003905" + "9106" + stagesId + String.format("%02d", stagesCount);
 			reqMessage.setFieldString(48, field48);
 			reqMessage.setFieldString(49, currency);
-			reqMessage.setFieldString(52, getPin(cardNo, pin));
+//			reqMessage.setFieldString(52, getPin(cardNo, pin).substring(0, 8));
+			reqMessage.setField(52, ByteBuffer.wrap(Utils.ASCII_To_BCD(getPin(cardNo, pin).getBytes())));
 			reqMessage.setFieldString(61, getBatchNo() + getTellerNo() + getCerNo());
 			StringBuilder macData = new StringBuilder();
 			macData.append(cardNo.length() % 2 == 0 ? cardNo : "0" + cardNo);
@@ -173,6 +174,7 @@ public class Traner extends AbsTraner {
 		} catch (PackagingException e) {
 			LOGGER.debug("when stagesPay happen PackagingException",e);
 		} catch (IOException e) {
+			LOGGER.debug("when stagesPay happen IOException",e);
 			addElementToQueue(reqMessage);
 		}
 		return respMessage;
