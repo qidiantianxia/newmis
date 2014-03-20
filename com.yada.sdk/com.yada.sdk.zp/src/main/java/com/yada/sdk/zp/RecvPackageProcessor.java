@@ -12,13 +12,16 @@ import com.yada.sdk.packages.transaction.IMessage;
 import com.yada.sdk.packages.transaction.IPacker;
 
 class RecvPackageProcessor implements IPackageProcessor {
-	private final static Logger logger = LoggerFactory.getLogger(RecvPackageProcessor.class);
+	private final static Logger logger = LoggerFactory
+			.getLogger(RecvPackageProcessor.class);
 	private IPacker packer;
 	private IZpSystemConfigService zpSystemConfigService;
 	private ITraceNoService traceNoService;
 	private ConcurrentMap<String, TranContext> map;
 
-	public RecvPackageProcessor(ConcurrentMap<String, TranContext> map, IPacker packer, IZpSystemConfigService zpSystemConfigService,ITraceNoService traceNoService) {
+	public RecvPackageProcessor(ConcurrentMap<String, TranContext> map,
+			IPacker packer, IZpSystemConfigService zpSystemConfigService,
+			ITraceNoService traceNoService) {
 		this.packer = packer;
 		this.zpSystemConfigService = zpSystemConfigService;
 		this.traceNoService = traceNoService;
@@ -34,16 +37,17 @@ class RecvPackageProcessor implements IPackageProcessor {
 			logger.error("解包错误", e);
 			return;
 		}
-		
+
 		String key = respMessage.getTranId();
 		TranContext tranContext = map.get(key);
-		
-		if(tranContext != null)
-		{
+
+		if (tranContext != null) {
 			synchronized (tranContext) {
 				tranContext.respMessage = respMessage;
 				tranContext.notify();
 			}
+		} else {
+
 		}
 	}
 
