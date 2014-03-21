@@ -79,15 +79,8 @@ public class ZpClient implements IZpkChangeNotify {
 		}
 	}
 
-	public void setEncryptionPin(String accountNo, String pin, IMessage message) {
-		String lmkPin = encryption.getTpkPin(accountNo, pin, lmkZpk);
-
-		try {
-			message.setFieldString(52, lmkPin);
-		} catch (PackagingException e) {
-			logger.debug("设置11域错误", e);
-			throw new RuntimeException(e);
-		}
+	public String getEncryptionPin(String accountNo, String pin) {
+		return encryption.getTpkPin(accountNo, pin, lmkZpk);
 	}
 
 	public String getTraceNo(String terminalId) {
