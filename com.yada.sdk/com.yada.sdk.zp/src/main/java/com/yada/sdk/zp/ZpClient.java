@@ -90,14 +90,9 @@ public class ZpClient implements IZpkChangeNotify {
 		}
 	}
 
-	public void setTraceNo(IMessage message) {
-		String terminalId = message.getFieldString(41);
-		try {
-			message.setFieldString(11, traceNoService.getTraceNo(terminalId));
-		} catch (PackagingException e) {
-			logger.debug("设置11域错误", e);
-			throw new RuntimeException(e);
-		}
+	public String getTraceNo(String terminalId) {
+		return traceNoService.getTraceNo(terminalId);
+		
 	}
 
 	public IMessage Tran(IMessage pkg) throws InterruptedException, PackagingException, TimeoutException {
