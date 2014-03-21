@@ -88,7 +88,7 @@ public class ZpClient implements IZpkChangeNotify {
 		
 	}
 
-	public IMessage Tran(IMessage pkg) throws InterruptedException, PackagingException, TimeoutException {
+	public IMessage tran(IMessage pkg) throws InterruptedException, PackagingException, TimeoutException {
 		TranContext tranContext = new TranContext();
 		tranContext.reqMessage = pkg;
 		String key = pkg.getTranId();
@@ -108,7 +108,7 @@ public class ZpClient implements IZpkChangeNotify {
 		return tranContext.respMessage;
 	}
 
-	public void Reversal(IMessage tranPkg) {
+	public void reversal(IMessage tranPkg) {
 		Calendar calendar = Calendar.getInstance();
 		final IMessage reversalMsg = packer.createEmpty();
 		// 消息头
@@ -189,7 +189,7 @@ public class ZpClient implements IZpkChangeNotify {
 			public void run() {
 				while (true)
 					try {
-						Tran(reversalMsg);
+						tran(reversalMsg);
 						break;
 					} catch (InterruptedException e) {
 						logger.error("系统中断:原包信息{}", reversalMsg.toString(), e);
@@ -212,7 +212,7 @@ public class ZpClient implements IZpkChangeNotify {
 		}
 	}
 
-	public void SendNetManagement(String infoCode) {
+	public void sendNetManagement(String infoCode) {
 		final IMessage netManagementMessage = packer.createEmpty();
 		Calendar calendar = Calendar.getInstance();
 		String mti = "0800";
@@ -234,7 +234,7 @@ public class ZpClient implements IZpkChangeNotify {
 			throw new RuntimeException(e);
 		}
 		try {
-			Tran(netManagementMessage);
+			tran(netManagementMessage);
 		} catch (InterruptedException e) {
 			logger.error("系统中断:原包信息【{}】" + netManagementMessage.toString(), e);
 		} catch (PackagingException e) {
