@@ -18,11 +18,13 @@ class RecvPackageProcessor implements IPackageProcessor {
 	private IPacker packer;
 	private IZpSystemConfigService zpSystemConfigService;
 	private ConcurrentMap<String, TranContext> map;
+	private IZpkChangeNotify zpkChangedNotify;
 
-	public RecvPackageProcessor(ConcurrentMap<String, TranContext> map, IPacker packer, IZpSystemConfigService zpSystemConfigService) {
+	public RecvPackageProcessor(ConcurrentMap<String, TranContext> map, IPacker packer, IZpSystemConfigService zpSystemConfigService, IZpkChangeNotify zpkChangedNotify) {
 		this.packer = packer;
 		this.zpSystemConfigService = zpSystemConfigService;
 		this.map = map;
+		this.zpkChangedNotify = zpkChangedNotify;
 	}
 
 	@Override
@@ -85,7 +87,9 @@ class RecvPackageProcessor implements IPackageProcessor {
 				logger.error("不支持的密钥交换类型,48域信息为【{}】", field48);
 				return;
 			}
-			zpSystemConfigService.savePinKey(field48.substring(2, 34));
+			String newZmkZpk = field48.substring(2, 34);
+			zpSystemConfigService.savePinKey(newZmkZpk);
+			zpkChangedNotify.changeZpk(newZmkZpk);
 			break;
 		case "301":// 网络测试
 			logger.info("接收到网络测试请求，但是无特殊处理。");

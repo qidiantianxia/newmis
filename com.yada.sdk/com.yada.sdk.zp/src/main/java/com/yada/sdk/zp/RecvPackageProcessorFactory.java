@@ -11,17 +11,20 @@ class RecvPackageProcessorFactory implements IPackageProcessorFactory {
 	private ConcurrentMap<String, TranContext> map;
 	private IPacker packer;
 	private IZpSystemConfigService zpSystemConfigService;
+	private IZpkChangeNotify zpkChangedNotify;
 
 	public RecvPackageProcessorFactory(ConcurrentMap<String, TranContext> map,
-			IPacker packer, IZpSystemConfigService zpSystemConfigService) {
+			IPacker packer, IZpSystemConfigService zpSystemConfigService,
+			IZpkChangeNotify zpkChangedNotify) {
 		this.map = map;
 		this.packer = packer;
 		this.zpSystemConfigService = zpSystemConfigService;
+		this.zpkChangedNotify = zpkChangedNotify;
 	}
 
 	@Override
 	public IPackageProcessor create() {
-		return new RecvPackageProcessor(map, packer, zpSystemConfigService);
+		return new RecvPackageProcessor(map, packer, zpSystemConfigService, zpkChangedNotify);
 	}
 
 }

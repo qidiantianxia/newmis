@@ -22,16 +22,23 @@ import com.yada.sdk.packages.PackagingException;
 import com.yada.sdk.packages.transaction.IMessage;
 import com.yada.sdk.packages.transaction.jpos.ZpPacker;
 
-public abstract class ZpClient {
+public class ZpClient implements IZpkChangeNotify {
 	private final static Logger logger = LoggerFactory
 			.getLogger(ZpClient.class);
 	private AsyncTcpClient client;
 	private ZpPacker packer;
 	private EncryptionMachine encryption;
-	private IZpSystemConfigService zpSystemConfigService;
 	private ConcurrentMap<String, TranContext> map;
 	private int timeout;
 	private ExecutorService reversalPool;
+	private ITraceNoService traceNoService;
+	private String lmkZpk;
+	private String lmkZmk;
+
+	public ZpClient(String zpServerIp, int zpServerPort,
+			ITraceNoService traceNoService, int timeout) {
+		this(zpServerIp, zpServerPort, null, 0, null, traceNoService, timeout);
+	}
 
 	public ZpClient(String zpServerIp, int zpServerPort, String encryptionIp,
 			int encryptionPort, IZpSystemConfigService zpSystemConfigService,
@@ -40,10 +47,12 @@ public abstract class ZpClient {
 		int zpHeadLength = 4;
 		this.map = new ConcurrentSkipListMap<String, TranContext>();
 		this.reversalPool = Executors.newFixedThreadPool(10);
+		this.traceNoService = traceNoService;
+
 		IPackageSplitterFactory packageSplitterFactory = new FixLenPackageSplitterFactory(
 				zpHeadLength, false);
 		IPackageProcessorFactory packageProcessorFactory = new RecvPackageProcessorFactory(
-				map, packer, zpSystemConfigService);
+				map, packer, zpSystemConfigService, this);
 
 		try {
 			this.packer = new ZpPacker(0);
@@ -51,32 +60,50 @@ public abstract class ZpClient {
 			throw new RuntimeException(e);
 		}
 
-		this.zpSystemConfigService = zpSystemConfigService;
-		this.encryption = new EncryptionMachine(encryptionIp, encryptionPort,
-				zpSystemConfigService.getLmkZmk());
+		if (encryptionIp != null && encryptionPort != 0
+				&& zpSystemConfigService != null) {
+			this.lmkZmk = zpSystemConfigService.getLmkZmk();
+			String zmkZpk = zpSystemConfigService.getPinKey();
+			initEncryption(encryptionIp, encryptionPort, zmkZpk);
+		}
 
 		this.client = new AsyncTcpClient(new InetSocketAddress(zpServerIp,
 				zpServerPort), packageSplitterFactory, packageProcessorFactory,
 				timeout, true);
 	}
 
-	protected EncryptionMachine getEncryption() {
-		return encryption;
+	private void initEncryption(String encryptionIp, int encryptionPort,
+			String zmkZpk) {
+		if (zmkZpk != null) {
+			this.encryption = new EncryptionMachine(encryptionIp,
+					encryptionPort, lmkZmk);
+
+			changeZpk(zmkZpk);
+		}
 	}
 
-	protected IZpSystemConfigService getEncryptionKeyService() {
-		return zpSystemConfigService;
+	public void setEncryptionPin(String accountNo, String pin, IMessage message) {
+		String lmkPin = encryption.getTpkPin(accountNo, pin, lmkZpk);
+
+		try {
+			message.setFieldString(52, lmkPin);
+		} catch (PackagingException e) {
+			logger.debug("设置11域错误", e);
+			throw new RuntimeException(e);
+		}
 	}
 
-	protected ZpPacker getPacker() {
-		return packer;
+	public void setTraceNo(IMessage message) {
+		String terminalId = message.getFieldString(41);
+		try {
+			message.setFieldString(11, traceNoService.getTraceNo(terminalId));
+		} catch (PackagingException e) {
+			logger.debug("设置11域错误", e);
+			throw new RuntimeException(e);
+		}
 	}
 
-	protected AsyncTcpClient getClient() {
-		return client;
-	}
-
-	protected TranContext Tran(IMessage pkg) throws InterruptedException,
+	public TranContext Tran(IMessage pkg) throws InterruptedException,
 			PackagingException, TimeoutException {
 		TranContext tranContext = new TranContext();
 		tranContext.reqMessage = pkg;
@@ -98,7 +125,7 @@ public abstract class ZpClient {
 		return tranContext;
 	}
 
-	protected void Reversal(IMessage tranPkg) {
+	public void Reversal(IMessage tranPkg) {
 		Calendar calendar = Calendar.getInstance();
 		final IMessage reversalMsg = packer.createEmpty();
 		// 消息头
@@ -195,5 +222,12 @@ public abstract class ZpClient {
 			}
 		};
 		reversalPool.execute(work);
+	}
+
+	@Override
+	public void changeZpk(String newzpk) {
+		if (encryption != null) {
+			this.lmkZpk = encryption.getLmkTpk(lmkZmk, newzpk);
+		}
 	}
 }
