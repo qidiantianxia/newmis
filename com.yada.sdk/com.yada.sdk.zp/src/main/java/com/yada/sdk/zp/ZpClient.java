@@ -23,8 +23,7 @@ import com.yada.sdk.packages.transaction.IMessage;
 import com.yada.sdk.packages.transaction.jpos.ZpPacker;
 
 public class ZpClient implements IZpkChangeNotify {
-	private final static Logger logger = LoggerFactory
-			.getLogger(ZpClient.class);
+	private final static Logger logger = LoggerFactory.getLogger(ZpClient.class);
 	private AsyncTcpClient client;
 	private ZpPacker packer;
 	private EncryptionMachine encryption;
@@ -34,25 +33,22 @@ public class ZpClient implements IZpkChangeNotify {
 	private ITraceNoService traceNoService;
 	private String lmkZpk;
 	private String lmkZmk;
+	private IZpSystemConfigService zpSystemConfigService;
 
-	public ZpClient(String zpServerIp, int zpServerPort,
-			ITraceNoService traceNoService, int timeout) {
+	public ZpClient(String zpServerIp, int zpServerPort, ITraceNoService traceNoService, int timeout) {
 		this(zpServerIp, zpServerPort, null, 0, null, traceNoService, timeout);
 	}
 
-	public ZpClient(String zpServerIp, int zpServerPort, String encryptionIp,
-			int encryptionPort, IZpSystemConfigService zpSystemConfigService,
+	public ZpClient(String zpServerIp, int zpServerPort, String encryptionIp, int encryptionPort, IZpSystemConfigService zpSystemConfigService,
 			ITraceNoService traceNoService, int timeout) {
 		this.timeout = timeout;
 		int zpHeadLength = 4;
 		this.map = new ConcurrentSkipListMap<String, TranContext>();
 		this.reversalPool = Executors.newFixedThreadPool(10);
 		this.traceNoService = traceNoService;
-
-		IPackageSplitterFactory packageSplitterFactory = new FixLenPackageSplitterFactory(
-				zpHeadLength, false);
-		IPackageProcessorFactory packageProcessorFactory = new RecvPackageProcessorFactory(
-				map, packer, zpSystemConfigService, this);
+		this.zpSystemConfigService = zpSystemConfigService;
+		IPackageSplitterFactory packageSplitterFactory = new FixLenPackageSplitterFactory(zpHeadLength, false);
+		IPackageProcessorFactory packageProcessorFactory = new RecvPackageProcessorFactory(map, packer, zpSystemConfigService, this);
 
 		try {
 			this.packer = new ZpPacker(0);
@@ -60,23 +56,18 @@ public class ZpClient implements IZpkChangeNotify {
 			throw new RuntimeException(e);
 		}
 
-		if (encryptionIp != null && encryptionPort != 0
-				&& zpSystemConfigService != null) {
+		if (encryptionIp != null && encryptionPort != 0 && zpSystemConfigService != null) {
 			this.lmkZmk = zpSystemConfigService.getLmkZmk();
 			String zmkZpk = zpSystemConfigService.getPinKey();
 			initEncryption(encryptionIp, encryptionPort, zmkZpk);
 		}
 
-		this.client = new AsyncTcpClient(new InetSocketAddress(zpServerIp,
-				zpServerPort), packageSplitterFactory, packageProcessorFactory,
-				timeout, true);
+		this.client = new AsyncTcpClient(new InetSocketAddress(zpServerIp, zpServerPort), packageSplitterFactory, packageProcessorFactory, timeout, true);
 	}
 
-	private void initEncryption(String encryptionIp, int encryptionPort,
-			String zmkZpk) {
+	private void initEncryption(String encryptionIp, int encryptionPort, String zmkZpk) {
 		if (zmkZpk != null) {
-			this.encryption = new EncryptionMachine(encryptionIp,
-					encryptionPort, lmkZmk);
+			this.encryption = new EncryptionMachine(encryptionIp, encryptionPort, lmkZmk);
 
 			changeZpk(zmkZpk);
 		}
@@ -103,8 +94,7 @@ public class ZpClient implements IZpkChangeNotify {
 		}
 	}
 
-	public TranContext Tran(IMessage pkg) throws InterruptedException,
-			PackagingException, TimeoutException {
+	public TranContext Tran(IMessage pkg) throws InterruptedException, PackagingException, TimeoutException {
 		TranContext tranContext = new TranContext();
 		tranContext.reqMessage = pkg;
 		String key = pkg.getTranId();
@@ -116,8 +106,7 @@ public class ZpClient implements IZpkChangeNotify {
 		synchronized (tranContext) {
 			tranContext.wait(timeout);
 
-			if (Calendar.getInstance().getTimeInMillis()
-					- tranContext.createDateTime >= timeout)
+			if (Calendar.getInstance().getTimeInMillis() - tranContext.createDateTime >= timeout)
 				throw new TimeoutException("交易超时");
 		}
 
@@ -170,8 +159,7 @@ public class ZpClient implements IZpkChangeNotify {
 		String orig_bocTxnTime = tranPkg.getFieldString(7);// 原交易的交易日期和时间
 		String orig_acqInsCode = tranPkg.getFieldString(32);// 原交易的收单机构
 		String orig_sndInsCode = tranPkg.getFieldString(33);// 原交易的发送机构
-		String field90 = MessageUtil.getField90(orig_mti, orig_traceNo,
-				orig_bocTxnTime, orig_acqInsCode, orig_sndInsCode);
+		String field90 = MessageUtil.getField90(orig_mti, orig_traceNo, orig_bocTxnTime, orig_acqInsCode, orig_sndInsCode);
 		// 11系统跟踪号(和原交易相同)
 		String field11 = orig_traceNo;
 		try {
@@ -208,16 +196,15 @@ public class ZpClient implements IZpkChangeNotify {
 				while (true)
 					try {
 						Tran(reversalMsg);
+						break;
 					} catch (InterruptedException e) {
-						logger.error("系统中断:原包信息" + reversalMsg.toString(), e);
+						logger.error("系统中断:原包信息{}", reversalMsg.toString(), e);
 						break;
 					} catch (PackagingException e) {
-						logger.debug("包错误:原包信息" + reversalMsg.toString(), e);
+						logger.debug("包错误:原包信息{}", reversalMsg.toString(), e);
 						break;
 					} catch (TimeoutException e) {
-						logger.error("冲证超时，准备重发:原包信息" + reversalMsg.toString(),
-								e);
-						;
+						logger.error("冲证超时，准备重发:原包信息{}", reversalMsg.toString(), e);
 					}
 			}
 		};
@@ -229,5 +216,38 @@ public class ZpClient implements IZpkChangeNotify {
 		if (encryption != null) {
 			this.lmkZpk = encryption.getLmkTpk(lmkZmk, newzpk);
 		}
+	}
+
+	public void SendNetManagement(String infoCode) {
+		final IMessage netManagementMessage = packer.createEmpty();
+		Calendar calendar = Calendar.getInstance();
+		String mti = "0800";
+		String field07 = MessageUtil.getField07(calendar);// 交易传送日期和时间MMddHHmmss
+		String field11 = traceNoService.getTraceNo("00000000");
+		String field33 = zpSystemConfigService.getAcqOrgId();// 183001
+		String field70 = infoCode;
+		String field100 = "140140";
+
+		try {
+			netManagementMessage.setFieldString(0, mti);
+			netManagementMessage.setFieldString(7, field07);
+			netManagementMessage.setFieldString(11, field11);
+			netManagementMessage.setFieldString(33, field33);
+			netManagementMessage.setFieldString(70, field70);
+			netManagementMessage.setFieldString(100, field100);
+		} catch (PackagingException e) {
+			logger.error("网络管理类交易组装异常。包内容【{}】", netManagementMessage.toString(), e);
+			throw new RuntimeException(e);
+		}
+		try {
+			Tran(netManagementMessage);
+		} catch (InterruptedException e) {
+			logger.error("系统中断:原包信息【{}】" + netManagementMessage.toString(), e);
+		} catch (PackagingException e) {
+			logger.error("网络管理类交易组装异常。包内容【{}】", netManagementMessage.toString(), e);
+		} catch (TimeoutException e) {
+			logger.error("冲证超时，准备重发:原包信息【{}】" + netManagementMessage.toString(), e);
+		}
+
 	}
 }
