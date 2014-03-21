@@ -42,6 +42,7 @@ class RecvPackageProcessor implements IPackageProcessor {
 
 		if (tranContext != null) {
 			synchronized (tranContext) {
+				tranContext.respMessage = respMessage;
 				tranContext.notify();
 			}
 		} else {

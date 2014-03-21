@@ -94,7 +94,7 @@ public class ZpClient implements IZpkChangeNotify {
 		}
 	}
 
-	public TranContext Tran(IMessage pkg) throws InterruptedException, PackagingException, TimeoutException {
+	public IMessage Tran(IMessage pkg) throws InterruptedException, PackagingException, TimeoutException {
 		TranContext tranContext = new TranContext();
 		tranContext.reqMessage = pkg;
 		String key = pkg.getTranId();
@@ -111,7 +111,7 @@ public class ZpClient implements IZpkChangeNotify {
 		}
 
 		map.remove(key);
-		return tranContext;
+		return tranContext.respMessage;
 	}
 
 	public void Reversal(IMessage tranPkg) {
