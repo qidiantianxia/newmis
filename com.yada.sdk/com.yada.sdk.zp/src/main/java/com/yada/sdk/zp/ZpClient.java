@@ -34,6 +34,11 @@ public class ZpClient implements IZpkChangeNotify {
 	private String lmkZpk;
 	private String lmkZmk;
 	private IZpSystemConfigService zpSystemConfigService;
+	private String acqOrgId;
+
+	public String getAcqOrgId() {
+		return acqOrgId;
+	}
 
 	public ZpClient(String zpServerIp, int zpServerPort, ITraceNoService traceNoService, int timeout) {
 		this(zpServerIp, zpServerPort, null, 0, null, traceNoService, timeout);
@@ -50,6 +55,7 @@ public class ZpClient implements IZpkChangeNotify {
 		IPackageSplitterFactory packageSplitterFactory = new FixLenPackageSplitterFactory(zpHeadLength, false);
 		IPackageProcessorFactory packageProcessorFactory = new RecvPackageProcessorFactory(map, packer, zpSystemConfigService, this);
 
+		acqOrgId = zpSystemConfigService.getAcqOrgId();
 		try {
 			this.packer = new ZpPacker(0);
 		} catch (ISOException e) {
