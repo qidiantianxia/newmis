@@ -2,8 +2,6 @@ package com.yada.sdk.zp;
 
 import java.nio.ByteBuffer;
 import java.util.concurrent.ConcurrentMap;
-import java.util.concurrent.ExecutorService;
-import java.util.concurrent.Executors;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -19,14 +17,11 @@ class RecvPackageProcessor implements IPackageProcessor {
 	private final static Logger logger = LoggerFactory.getLogger(RecvPackageProcessor.class);
 	private IPacker packer;
 	private IZpSystemConfigService zpSystemConfigService;
-	private ITraceNoService traceNoService;
 	private ConcurrentMap<String, TranContext> map;
 
-	public RecvPackageProcessor(ConcurrentMap<String, TranContext> map, IPacker packer, IZpSystemConfigService zpSystemConfigService,
-			ITraceNoService traceNoService) {
+	public RecvPackageProcessor(ConcurrentMap<String, TranContext> map, IPacker packer, IZpSystemConfigService zpSystemConfigService) {
 		this.packer = packer;
 		this.zpSystemConfigService = zpSystemConfigService;
-		this.traceNoService = traceNoService;
 		this.map = map;
 	}
 
@@ -121,7 +116,7 @@ class RecvPackageProcessor implements IPackageProcessor {
 		String mti = "0810";
 		String field7 = receMessage.getFieldString(7);
 		String field11 = receMessage.getFieldString(11);
-		String field33 = "";// TODO acqOrgId
+		String field33 = zpSystemConfigService.getAcqOrgId();
 		String field39 = "00";
 		String field70 = receMessage.getFieldString(70);// 密钥交换请求
 		String field100 = receMessage.getFieldString(100);
