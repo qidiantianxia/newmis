@@ -250,4 +250,9 @@ public class ZpClient implements IZpkChangeNotify {
 		}
 
 	}
+	
+	public IMessage createMessage()
+	{
+		return packer.createEmpty();
+	}
 }
