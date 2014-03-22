@@ -196,7 +196,7 @@ public class ZpClient implements IZpkChangeNotify {
 			reversalMsg.setFieldString(90, field90);
 
 		} catch (PackagingException e) {
-			logger.debug("冲证包生成异常", e);
+			logger.debug("冲证包生成异常,原交易信息:{}", reversalMsg, e);
 			throw new RuntimeException(e);
 		}
 
@@ -211,18 +211,16 @@ public class ZpClient implements IZpkChangeNotify {
 				while (true)
 					try {
 						IMessage message = tran(notifyMessage);
-						logger.error("通知类交易已发送成功，但返回码错误,message:{}",
-								message.toString());
+						logger.error("通知类交易已发送成功，但返回码错误,message:{}", message);
 						break;
 					} catch (InterruptedException e) {
-						logger.error("系统中断:原包信息{}", notifyMessage.toString(), e);
+						logger.error("系统中断:原包信息{}", notifyMessage, e);
 						break;
 					} catch (PackagingException e) {
-						logger.debug("包错误:原包信息{}", notifyMessage.toString(), e);
+						logger.debug("包错误:原包信息{}", notifyMessage, e);
 						break;
 					} catch (TimeoutException e) {
-						logger.error("通知交易超时，准备重发:原包信息{}",
-								notifyMessage.toString(), e);
+						logger.error("通知交易超时，准备重发:原包信息{}", notifyMessage, e);
 					}
 			}
 		};
