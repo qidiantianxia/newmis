@@ -33,7 +33,7 @@ public class ZpClient implements IZpkChangeNotify {
 	private EncryptionMachine encryption;
 	private ConcurrentMap<String, TranContext> map;
 	private int timeout;
-	private ExecutorService reversalPool;
+	private ExecutorService notifyPkgWorkPool;
 	private ITraceNoService traceNoService;
 	private String lmkZpk;
 	private String lmkZmk;
@@ -53,7 +53,7 @@ public class ZpClient implements IZpkChangeNotify {
 		this.timeout = timeout;
 		int zpHeadLength = 4;
 		this.map = new ConcurrentSkipListMap<String, TranContext>();
-		this.reversalPool = Executors.newFixedThreadPool(10);
+		this.notifyPkgWorkPool = Executors.newFixedThreadPool(10);
 		this.traceNoService = traceNoService;
 		this.zpSystemConfigService = zpSystemConfigService;
 		IPackageSplitterFactory packageSplitterFactory = new FixLenPackageSplitterFactory(zpHeadLength, false);
@@ -186,27 +186,32 @@ public class ZpClient implements IZpkChangeNotify {
 			logger.debug("冲证包生成异常", e);
 			throw new RuntimeException(e);
 		}
-
+		
+		notifyTran(reversalMsg);
+	}
+	
+	public void notifyTran(final IMessage notifyMessage)
+	{
 		Runnable work = new Runnable() {
 
 			@Override
 			public void run() {
 				while (true)
 					try {
-						tran(reversalMsg);
+						tran(notifyMessage);
 						break;
 					} catch (InterruptedException e) {
-						logger.error("系统中断:原包信息{}", reversalMsg.toString(), e);
+						logger.error("系统中断:原包信息{}", notifyMessage.toString(), e);
 						break;
 					} catch (PackagingException e) {
-						logger.debug("包错误:原包信息{}", reversalMsg.toString(), e);
+						logger.debug("包错误:原包信息{}", notifyMessage.toString(), e);
 						break;
 					} catch (TimeoutException e) {
-						logger.error("冲证超时，准备重发:原包信息{}", reversalMsg.toString(), e);
+						logger.error("通知交易超时，准备重发:原包信息{}", notifyMessage.toString(), e);
 					}
 			}
 		};
-		reversalPool.execute(work);
+		notifyPkgWorkPool.execute(work);
 	}
 
 	@Override
