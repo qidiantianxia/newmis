@@ -2,7 +2,11 @@ package com.yada.sdk.zp;
 
 import java.net.InetSocketAddress;
 import java.nio.ByteBuffer;
+import java.text.ParseException;
+import java.text.SimpleDateFormat;
 import java.util.Calendar;
+import java.util.Date;
+import java.util.SimpleTimeZone;
 import java.util.concurrent.ConcurrentMap;
 import java.util.concurrent.ConcurrentSkipListMap;
 import java.util.concurrent.ExecutorService;
@@ -85,7 +89,7 @@ public class ZpClient implements IZpkChangeNotify {
 
 	public String getTraceNo(String terminalId) {
 		return traceNoService.getTraceNo(terminalId);
-		
+
 	}
 
 	public IMessage tran(IMessage pkg) throws InterruptedException, PackagingException, TimeoutException {
@@ -244,9 +248,77 @@ public class ZpClient implements IZpkChangeNotify {
 		}
 
 	}
-	
-	public IMessage createMessage()
-	{
+
+	public IMessage createMessage() {
 		return packer.createEmpty();
+	}
+
+	public String getField07(String txnDate, String txnTime) {
+		try {
+			String currentDateTime = new StringBuilder().append(txnDate).append(txnTime).toString();
+			SimpleDateFormat dateFormat = new SimpleDateFormat("yyyyMMddHHmmss");
+			// 先将时间解析成标准日期
+			Date dateTime = dateFormat.parse(currentDateTime);
+			// 设置格林威治时间
+			dateFormat.setTimeZone(new SimpleTimeZone(0, "GMT"));
+			// 输出
+			return dateFormat.format(dateTime);
+		} catch (ParseException e) {
+			logger.error("时间无法解析【{}{}】", txnDate, txnTime, e);
+			throw new RuntimeException(e);
+		}
+	}
+
+	/**
+	 * 处理中国银行IST（ZP） 8583包的37域
+	 * 
+	 * @param date
+	 * @param traceNo
+	 * @return
+	 */
+	public String getField37(String txnDate, String txnTime, String traceNo) {
+		try {
+			String currentDateTime = new StringBuilder().append(txnDate).append(txnTime).toString();
+			SimpleDateFormat dateFormat = new SimpleDateFormat("yyyyMMddHHmmss");
+			// 先将时间解析成标准日期
+			Date dateTime = dateFormat.parse(currentDateTime);
+			StringBuilder field37 = new StringBuilder();
+			field37.append(new SimpleDateFormat("yyDDDHH").format(dateTime).substring(1, 7)).append(traceNo);
+			return field37.toString();
+		} catch (ParseException e) {
+			logger.error("时间无法解析【{}{}】", txnDate, txnTime, e);
+			throw new RuntimeException(e);
+		}
+	}
+
+	/**
+	 * 处理中国银行IST（ZP） 8583包的90域。
+	 * 
+	 * @param mti
+	 *            原交易的MTI
+	 * @param traceNo
+	 *            原交易的traceNo
+	 * @param bocTxnTime
+	 *            原交易的第七域交易时间
+	 * @param acqInsCode
+	 *            原交易的acqInsCode
+	 * @param sndInsCode
+	 *            原交易的sndInsCode
+	 * @return
+	 */
+	public String getField90(String mti, String traceNo, String bocTxnTime, String acqInsCode, String sndInsCode) {
+		StringBuilder field90 = new StringBuilder(42);
+		field90.append(mti);
+		field90.append(traceNo);
+		field90.append(bocTxnTime);
+		for (int i = 0; i < 11 - acqInsCode.length(); i++) {// origAcquiringOrgId左边补零
+			field90.append("0");
+		}
+		field90.append(acqInsCode);
+		for (int i = 0; i < 11 - sndInsCode.length(); i++) {// origForwardingOrgId左边补零
+			field90.append("0");
+		}
+		field90.append(sndInsCode);
+		return field90.toString();
 	}
 }
