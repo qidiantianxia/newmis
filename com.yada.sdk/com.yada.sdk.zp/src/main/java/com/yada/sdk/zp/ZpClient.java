@@ -253,7 +253,7 @@ public class ZpClient implements IZpkChangeNotify {
 		return packer.createEmpty();
 	}
 
-	public String getField07(String txnDate, String txnTime) {
+	public static String getField07(String txnDate, String txnTime) {
 		try {
 			String currentDateTime = new StringBuilder().append(txnDate).append(txnTime).toString();
 			SimpleDateFormat dateFormat = new SimpleDateFormat("yyyyMMddHHmmss");
@@ -269,6 +269,19 @@ public class ZpClient implements IZpkChangeNotify {
 		}
 	}
 
+	public static String getField14(String yearOfValidThru, String monthOfValidThru) {
+		StringBuilder field14 = new StringBuilder();
+		if (yearOfValidThru.length() < 2) {
+			field14.append("0");
+		}
+		field14.append(yearOfValidThru);
+		if (monthOfValidThru.length() < 2) {
+			field14.append("0");
+		}
+		field14.append(monthOfValidThru);
+		return field14.toString();
+	}
+
 	/**
 	 * 处理中国银行IST（ZP） 8583包的37域
 	 * 
@@ -276,7 +289,7 @@ public class ZpClient implements IZpkChangeNotify {
 	 * @param traceNo
 	 * @return
 	 */
-	public String getField37(String txnDate, String txnTime, String traceNo) {
+	public static String getField37(String txnDate, String txnTime, String traceNo) {
 		try {
 			String currentDateTime = new StringBuilder().append(txnDate).append(txnTime).toString();
 			SimpleDateFormat dateFormat = new SimpleDateFormat("yyyyMMddHHmmss");
@@ -289,6 +302,63 @@ public class ZpClient implements IZpkChangeNotify {
 			logger.error("时间无法解析【{}{}】", txnDate, txnTime, e);
 			throw new RuntimeException(e);
 		}
+	}
+
+	/**
+	 * 48域用法4，TLV标签92
+	 * 
+	 * @param cvn2
+	 * @return
+	 */
+	public static String getField48Usage4Tag92(String cvn2) {
+		return new StringBuilder().append("9205").append(cvn2).append("11").toString();
+	}
+
+	public static String getField61(boolean hasPassword, boolean hasValidityPeriod, boolean hasCVN2, String credentialsType, String credentialsNo,
+			String mobileNo) {
+		StringBuilder field61 = new StringBuilder();
+		field61.append("00000000000000000000000000000000");
+		if (hasPassword) {
+			field61.replace(0, 1, "1");
+		}
+		if (hasValidityPeriod) {
+			field61.replace(1, 2, "1");
+		}
+		if (hasCVN2) {
+			field61.replace(5, 6, "1");
+		}
+		if (credentialsType != null && credentialsNo != null && !credentialsType.isEmpty() && !credentialsNo.isEmpty()) {
+			field61.replace(2, 3, "1");
+			field61.append(credentialsType);
+			field61.append(handleCredentialsNo(credentialsNo));
+		}
+		if (mobileNo != null && !mobileNo.isEmpty()) {
+			field61.replace(8, 9, "1");
+			field61.append(String.format("%03d", mobileNo.length()));
+			field61.append(mobileNo);
+		}
+		return new StringBuilder("AM").append(String.format("%03d", field61.length())).append(field61).toString();
+	}
+
+	protected static String handleCredentialsNo(String credentialsNo) {
+		StringBuilder tmpCredentialsNo = new StringBuilder();
+		// 以下参照IST接口规范5.9 61域AM用法 进行证件号码处理。
+		char[] nums = new char[6];
+		int noLen = nums.length;
+		char[] credentialsNos = credentialsNo.toCharArray();
+		for (int i = credentialsNos.length; i > 0 && noLen > 0; i--) {
+			if (Character.isDigit(credentialsNos[i - 1])) {
+				nums[noLen - 1] = credentialsNos[i - 1];
+				noLen--;
+			}
+		}
+		for (; noLen > 0; noLen--) {
+			nums[noLen - 1] = '0';
+		}
+		tmpCredentialsNo.append(nums);
+		tmpCredentialsNo.append("              ");// 后边补14个空格
+
+		return tmpCredentialsNo.toString();
 	}
 
 	/**
@@ -306,7 +376,7 @@ public class ZpClient implements IZpkChangeNotify {
 	 *            原交易的sndInsCode
 	 * @return
 	 */
-	public String getField90(String mti, String traceNo, String bocTxnTime, String acqInsCode, String sndInsCode) {
+	public static String getField90(String mti, String traceNo, String bocTxnTime, String acqInsCode, String sndInsCode) {
 		StringBuilder field90 = new StringBuilder(42);
 		field90.append(mti);
 		field90.append(traceNo);
@@ -321,4 +391,5 @@ public class ZpClient implements IZpkChangeNotify {
 		field90.append(sndInsCode);
 		return field90.toString();
 	}
+
 }
