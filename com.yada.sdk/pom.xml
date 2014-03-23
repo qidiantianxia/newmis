@@ -36,6 +36,7 @@
 
 		<module>com.yada.sdk.packages</module>
     <module>com.yada.sdk.zp</module>
+    <module>com.yada.sdk.security</module>
   </modules>
 	<dependencies>
 		<dependency>
