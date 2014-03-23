@@ -36,8 +36,8 @@ public class EncryptionMachine implements IEncryption {
 			}
 		}
 	}
-	
-	//用于直接发送字节
+
+	// 用于直接发送字节
 	private String send(ByteBuffer reqBuffer) {
 		TcpClient client = new TcpClient(endPoint,
 				new FixLenPackageSplitterFactory(2, false), 2000);
@@ -57,83 +57,87 @@ public class EncryptionMachine implements IEncryption {
 	@Override
 	public String getLmkTmk(String zmkTmk) {
 		StringBuilder sb = new StringBuilder();
-	
-		//1.消息头 2.命令代码 3.密钥类型  4.lmkZmk
+
+		// 1.消息头 2.命令代码 3.密钥类型 4.lmkZmk
 		sb.append(messageHead).append("A6").append("000").append(lmkZmk);
-		//是否需要增加1A
-		if(zmkTmk.length() != 16){
+		// 是否需要增加1A
+		if (zmkTmk.length() != 16) {
 			sb.append("X");
 		}
-		//5.zmkTmk  6.tmk加密方案 
+		// 5.zmkTmk 6.tmk加密方案
 		sb.append(zmkTmk).append("X");
 		String respMessage = send(sb.toString());
-		//1.消息头长度  2.响应码长度  3.错误代码长度
+		// 1.消息头长度 2.响应码长度 3.错误代码长度
 		int startIndex = messageHead.length() + 2 + 2;
-		//返回密钥是否存在1A
-		if(zmkTmk.length() != 16){
-			startIndex = startIndex+1;
+		// 返回密钥是否存在1A
+		if (zmkTmk.length() != 16) {
+			startIndex = startIndex + 1;
 		}
-		String lmkTmk = respMessage.substring(startIndex, startIndex + zmkTmk.length());
+		String lmkTmk = respMessage.substring(startIndex,
+				startIndex + zmkTmk.length());
 		return lmkTmk;
 	}
 
 	@Override
 	public String getLmkTak(String lmkTmk, String tmkTak) {
-		
+
 		StringBuilder sb = new StringBuilder();
-		//1.消息头 2.命令代码 
+		// 1.消息头 2.命令代码
 		sb.append(messageHead).append("MI");
-		//是否需要增加1A
-		if(lmkTmk.length() != 16){
+		// 是否需要增加1A
+		if (lmkTmk.length() != 16) {
 			sb.append("X");
 		}
 		sb.append(lmkTmk);
-		//是否需要增加1A
-		if(tmkTak.length() != 16){
+		// 是否需要增加1A
+		if (tmkTak.length() != 16) {
 			sb.append("X");
 		}
 		sb.append(tmkTak).append(";XX0");
 		String respMessage = send(sb.toString());
-		//1.消息头长度  2.响应码长度  3.错误代码长度
+		// 1.消息头长度 2.响应码长度 3.错误代码长度
 		int startIndex = messageHead.length() + 2 + 2;
-		//返回密钥是否存在1A
-		if(tmkTak.length() != 16){
-			startIndex = startIndex+1;
+		// 返回密钥是否存在1A
+		if (tmkTak.length() != 16) {
+			startIndex = startIndex + 1;
 		}
-		String lmkTak = respMessage.substring(startIndex, startIndex + tmkTak.length());
+		String lmkTak = respMessage.substring(startIndex,
+				startIndex + tmkTak.length());
 		return lmkTak;
 	}
 
 	@Override
 	public String getLmkTpk(String lmkTmk, String tmkTpk) {
-		
+
 		StringBuilder sb = new StringBuilder();
-		//1.消息头 2.命令代码 
+		// 1.消息头 2.命令代码
 		sb.append(messageHead).append("FA");
-		//是否需要增加1A
-		if(lmkTmk.length() != 16){
+		// 是否需要增加1A
+		if (lmkTmk.length() != 16) {
 			sb.append("X");
 		}
 		sb.append(lmkTmk);
-		//是否需要增加1A
-		if(tmkTpk.length() != 16){
+		// 是否需要增加1A
+		if (tmkTpk.length() != 16) {
 			sb.append("X");
 		}
 		sb.append(tmkTpk).append(";XX0");
 		String respMessage = send(sb.toString());
-		//1.消息头长度  2.响应码长度  3.错误代码长度
+		// 1.消息头长度 2.响应码长度 3.错误代码长度
 		int startIndex = messageHead.length() + 2 + 2;
-		//返回密钥是否存在1A
-		if(tmkTpk.length() != 16){
-			startIndex = startIndex+1;
+		// 返回密钥是否存在1A
+		if (tmkTpk.length() != 16) {
+			startIndex = startIndex + 1;
 		}
-		String lmkTpk = respMessage.substring(startIndex, startIndex + tmkTpk.length());
+		String lmkTpk = respMessage.substring(startIndex,
+				startIndex + tmkTpk.length());
 		return lmkTpk;
 	}
 
 	@Override
 	public String getTpkPin(String accountNo, String pin, String lmkTpk) {
-		String subAccountNo = accountNo.substring(accountNo.length() - 13, accountNo.length() - 1);
+		String subAccountNo = accountNo.substring(accountNo.length() - 13,
+				accountNo.length() - 1);
 		StringBuilder sb = new StringBuilder();
 		sb.append(messageHead);
 		sb.append("BA");
@@ -144,11 +148,11 @@ public class EncryptionMachine implements IEncryption {
 		String respMessage = send(sb.toString());
 		int startIndex = messageHead.length() + 2 + 2;
 		String lmkPin = respMessage.substring(startIndex);
-		
+
 		sb = new StringBuilder();
 		sb.append(messageHead);
 		sb.append("JG");
-		if(lmkTpk.length() != 16){
+		if (lmkTpk.length() != 16) {
 			sb.append("X");
 		}
 		sb.append(lmkTpk);
@@ -158,7 +162,7 @@ public class EncryptionMachine implements IEncryption {
 		sb.append("");
 		sb.append("");
 		respMessage = send(sb.toString());
-		String tmkPin = respMessage.substring(startIndex,startIndex+8+8);
+		String tmkPin = respMessage.substring(startIndex, startIndex + 8 + 8);
 		return tmkPin;
 	}
 
@@ -166,31 +170,33 @@ public class EncryptionMachine implements IEncryption {
 	public ByteBuffer getTakMac(ByteBuffer macData, String lmkTak) {
 
 		StringBuilder sb = new StringBuilder();
-		sb.append(messageHead).append("MS").append("0").append("0").append("1").append("0");
-		
-		if(lmkTak.length() != 16){
+		sb.append(messageHead).append("MS").append("0").append("0").append("1")
+				.append("0");
+
+		if (lmkTak.length() != 16) {
 			sb.append("X").append(lmkTak);
 		}
 		String len = String.format("%04X", macData.array().length);
 		sb.append(len);
-		
+
 		byte[] reqMsg = sb.toString().getBytes();
-		
-		ByteBuffer buf = ByteBuffer.allocate(macData.array().length+reqMsg.length);
+
+		ByteBuffer buf = ByteBuffer.allocate(macData.array().length
+				+ reqMsg.length);
 		macData.flip();
 		buf.put(reqMsg).put(macData);
-		
+
 		buf.flip();
-		
+
 		String respMessage = send(buf);
-		
+
 		int startIndex = messageHead.length() + 2 + 2;
-		
+
 		String mac = respMessage.substring(startIndex, startIndex + 16);
-		
+
 		byte[] macByte = Utils.decodeHex(mac.toCharArray());
-		
-		return ByteBuffer.wrap(macByte) ;
+
+		return ByteBuffer.wrap(macByte);
 	}
 
 }
