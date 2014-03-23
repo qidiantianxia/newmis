@@ -79,6 +79,11 @@
 				<artifactId>com.yada.sdk.device</artifactId>
 				<version>0.0.1-SNAPSHOT</version>
 			</dependency>
+			<dependency>
+				<groupId>com.yada.sdk</groupId>
+				<artifactId>com.yada.sdk.security</artifactId>
+				<version>0.0.1-SNAPSHOT</version>
+			</dependency>
 		</dependencies>
 	</dependencyManagement>
 </project>

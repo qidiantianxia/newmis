@@ -4,9 +4,12 @@ import java.net.InetSocketAddress;
 import java.nio.ByteBuffer;
 import java.text.ParseException;
 import java.text.SimpleDateFormat;
+import java.util.ArrayList;
 import java.util.Calendar;
 import java.util.Date;
+import java.util.List;
 import java.util.SimpleTimeZone;
+import java.util.concurrent.ConcurrentLinkedDeque;
 import java.util.concurrent.ConcurrentMap;
 import java.util.concurrent.ConcurrentSkipListMap;
 import java.util.concurrent.ExecutorService;
@@ -25,8 +28,9 @@ import com.yada.sdk.net.IPackageSplitterFactory;
 import com.yada.sdk.packages.PackagingException;
 import com.yada.sdk.packages.transaction.IMessage;
 import com.yada.sdk.packages.transaction.jpos.ZpPacker;
+import com.yada.sdk.security.IBizSystemExitService;
 
-public class ZpClient implements IZpkChangeNotify {
+public class ZpClient implements IZpkChangeNotify, IBizSystemExitService {
 	private final static Logger logger = LoggerFactory.getLogger(ZpClient.class);
 	private AsyncTcpClient client;
 	private ZpPacker packer;
@@ -39,6 +43,7 @@ public class ZpClient implements IZpkChangeNotify {
 	private String lmkZmk;
 	private IZpSystemConfigService zpSystemConfigService;
 	private String acqOrgId;
+	private ConcurrentLinkedDeque<IMessage> notifyMessageList = new ConcurrentLinkedDeque<IMessage>();
 
 	public String getAcqOrgId() {
 		return acqOrgId;
@@ -197,7 +202,9 @@ public class ZpClient implements IZpkChangeNotify {
 			public void run() {
 				while (true)
 					try {
+						notifyMessageList.add(notifyMessage);
 						IMessage message = tran(notifyMessage);
+						notifyMessageList.remove(notifyMessage);
 						logger.error("通知类交易已发送成功，但返回码错误,message:{}", message);
 						break;
 					} catch (InterruptedException e) {
@@ -405,5 +412,21 @@ public class ZpClient implements IZpkChangeNotify {
 	 */
 	public static String getRespMessage(String respCode) {
 		return RespCodeMap.getMessage(respCode);
+	}
+
+	@Override
+	public void beginClose() {
+	}
+
+	@Override
+	public List<Object> getBizData() {
+		List<Object> list = new ArrayList<Object>();
+		list.addAll(notifyMessageList);
+		return list;
+	}
+
+	@Override
+	public String getSystemName() {
+		return "ZP Client";
 	}
 }
