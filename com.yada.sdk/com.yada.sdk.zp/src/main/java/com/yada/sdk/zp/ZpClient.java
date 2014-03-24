@@ -303,10 +303,11 @@ public class ZpClient implements IZpkChangeNotify, IBizSystemExitService {
 			SimpleDateFormat dateFormat = new SimpleDateFormat("yyyyMMddHHmmss");
 			// 先将时间解析成标准日期
 			Date dateTime = dateFormat.parse(currentDateTime);
+			// 输出日期的格式
+			SimpleDateFormat outDateFormat = new SimpleDateFormat("MMddHHmmss");
 			// 设置格林威治时间
-			dateFormat.setTimeZone(new SimpleTimeZone(0, "GMT"));
-			// 输出
-			return dateFormat.format(dateTime);
+			outDateFormat.setTimeZone(new SimpleTimeZone(0, "GMT"));
+			return outDateFormat.format(dateTime);
 		} catch (ParseException e) {
 			logger.error("时间无法解析【{}{}】", txnDate, txnTime, e);
 			throw new RuntimeException(e);
