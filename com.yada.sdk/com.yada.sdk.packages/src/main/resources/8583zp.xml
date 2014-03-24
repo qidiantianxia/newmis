@@ -184,7 +184,7 @@
       id="43"
       length="40"
       name="Card Acceptor Name/Location"
-      class="com.yada.common.pack.extend.IFB_GBKCHAR"/>
+      class="com.yada.sdk.packages.transaction.jpos.extend.IF_GBK_CHAR"/>
   <isofield
       id="44"
       length="25"
