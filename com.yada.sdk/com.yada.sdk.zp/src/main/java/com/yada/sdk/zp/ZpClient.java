@@ -226,7 +226,7 @@ public class ZpClient implements IZpkChangeNotify, IBizSystemExitService {
 								|| "91".equals(respCode)
 								|| "96".equals(respCode)
 								|| "84".equals(respCode)) {
-							logger.error(
+							logger.warn(
 									"通知类交易已发送成功，但返回码需重做交易,reqMessage:{} respMessage{}",
 									notifyMessage, message);
 						} else {
@@ -256,7 +256,8 @@ public class ZpClient implements IZpkChangeNotify, IBizSystemExitService {
 		}
 	}
 
-	public void sendNetManagement(String infoCode) {
+	public void sendNetManagement(NetMngInfoCode enumNetMngInfoCode) {
+		String infoCode = enumNetMngInfoCode.getValue();
 		final IMessage netManagementMessage = packer.createEmpty();
 		Calendar calendar = Calendar.getInstance();
 		String mti = "0800";
