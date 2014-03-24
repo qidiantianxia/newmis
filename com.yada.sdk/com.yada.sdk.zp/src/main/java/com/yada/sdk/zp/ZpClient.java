@@ -31,7 +31,8 @@ import com.yada.sdk.packages.transaction.jpos.ZpPacker;
 import com.yada.sdk.security.IBizSystemExitService;
 
 public class ZpClient implements IZpkChangeNotify, IBizSystemExitService {
-	private final static Logger logger = LoggerFactory.getLogger(ZpClient.class);
+	private final static Logger logger = LoggerFactory
+			.getLogger(ZpClient.class);
 	private AsyncTcpClient client;
 	private ZpPacker packer;
 	private EncryptionMachine encryption;
@@ -49,11 +50,13 @@ public class ZpClient implements IZpkChangeNotify, IBizSystemExitService {
 		return acqOrgId;
 	}
 
-	public ZpClient(String zpServerIp, int zpServerPort, ITraceNoService traceNoService, int timeout) {
+	public ZpClient(String zpServerIp, int zpServerPort,
+			ITraceNoService traceNoService, int timeout) {
 		this(zpServerIp, zpServerPort, null, 0, null, traceNoService, timeout);
 	}
 
-	public ZpClient(String zpServerIp, int zpServerPort, String encryptionIp, int encryptionPort, IZpSystemConfigService zpSystemConfigService,
+	public ZpClient(String zpServerIp, int zpServerPort, String encryptionIp,
+			int encryptionPort, IZpSystemConfigService zpSystemConfigService,
 			ITraceNoService traceNoService, int timeout) {
 		this.timeout = timeout;
 		int zpHeadLength = 4;
@@ -61,8 +64,10 @@ public class ZpClient implements IZpkChangeNotify, IBizSystemExitService {
 		this.notifyPkgWorkPool = Executors.newFixedThreadPool(10);
 		this.traceNoService = traceNoService;
 		this.zpSystemConfigService = zpSystemConfigService;
-		IPackageSplitterFactory packageSplitterFactory = new FixLenPackageSplitterFactory(zpHeadLength, false);
-		IPackageProcessorFactory packageProcessorFactory = new RecvPackageProcessorFactory(map, packer, zpSystemConfigService, this);
+		IPackageSplitterFactory packageSplitterFactory = new FixLenPackageSplitterFactory(
+				zpHeadLength, false);
+		IPackageProcessorFactory packageProcessorFactory = new RecvPackageProcessorFactory(
+				map, packer, zpSystemConfigService, this);
 
 		acqOrgId = zpSystemConfigService.getAcqOrgId();
 		try {
@@ -71,18 +76,23 @@ public class ZpClient implements IZpkChangeNotify, IBizSystemExitService {
 			throw new RuntimeException(e);
 		}
 
-		if (encryptionIp != null && encryptionPort != 0 && zpSystemConfigService != null) {
+		if (encryptionIp != null && encryptionPort != 0
+				&& zpSystemConfigService != null) {
 			this.lmkZmk = zpSystemConfigService.getLmkZmk();
 			String zmkZpk = zpSystemConfigService.getPinKey();
 			initEncryption(encryptionIp, encryptionPort, zmkZpk);
 		}
 
-		this.client = new AsyncTcpClient(new InetSocketAddress(zpServerIp, zpServerPort), packageSplitterFactory, packageProcessorFactory, timeout, true);
+		this.client = new AsyncTcpClient(new InetSocketAddress(zpServerIp,
+				zpServerPort), packageSplitterFactory, packageProcessorFactory,
+				timeout, true);
 	}
 
-	private void initEncryption(String encryptionIp, int encryptionPort, String zmkZpk) {
+	private void initEncryption(String encryptionIp, int encryptionPort,
+			String zmkZpk) {
 		if (zmkZpk != null) {
-			this.encryption = new EncryptionMachine(encryptionIp, encryptionPort, lmkZmk);
+			this.encryption = new EncryptionMachine(encryptionIp,
+					encryptionPort, lmkZmk);
 
 			changeZpk(zmkZpk);
 		}
@@ -97,7 +107,8 @@ public class ZpClient implements IZpkChangeNotify, IBizSystemExitService {
 
 	}
 
-	public IMessage tran(IMessage pkg) throws InterruptedException, PackagingException, TimeoutException {
+	public IMessage tran(IMessage pkg) throws InterruptedException,
+			PackagingException, TimeoutException {
 		TranContext tranContext = new TranContext();
 		tranContext.reqMessage = pkg;
 		String key = pkg.getTranId();
@@ -109,7 +120,8 @@ public class ZpClient implements IZpkChangeNotify, IBizSystemExitService {
 		synchronized (tranContext) {
 			tranContext.wait(timeout);
 
-			if (Calendar.getInstance().getTimeInMillis() - tranContext.createDateTime >= timeout)
+			if (Calendar.getInstance().getTimeInMillis()
+					- tranContext.createDateTime >= timeout)
 				throw new TimeoutException("交易超时");
 		}
 
@@ -162,7 +174,8 @@ public class ZpClient implements IZpkChangeNotify, IBizSystemExitService {
 		String orig_bocTxnTime = tranPkg.getFieldString(7);// 原交易的交易日期和时间
 		String orig_acqInsCode = tranPkg.getFieldString(32);// 原交易的收单机构
 		String orig_sndInsCode = tranPkg.getFieldString(33);// 原交易的发送机构
-		String field90 = MessageUtil.getField90(orig_mti, orig_traceNo, orig_bocTxnTime, orig_acqInsCode, orig_sndInsCode);
+		String field90 = MessageUtil.getField90(orig_mti, orig_traceNo,
+				orig_bocTxnTime, orig_acqInsCode, orig_sndInsCode);
 		// 11系统跟踪号(和原交易相同)
 		String field11 = orig_traceNo;
 		try {
@@ -205,8 +218,23 @@ public class ZpClient implements IZpkChangeNotify, IBizSystemExitService {
 						notifyMessageList.add(notifyMessage);
 						IMessage message = tran(notifyMessage);
 						notifyMessageList.remove(notifyMessage);
-						logger.error("通知类交易已发送成功，但返回码错误,message:{}", message);
-						break;
+						String respCode = message.getFieldString(37);
+						if ("00".equals(respCode)) {
+							break;
+
+						} else if ("19".equals(respCode)
+								|| "91".equals(respCode)
+								|| "96".equals(respCode)
+								|| "84".equals(respCode)) {
+							logger.warn(
+									"通知类交易已发送成功，但返回码需重做交易,reqMessage:{} respMessage{}",
+									notifyMessage, message);
+						} else {
+							logger.error(
+									"通知类交易已发送成功，但返回码错误,reqMessage:{} respMessage{}",
+									notifyMessage, message);
+							break;
+						}
 					} catch (InterruptedException e) {
 						logger.error("系统中断:原包信息{}", notifyMessage, e);
 						break;
@@ -228,7 +256,8 @@ public class ZpClient implements IZpkChangeNotify, IBizSystemExitService {
 		}
 	}
 
-	public void sendNetManagement(String infoCode) {
+	public void sendNetManagement(NetMngInfoCode enumNetMngInfoCode) {
+		String infoCode = enumNetMngInfoCode.getValue();
 		final IMessage netManagementMessage = packer.createEmpty();
 		Calendar calendar = Calendar.getInstance();
 		String mti = "0800";
@@ -246,7 +275,8 @@ public class ZpClient implements IZpkChangeNotify, IBizSystemExitService {
 			netManagementMessage.setFieldString(70, field70);
 			netManagementMessage.setFieldString(100, field100);
 		} catch (PackagingException e) {
-			logger.error("网络管理类交易组装异常。包内容【{}】", netManagementMessage.toString(), e);
+			logger.error("网络管理类交易组装异常。包内容【{}】",
+					netManagementMessage.toString(), e);
 			throw new RuntimeException(e);
 		}
 		try {
@@ -254,9 +284,11 @@ public class ZpClient implements IZpkChangeNotify, IBizSystemExitService {
 		} catch (InterruptedException e) {
 			logger.error("系统中断:原包信息【{}】" + netManagementMessage.toString(), e);
 		} catch (PackagingException e) {
-			logger.error("网络管理类交易组装异常。包内容【{}】", netManagementMessage.toString(), e);
+			logger.error("网络管理类交易组装异常。包内容【{}】",
+					netManagementMessage.toString(), e);
 		} catch (TimeoutException e) {
-			logger.error("冲证超时，准备重发:原包信息【{}】" + netManagementMessage.toString(), e);
+			logger.error(
+					"冲证超时，准备重发:原包信息【{}】" + netManagementMessage.toString(), e);
 		}
 
 	}
@@ -267,21 +299,24 @@ public class ZpClient implements IZpkChangeNotify, IBizSystemExitService {
 
 	public static String getField07(String txnDate, String txnTime) {
 		try {
-			String currentDateTime = new StringBuilder().append(txnDate).append(txnTime).toString();
+			String currentDateTime = new StringBuilder().append(txnDate)
+					.append(txnTime).toString();
 			SimpleDateFormat dateFormat = new SimpleDateFormat("yyyyMMddHHmmss");
 			// 先将时间解析成标准日期
 			Date dateTime = dateFormat.parse(currentDateTime);
+			// 输出日期的格式
+			SimpleDateFormat outDateFormat = new SimpleDateFormat("MMddHHmmss");
 			// 设置格林威治时间
-			dateFormat.setTimeZone(new SimpleTimeZone(0, "GMT"));
-			// 输出
-			return dateFormat.format(dateTime);
+			outDateFormat.setTimeZone(new SimpleTimeZone(0, "GMT"));
+			return outDateFormat.format(dateTime);
 		} catch (ParseException e) {
 			logger.error("时间无法解析【{}{}】", txnDate, txnTime, e);
 			throw new RuntimeException(e);
 		}
 	}
 
-	public static String getField14(String yearOfValidThru, String monthOfValidThru) {
+	public static String getField14(String yearOfValidThru,
+			String monthOfValidThru) {
 		StringBuilder field14 = new StringBuilder();
 		if (yearOfValidThru.length() < 2) {
 			field14.append("0");
@@ -301,14 +336,18 @@ public class ZpClient implements IZpkChangeNotify, IBizSystemExitService {
 	 * @param traceNo
 	 * @return
 	 */
-	public static String getField37(String txnDate, String txnTime, String traceNo) {
+	public static String getField37(String txnDate, String txnTime,
+			String traceNo) {
 		try {
-			String currentDateTime = new StringBuilder().append(txnDate).append(txnTime).toString();
+			String currentDateTime = new StringBuilder().append(txnDate)
+					.append(txnTime).toString();
 			SimpleDateFormat dateFormat = new SimpleDateFormat("yyyyMMddHHmmss");
 			// 先将时间解析成标准日期
 			Date dateTime = dateFormat.parse(currentDateTime);
 			StringBuilder field37 = new StringBuilder();
-			field37.append(new SimpleDateFormat("yyDDDHH").format(dateTime).substring(1, 7)).append(traceNo);
+			field37.append(
+					new SimpleDateFormat("yyDDDHH").format(dateTime).substring(
+							1, 7)).append(traceNo);
 			return field37.toString();
 		} catch (ParseException e) {
 			logger.error("时间无法解析【{}{}】", txnDate, txnTime, e);
@@ -323,11 +362,13 @@ public class ZpClient implements IZpkChangeNotify, IBizSystemExitService {
 	 * @return
 	 */
 	public static String getField48Usage4Tag92(String cvn2) {
-		return new StringBuilder().append("9205").append(cvn2).append("11").toString();
+		return new StringBuilder().append("9205").append(cvn2).append("11")
+				.toString();
 	}
 
-	public static String getField61(boolean hasPassword, boolean hasValidityPeriod, boolean hasCVN2, String credentialsType, String credentialsNo,
-			String mobileNo) {
+	public static String getField61(boolean hasPassword,
+			boolean hasValidityPeriod, boolean hasCVN2, String credentialsType,
+			String credentialsNo, String mobileNo) {
 		StringBuilder field61 = new StringBuilder();
 		field61.append("00000000000000000000000000000000");
 		if (hasPassword) {
@@ -339,7 +380,8 @@ public class ZpClient implements IZpkChangeNotify, IBizSystemExitService {
 		if (hasCVN2) {
 			field61.replace(5, 6, "1");
 		}
-		if (credentialsType != null && credentialsNo != null && !credentialsType.isEmpty() && !credentialsNo.isEmpty()) {
+		if (credentialsType != null && credentialsNo != null
+				&& !credentialsType.isEmpty() && !credentialsNo.isEmpty()) {
 			field61.replace(2, 3, "1");
 			field61.append(credentialsType);
 			field61.append(handleCredentialsNo(credentialsNo));
@@ -349,7 +391,9 @@ public class ZpClient implements IZpkChangeNotify, IBizSystemExitService {
 			field61.append(String.format("%03d", mobileNo.length()));
 			field61.append(mobileNo);
 		}
-		return new StringBuilder("AM").append(String.format("%03d", field61.length())).append(field61).toString();
+		return new StringBuilder("AM")
+				.append(String.format("%03d", field61.length()))
+				.append(field61).toString();
 	}
 
 	protected static String handleCredentialsNo(String credentialsNo) {
@@ -388,7 +432,8 @@ public class ZpClient implements IZpkChangeNotify, IBizSystemExitService {
 	 *            原交易的sndInsCode
 	 * @return
 	 */
-	public static String getField90(String mti, String traceNo, String bocTxnTime, String acqInsCode, String sndInsCode) {
+	public static String getField90(String mti, String traceNo,
+			String bocTxnTime, String acqInsCode, String sndInsCode) {
 		StringBuilder field90 = new StringBuilder(42);
 		field90.append(mti);
 		field90.append(traceNo);
