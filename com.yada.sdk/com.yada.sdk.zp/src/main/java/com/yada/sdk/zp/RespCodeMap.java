@@ -74,7 +74,7 @@ class RespCodeMap {
 	}
 
 	private String get(String respCode) {
-		return map.get(map);
+		return map.get(respCode);
 	}
 
 	public static String getMessage(String respCode) {
