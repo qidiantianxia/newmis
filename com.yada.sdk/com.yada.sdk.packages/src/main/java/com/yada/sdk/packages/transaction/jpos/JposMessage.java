@@ -12,13 +12,14 @@ import com.yada.sdk.packages.transaction.IMessage;
 public class JposMessage extends ISOMsg implements IMessage {
 
 	private ITranIdParser tranIdParser;
-	
+
 	public JposMessage() {
 		super();
 	}
 
 	/**
 	 * 初始化头信息的构造
+	 * 
 	 * @param headLength
 	 */
 	public JposMessage(int headLength) {
@@ -26,11 +27,10 @@ public class JposMessage extends ISOMsg implements IMessage {
 		this.setHeader(new byte[headLength]);
 	}
 
-	void setTranIdParser(ITranIdParser tranIdParser)
-	{
+	void setTranIdParser(ITranIdParser tranIdParser) {
 		this.tranIdParser = tranIdParser;
 	}
-	
+
 	@Override
 	public ByteBuffer getField(int fieldId) {
 		return ByteBuffer.wrap(this.getBytes(fieldId));
@@ -71,7 +71,7 @@ public class JposMessage extends ISOMsg implements IMessage {
 	public String getTranId() {
 		return tranIdParser == null ? null : tranIdParser.getTranId(this);
 	}
-	
+
 	@Override
 	public ByteBuffer getTpduFromAddress() throws PackagingException {
 		byte[] header = this.getHeader();
@@ -132,7 +132,7 @@ public class JposMessage extends ISOMsg implements IMessage {
 			throw new PackagingException("The length of tpduId must be 1 bytes.");
 		}
 		header[0] = tpduId.get();
-		
+
 		this.setHeader(header);
 	}
 
@@ -145,11 +145,27 @@ public class JposMessage extends ISOMsg implements IMessage {
 		if (version.remaining() != 2) {
 			throw new PackagingException("The length of version must be 2 bytes.");
 		}
-		
+
 		header[5] = version.get();
 		header[6] = version.get();
 		this.setHeader(header);
 	}
-	
+
+	@Override
+	public String toString() {
+		StringBuilder sb = new StringBuilder();
+		for (int i = 0; i < 129; i++) {
+			if (i == 1) {
+				// 位图
+				continue;
+			}
+			String value = this.getFieldString(i);
+			if (value == null) {
+				continue;
+			}
+			sb.append(String.format("Field[%03d]value[%s]%n", i, value));
+		}
+		return sb.toString();
+	}
 
 }
