@@ -63,6 +63,7 @@ public class Traner extends AbsTraner {
 		//返回参数数据继续发送签到交易直到返回密钥为止
 		while(temp.substring(0,2).equals("97")){
 			respMessage = sendTran(reqMessage);
+			temp = new String(respMessage.getField(48).array(),Charset.forName("GBK"));
 		}
 		
 		SigninInfo si = new SigninInfo();
