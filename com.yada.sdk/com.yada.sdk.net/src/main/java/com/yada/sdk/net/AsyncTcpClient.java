@@ -9,7 +9,11 @@ import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 import java.util.concurrent.TimeUnit;
 
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+
 public class AsyncTcpClient {
+	private final static Logger log = LoggerFactory.getLogger(AsyncTcpClient.class);
 	private InetSocketAddress hostAddress;
 	private IPackageSplitterFactory pkgSplitterFactory;
 	private IPackageProcessorFactory processorFactory;
@@ -55,25 +59,26 @@ public class AsyncTcpClient {
 		final AsynchronousSocketChannel socket = new TempAsynchronousSocketChannel();
 		try {
 			socket.connect(hostAddress).get();
-		} catch (InterruptedException | ExecutionException e1) {
-		}
-		
-		dt = new DataTransceivers(socket, pkgSplitterFactory.create(),
-				processorFactory.create(), new IChannelNeedToCloseHandler() {
+			dt = new DataTransceivers(socket, pkgSplitterFactory.create(),
+					processorFactory.create(),
+					new IChannelNeedToCloseHandler() {
 
-					@Override
-					public void needToCloseCallback(DataTransceivers sender) {
-						if (socket.isOpen()) {
-							try {
-								socket.shutdownInput();
-								socket.shutdownOutput();
-								
-								socket.close();
-							} catch (IOException e) {
+						@Override
+						public void needToCloseCallback(DataTransceivers sender) {
+							if (socket.isOpen()) {
+								try {
+									socket.shutdownInput();
+									socket.shutdownOutput();
+
+									socket.close();
+								} catch (IOException e) {
+								}
 							}
 						}
-					}
-				}, timeout);
+					}, timeout);
+		} catch (InterruptedException | ExecutionException e1) {
+			log.error("连接失败", e1);
+		}
 	}
 
 	public void close() {
