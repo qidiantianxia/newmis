@@ -40,10 +40,7 @@ public class AsyncTcpClient {
 					try {
 						while (true) {
 							Thread.sleep(5000);
-							try {
-								open();
-							} catch (IOException e) {
-							}
+							open();
 						}
 					} catch (InterruptedException e) {
 					}
@@ -52,11 +49,11 @@ public class AsyncTcpClient {
 		}
 	}
 
-	public synchronized void open() throws IOException {
+	public synchronized void open() {
 		if (isOpen())
 			return;
 
-		final AsynchronousSocketChannel socket = new TempAsynchronousSocketChannel();
+		final AsynchronousSocketChannel socket = createChannel();
 		try {
 			socket.connect(hostAddress).get();
 			dt = new DataTransceivers(socket, pkgSplitterFactory.create(),
@@ -109,5 +106,10 @@ public class AsyncTcpClient {
 
 	public void send(ByteBuffer sendBuffer) throws InterruptedException {
 		dt.send(sendBuffer);
+	}
+	
+	protected AsynchronousSocketChannel createChannel()
+	{
+		return new TempAsynchronousSocketChannel();
 	}
 }
