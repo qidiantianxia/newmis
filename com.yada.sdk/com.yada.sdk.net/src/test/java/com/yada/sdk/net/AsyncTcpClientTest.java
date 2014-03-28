@@ -135,6 +135,8 @@ public class AsyncTcpClientTest {
 		service.close();
 		Thread.sleep(3000);
 		Assert.assertTrue(!client.isOpen());
+		client.open();
+		Assert.assertTrue(!client.isOpen());
 		service.listen(address);
 		Thread.sleep(2500);
 
