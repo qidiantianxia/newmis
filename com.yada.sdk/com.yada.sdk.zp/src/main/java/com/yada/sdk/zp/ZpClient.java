@@ -97,13 +97,16 @@ public class ZpClient implements IZpkChangeNotify, IBizSystemExitService {
 
 	}
 
-	public IMessage tran(IMessage pkg) throws InterruptedException, PackagingException, TimeoutException {
+	public IMessage tran(IMessage pkg) throws InterruptedException, PackagingException, TimeoutException, ZpConnectionException {
 		TranContext tranContext = new TranContext();
 		tranContext.reqMessage = pkg;
 		String key = pkg.getTranId();
 		map.put(key, tranContext);
 		ByteBuffer rawBuffer;
 		rawBuffer = packer.pack(pkg);
+		
+		if(!client.isOpen())
+			throw new ZpConnectionException();
 		client.send(rawBuffer);
 
 		synchronized (tranContext) {
@@ -222,6 +225,14 @@ public class ZpClient implements IZpkChangeNotify, IBizSystemExitService {
 						break;
 					} catch (TimeoutException e) {
 						logger.error("通知交易超时，准备重发:原包信息{}", notifyMessage, e);
+					} catch (ZpConnectionException e) {
+						logger.error("无法连接ZP，10秒后准备重发:原包信息{}", notifyMessage);
+						try {
+							Thread.sleep(10000);
+						} catch (InterruptedException e1) {
+							logger.error("系统中断:原包信息{}", notifyMessage, e1);
+							break;
+						}
 					}
 			}
 		};
@@ -264,7 +275,9 @@ public class ZpClient implements IZpkChangeNotify, IBizSystemExitService {
 		} catch (PackagingException e) {
 			logger.error("网络管理类交易组装异常。包内容【{}】", netManagementMessage.toString(), e);
 		} catch (TimeoutException e) {
-			logger.error("冲证超时，准备重发:原包信息【{}】" + netManagementMessage.toString(), e);
+			logger.error("交易超时:原包信息【{}】" + netManagementMessage.toString(), e);
+		} catch (ZpConnectionException e) {
+			logger.error("无法连接ZP:原包信息【{}】" + netManagementMessage.toString(), e);
 		}
 
 	}
