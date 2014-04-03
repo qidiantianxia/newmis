@@ -117,7 +117,7 @@ class TempAsynchronousSocketChannel extends AsynchronousSocketChannel {
 		final SocketAddress _remote = remote;
 
 		socket = new Socket();
-		readPool = Executors.newFixedThreadPool(1);
+		readPool = Executors.newFixedThreadPool(2);
 		writePool = Executors.newFixedThreadPool(1);
 		FutureTask<Void> task = new FutureTask<Void>(new Callable<Void>() {
 
