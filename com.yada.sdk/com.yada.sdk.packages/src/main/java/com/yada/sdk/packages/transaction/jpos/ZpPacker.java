@@ -34,4 +34,12 @@ public class ZpPacker extends JposPacker {
 		}
 
 	}
+
+	@Override
+	public JposMessage createEmpty() {
+		JposMessage message = super.createEmpty();
+		message.setTranIdParser(tranIdParser);
+		return message;
+	}
+
 }
