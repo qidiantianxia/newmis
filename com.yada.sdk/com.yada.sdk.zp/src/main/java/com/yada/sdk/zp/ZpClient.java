@@ -68,7 +68,9 @@ public class ZpClient implements IZpkChangeNotify, IBizSystemExitService {
 		}
 		IPackageSplitterFactory packageSplitterFactory = new FixLenPackageSplitterFactory(zpHeadLength, false);
 		IPackageProcessorFactory packageProcessorFactory = new RecvPackageProcessorFactory(map, packer, zpSystemConfigService, this);
+
 		acqOrgId = zpSystemConfigService.getAcqOrgId();
+
 		if (encryptionIp != null && encryptionPort != 0 && zpSystemConfigService != null) {
 			this.lmkZmk = zpSystemConfigService.getLmkZmk();
 			String zmkZpk = zpSystemConfigService.getPinKey();
@@ -343,7 +345,7 @@ public class ZpClient implements IZpkChangeNotify, IBizSystemExitService {
 	 * @return
 	 */
 	public static String getField48Usage4Tag92(String cvn2) {
-		return new StringBuilder().append("9205").append(cvn2).append("11").toString();
+		return new StringBuilder().append("9203").append(cvn2).toString();
 	}
 
 	public static String getField61(boolean hasPassword, boolean hasValidityPeriod, boolean hasCVN2, String credentialsType, String credentialsNo,
