@@ -61,16 +61,14 @@ public class ZpClient implements IZpkChangeNotify, IBizSystemExitService {
 		this.notifyPkgWorkPool = Executors.newFixedThreadPool(10);
 		this.traceNoService = traceNoService;
 		this.zpSystemConfigService = zpSystemConfigService;
-		IPackageSplitterFactory packageSplitterFactory = new FixLenPackageSplitterFactory(zpHeadLength, false);
-		IPackageProcessorFactory packageProcessorFactory = new RecvPackageProcessorFactory(map, packer, zpSystemConfigService, this);
-
-		acqOrgId = zpSystemConfigService.getAcqOrgId();
 		try {
 			this.packer = new ZpPacker(0);
 		} catch (ISOException e) {
 			throw new RuntimeException(e);
 		}
-
+		IPackageSplitterFactory packageSplitterFactory = new FixLenPackageSplitterFactory(zpHeadLength, false);
+		IPackageProcessorFactory packageProcessorFactory = new RecvPackageProcessorFactory(map, packer, zpSystemConfigService, this);
+		acqOrgId = zpSystemConfigService.getAcqOrgId();
 		if (encryptionIp != null && encryptionPort != 0 && zpSystemConfigService != null) {
 			this.lmkZmk = zpSystemConfigService.getLmkZmk();
 			String zmkZpk = zpSystemConfigService.getPinKey();
