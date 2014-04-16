@@ -348,17 +348,17 @@ public class ZpClient implements IZpkChangeNotify, IBizSystemExitService {
 		return new StringBuilder().append("9203").append(cvn2).toString();
 	}
 
-	public static String getField61(boolean hasPassword, boolean hasValidityPeriod, boolean hasCVN2, String credentialsType, String credentialsNo,
+	public static String getField61(Boolean hasPassword, Boolean hasValidityPeriod, Boolean hasCVN2, String credentialsType, String credentialsNo,
 			String mobileNo) {
 		StringBuilder field61 = new StringBuilder();
 		field61.append("00000000000000000000000000000000");
-		if (hasPassword) {
+		if (hasPassword != null && hasPassword) {
 			field61.replace(0, 1, "1");
 		}
-		if (hasValidityPeriod) {
+		if (hasValidityPeriod != null && hasValidityPeriod) {
 			field61.replace(1, 2, "1");
 		}
-		if (hasCVN2) {
+		if (hasCVN2 != null && hasCVN2) {
 			field61.replace(5, 6, "1");
 		}
 		if (credentialsType != null && credentialsNo != null && !credentialsType.isEmpty() && !credentialsNo.isEmpty()) {
