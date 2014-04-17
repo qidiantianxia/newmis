@@ -104,8 +104,8 @@ public class ZpClient implements IZpkChangeNotify, IBizSystemExitService {
 		map.put(key, tranContext);
 		ByteBuffer rawBuffer;
 		rawBuffer = packer.pack(pkg);
-		
-		if(!client.isOpen())
+
+		if (!client.isOpen())
 			throw new ZpConnectionException();
 		client.send(rawBuffer);
 
@@ -339,12 +339,12 @@ public class ZpClient implements IZpkChangeNotify, IBizSystemExitService {
 	}
 
 	/**
-	 * 48域用法4，TLV标签92
+	 * 48域用法4，TLV标签92，用法03
 	 * 
 	 * @param cvn2
 	 * @return
 	 */
-	public static String getField48Usage4Tag92(String cvn2) {
+	public static String getField48Usage4Tag9203(String cvn2) {
 		return new StringBuilder().append("9203").append(cvn2).toString();
 	}
 
