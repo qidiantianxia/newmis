@@ -14,6 +14,7 @@ import java.util.concurrent.ConcurrentMap;
 import java.util.concurrent.ConcurrentSkipListMap;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
+import java.util.concurrent.TimeUnit;
 import java.util.concurrent.TimeoutException;
 
 import org.jpos.iso.ISOException;
@@ -453,5 +454,19 @@ public class ZpClient implements IZpkChangeNotify, IBizSystemExitService {
 	@Override
 	public String getSystemName() {
 		return "ZP Client";
+	}
+
+	public void close() {
+		if (!this.notifyPkgWorkPool.isShutdown()) {
+			this.notifyPkgWorkPool.shutdown();
+		}
+		if (!this.notifyPkgWorkPool.isTerminated()) {
+			this.notifyPkgWorkPool.shutdownNow();
+		}
+		try {
+			this.notifyPkgWorkPool.awaitTermination(10, TimeUnit.SECONDS);
+		} catch (InterruptedException e) {
+		}
+		this.client.close();
 	}
 }
