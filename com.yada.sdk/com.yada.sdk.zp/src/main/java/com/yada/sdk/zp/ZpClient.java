@@ -161,7 +161,7 @@ public class ZpClient implements IZpkChangeNotify, IBizSystemExitService {
 		// 49
 		String field49 = tranPkg.getFieldString(49);
 		// 60*
-		String field60 = "PD05000000000000000000000000000000000000000000000000000";
+		String field60 = tranPkg.getFieldString(60);
 		// 90原交易数据
 		String orig_mti = tranPkg.getFieldString(0);// 原交易的信息类型代码
 		String orig_traceNo = tranPkg.getFieldString(11);// 原交易系统跟踪号
