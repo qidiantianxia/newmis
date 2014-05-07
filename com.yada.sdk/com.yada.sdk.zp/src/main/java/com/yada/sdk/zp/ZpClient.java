@@ -99,7 +99,7 @@ public class ZpClient implements IZpkChangeNotify, IBizSystemExitService {
 	}
 
 	public IMessage tran(IMessage pkg) throws InterruptedException, PackagingException, TimeoutException, ZpConnectionException {
-		logger.info("向IST发送交易[{}][{}]", System.getProperty("line.separator"), pkg);
+		logger.info("向IST发送交易{}", pkg);
 		TranContext tranContext = new TranContext();
 		tranContext.reqMessage = pkg;
 		String key = pkg.getTranId();
@@ -119,7 +119,7 @@ public class ZpClient implements IZpkChangeNotify, IBizSystemExitService {
 		}
 
 		map.remove(key);
-		logger.info("从IST收到交易[{}][{}]", System.getProperty("line.separator"), tranContext.respMessage);
+		logger.info("从IST收到交易{}", tranContext.respMessage);
 		return tranContext.respMessage;
 	}
 

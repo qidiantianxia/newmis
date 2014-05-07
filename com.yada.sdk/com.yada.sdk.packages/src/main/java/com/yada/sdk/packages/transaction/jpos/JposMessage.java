@@ -153,7 +153,7 @@ public class JposMessage extends ISOMsg implements IMessage {
 
 	@Override
 	public String toString() {
-		StringBuilder sb = new StringBuilder();
+		StringBuilder sb = new StringBuilder(System.getProperty("line.separator"));
 		for (int i = 0; i < 129; i++) {
 			if (i == 1) {
 				// 位图
