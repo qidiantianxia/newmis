@@ -21,9 +21,7 @@ public class AsyncTcpClient {
 	private DataTransceivers dt;
 	private ExecutorService pool;
 
-	public AsyncTcpClient(InetSocketAddress hostAddress,
-			IPackageSplitterFactory pkgSplitterFactory,
-			IPackageProcessorFactory processorFactory, int timeout,
+	public AsyncTcpClient(InetSocketAddress hostAddress, IPackageSplitterFactory pkgSplitterFactory, IPackageProcessorFactory processorFactory, int timeout,
 			boolean autoReconnection) {
 		this.hostAddress = hostAddress;
 		this.pkgSplitterFactory = pkgSplitterFactory;
@@ -56,25 +54,30 @@ public class AsyncTcpClient {
 		final AsynchronousSocketChannel socket = createChannel();
 		try {
 			socket.connect(hostAddress).get();
-			dt = new DataTransceivers(socket, pkgSplitterFactory.create(),
-					processorFactory.create(),
-					new IChannelNeedToCloseHandler() {
+			dt = new DataTransceivers(socket, pkgSplitterFactory.create(), processorFactory.create(), new IChannelNeedToCloseHandler() {
 
-						@Override
-						public void needToCloseCallback(DataTransceivers sender) {
-							if (socket.isOpen()) {
-								try {
-									socket.shutdownInput();
-									socket.shutdownOutput();
+				@Override
+				public void needToCloseCallback(DataTransceivers sender) {
+					if (socket.isOpen()) {
+						try {
+							socket.shutdownInput();
+							socket.shutdownOutput();
 
-									socket.close();
-								} catch (IOException e) {
-								}
-							}
+							socket.close();
+						} catch (IOException e) {
 						}
-					}, timeout);
+					}
+				}
+			}, timeout);
 		} catch (InterruptedException | ExecutionException e1) {
 			log.error("连接失败，主机地址：{}", hostAddress, e1);
+			if (socket != null) {
+				try {
+					socket.close();
+				} catch (IOException e) {
+					log.error("关闭SOCKET异常。", e);
+				}
+			}
 		}
 	}
 
@@ -107,9 +110,8 @@ public class AsyncTcpClient {
 	public void send(ByteBuffer sendBuffer) throws InterruptedException {
 		dt.send(sendBuffer);
 	}
-	
-	protected AsynchronousSocketChannel createChannel()
-	{
+
+	protected AsynchronousSocketChannel createChannel() {
 		return new TempAsynchronousSocketChannel();
 	}
 }
