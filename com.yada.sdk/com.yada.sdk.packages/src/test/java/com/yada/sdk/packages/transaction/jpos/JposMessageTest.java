@@ -11,7 +11,7 @@ public class JposMessageTest {
 		JposMessage message = new JposMessage();
 		message.set(0, "a");
 		message.set(50, "b");
-		String expected = "Field[000]value[a]" + System.getProperty("line.separator") + "Field[050]value[b]" + System.getProperty("line.separator");
+		String expected =  System.getProperty("line.separator") + "Field[000]value[a]" + System.getProperty("line.separator") + "Field[050]value[b]" + System.getProperty("line.separator");
 		Assert.assertEquals(expected, message.toString());
 	}
 }
