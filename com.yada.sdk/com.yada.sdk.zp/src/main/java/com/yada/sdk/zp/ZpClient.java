@@ -211,7 +211,7 @@ public class ZpClient implements IZpkChangeNotify, IBizSystemExitService {
 						notifyMessageList.add(notifyMessage);
 						IMessage message = tran(notifyMessage);
 						notifyMessageList.remove(notifyMessage);
-						String respCode = message.getFieldString(37);
+						String respCode = message.getFieldString(39);
 						if ("00".equals(respCode)) {
 							break;
 
