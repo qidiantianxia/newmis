@@ -66,7 +66,7 @@ public interface IEncryption {
 	 * @param cardNo
 	 * 				卡号/主账号
 	 * @return 受本地PIN密钥（ZpkLmk）保护的pin的明文
-	 * @throws Exception 
+	 * @author ZhangYaMin 
 	 */
 	public String getLmkPinFromZpkPin(String hsmZpkLmk, String classifiedPin, String cardNo);
 	
