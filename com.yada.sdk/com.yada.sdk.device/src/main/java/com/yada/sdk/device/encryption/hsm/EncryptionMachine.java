@@ -351,16 +351,25 @@ public class EncryptionMachine implements IEncryption {
 		}else{
 			throw new RuntimeException("getZakMac()密钥长度错误...");
 		}
-		String len = String.format("%04X", macData.length());
+		
+		String len = String.format("%04X", macData.getBytes().length);
 		sb.append(len).append(macData);
-		
-//		System.out.println(sb.toString());
-		
-		String respMessage = send(sb.toString());
+
+		byte[] reqMsg = sb.toString().getBytes();
+
+		ByteBuffer buf = ByteBuffer.allocate(reqMsg.length);
+		buf.put(reqMsg);
+
+		buf.flip();
+		String respMessage = send(buf);
 		String respCode = respMessage.substring(messageHead.length()+2, messageHead.length()+2+2);
 		
-//		System.out.println(respMessage);
-		
+		/*String len = String.format("%04X", macData.length());
+		System.out.println("len="+len);
+		sb.append(len).append(macData.toString());
+		String respMessage = send(sb.toString());
+		String respCode = respMessage.substring(messageHead.length()+2, messageHead.length()+2+2);*/
+
 		if(!respCode.equals("00")){
 			throw new RuntimeException("加密机返回失败！" + respCode);
 		}
