@@ -69,6 +69,7 @@ public class AsyncTcpClient {
 					}
 				}
 			}, timeout);
+			log.warn("连接成功，主机地址：{}", hostAddress);
 		} catch (InterruptedException | ExecutionException e1) {
 			log.error("连接失败，主机地址：{}", hostAddress, e1);
 			if (socket != null) {
