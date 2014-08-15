@@ -83,9 +83,9 @@ public class ZpClient implements IZpkChangeNotify, IBizSystemExitService {
 
 	private void initEncryption(String encryptionIp, int encryptionPort, String zmkZpk) {
 		if (zmkZpk != null) {
-			this.encryption = new EncryptionMachine(encryptionIp, encryptionPort, lmkZmk);
+			this.encryption = new EncryptionMachine(encryptionIp, encryptionPort);
 
-			changeZpk(zmkZpk);
+			//changeZpk(zmkZpk);
 		}
 	}
 
