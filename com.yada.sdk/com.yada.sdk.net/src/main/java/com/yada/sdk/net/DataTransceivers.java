@@ -169,7 +169,7 @@ public class DataTransceivers {
 	 * </p>
 	 * </blockquote>
 	 */
-	void close() {
+	public void close() {
 		logger.info("连接主动关闭remote addresslocalhost{} local address {}",
 				remoteAddress, localAddress);
 		internalClose();
