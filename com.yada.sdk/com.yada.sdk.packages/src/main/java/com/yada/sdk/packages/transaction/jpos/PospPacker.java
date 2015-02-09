@@ -37,4 +37,11 @@ public class PospPacker extends JposPacker {
 		}
 
 	}
+
+	@Override
+	public JposMessage createEmpty() {
+		JposMessage jposMessage = super.createEmpty();
+		jposMessage.setTranIdParser(tranIdParser);
+		return jposMessage;
+	}
 }
