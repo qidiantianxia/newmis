@@ -86,7 +86,7 @@ public class FixLenPackageSplitter implements IPackageSplitter {
 				buffer.put(relLenRaw[i]);
 			}
 		} else {
-			for (int i = packagHeadByteSize; i >= 0; i--) {
+			for (int i = packagHeadByteSize - 1; i >= 0; i--) {
 				buffer.put(relLenRaw[i]);
 			}
 		}
