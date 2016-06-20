@@ -148,82 +148,82 @@ public class Block01 {
   }
 
   public String currency1() {
-    return new String(raw, 52, 3);
+    return new String(raw, 50, 3);
   }
 
   public String currency2() {
-    return new String(raw, 55, 3);
+    return new String(raw, 53, 3);
   }
 
   public String currency3() {
-    return new String(raw, 58, 3);
+    return new String(raw, 56, 3);
   }
 
   public String prefixOfDefaultPhone() {
-    return new String(raw, 61, 4);
+    return new String(raw, 59, 4);
   }
 
   public String defaultPhone() {
-    return new String(raw, 65, 16);
+    return new String(raw, 63, 16);
   }
 
   public String prefixOfSparePhone() {
-    return new String(raw, 81, 4);
+    return new String(raw, 79, 4);
   }
 
   public String sparePhone() {
-    return new String(raw, 85, 16);
+    return new String(raw, 83, 16);
   }
 
   public int billPrintCount() {
-    return Integer.parseInt(new String(raw, 101, 2));
+    return Integer.parseInt(new String(raw, 99, 2));
   }
 
   public String plant1() {
-    return new String(raw, 103, 4);
+    return new String(raw, 101, 4);
   }
 
   public String plant2() {
-    return new String(raw, 107, 4);
+    return new String(raw, 105, 4);
   }
 
   public String plant3() {
-    return new String(raw, 111, 4);
+    return new String(raw, 109, 4);
   }
 
   public String plant4() {
-    return new String(raw, 115, 4);
+    return new String(raw, 113, 4);
   }
 
   public String plant5() {
-    return new String(raw, 119, 4);
+    return new String(raw, 117, 4);
   }
 
   public String plant6() {
-    return new String(raw, 123, 4);
+    return new String(raw, 121, 4);
   }
 
   public String plant7() {
-    return new String(raw, 127, 4);
+    return new String(raw, 125, 4);
   }
 
   public String plant8() {
-    return new String(raw, 131, 4);
+    return new String(raw, 129, 4);
   }
 
   public String plant9() {
-    return new String(raw, 135, 4);
+    return new String(raw, 133, 4);
   }
 
   public int timeout() {
-    return Integer.parseInt(new String(raw, 139, 2));
+    return Integer.parseInt(new String(raw, 137, 2));
   }
 
   public String enMerName() {
-    return (new String(raw, 141, 25)).trim();
+    return (new String(raw, 139, 25)).trim();
   }
 
   public String cnMerName() {
-    return (new String(raw, 166, 20)).trim();
+    return (new String(raw, 164, 20)).trim();
   }
 }
