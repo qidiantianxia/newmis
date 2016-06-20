@@ -29,14 +29,13 @@ public abstract class AbsTraner {
 	private String batchNo;
 	private TerminalAuth terminalAuth;
 	private String tellerNo;
-	private ByteBuffer head;
 	private LinkedBlockingQueue<IMessage> queue;
 	
 	public AbsTraner(String merchantId, String terminalId, String tellerNo,
 			String batchNo, IPackageSplitterFactory pkgSplitterFactory,
 			IPacker packer, String serverIp, int serverPort, int timeout,
 			TerminalAuth terminalAuth, SequenceGenerator traceNoSeqGenerator,
-			SequenceGenerator cerNoSeqGenerator,ByteBuffer head,
+			SequenceGenerator cerNoSeqGenerator,
 			LinkedBlockingQueue<IMessage> queue) throws IOException {
 		this.merchantId = merchantId;
 		this.terminalId = terminalId;
@@ -45,7 +44,6 @@ public abstract class AbsTraner {
 		this.packer = packer;
 		this.traceNoSeqGenerator = traceNoSeqGenerator;
 		this.cerNoSeqGenerator = cerNoSeqGenerator;
-		this.head = head;
 		this.queue = queue;
 		InetSocketAddress serverEndPoint = new InetSocketAddress(serverIp,
 				serverPort);
@@ -95,21 +93,7 @@ public abstract class AbsTraner {
 	}
 
 	protected IMessage createMessage() throws PackagingException {
-		IMessage message = packer.createEmpty();
-		
-		//TODO 是否抽取？
-		byte[] headBytes = head.array();
-		byte[] tpduId = Arrays.copyOfRange(headBytes, 0, 1);
-		byte[] tpduToAddress = Arrays.copyOfRange(headBytes, 1, 3);
-		byte[] tpduFromAddress = Arrays.copyOfRange(headBytes, 3, 5);
-		byte[] version = Arrays.copyOfRange(headBytes, 5, 7);
-		
-		message.setTpduId(ByteBuffer.wrap(tpduId));
-		message.setTpduToAddress(ByteBuffer.wrap(tpduToAddress));
-		message.setTpduFromAddress(ByteBuffer.wrap(tpduFromAddress));
-		message.setVersion(ByteBuffer.wrap(version));
-		
-		return message;
+		return packer.createEmpty();
 	}
 
 	protected void addElementToQueue(IMessage message) {

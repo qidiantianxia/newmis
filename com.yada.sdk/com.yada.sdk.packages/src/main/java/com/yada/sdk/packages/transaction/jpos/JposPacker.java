@@ -68,11 +68,6 @@ public class JposPacker implements IPacker {
 	public ByteBuffer pack(IMessage message) throws PackagingException {
 		try {
 			JposMessage msg = (JposMessage) message;
-			ISOPackager tempPacker = msg.getPackager();
-			if (tempPacker == null) {
-				// 如果为null，则为手工创建的message，设置默认的packer。
-				msg.setPackager(packer);
-			}
 			return ByteBuffer.wrap(msg.pack());
 		} catch (Exception e) {
 			throw new PackagingException(e);
@@ -85,8 +80,6 @@ public class JposPacker implements IPacker {
 			byte[] bts = new byte[byteBuffer.remaining()];
 			byteBuffer.get(bts);
 			JposMessage message = createEmpty();
-			// packer.unpack(message.getIsoMsg(), bts);
-			message.setPackager(packer);
 			message.unpack(bts);
 			return message;
 		} catch (Exception e) {
@@ -96,7 +89,8 @@ public class JposPacker implements IPacker {
 
 	@Override
 	public JposMessage createEmpty() {
-		JposMessage message = new JposMessage(headLength);
+		JposMessage message = new JposMessage();
+		message.setPackager(packer);
 		return message;
 	}
 }

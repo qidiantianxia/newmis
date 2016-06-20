@@ -10,8 +10,8 @@ import com.yada.sdk.packages.transaction.IMessage;
 public class ZpPacker extends JposPacker {
 	ZpParser tranIdParser = new ZpParser();
 
-	public ZpPacker(int headLength) throws ISOException {
-		super(headLength, ZpPacker.class.getResourceAsStream("/8583zp.xml"), "zp");
+	public ZpPacker() throws ISOException {
+		super(0, ZpPacker.class.getResourceAsStream("/8583zp.xml"), "zp");
 	}
 
 	@Override
@@ -29,8 +29,7 @@ public class ZpPacker extends JposPacker {
 			// 4+15+6
 			String termId = message.getFieldString(41);
 			String traceNo = message.getFieldString(11);
-			StringBuilder sb = new StringBuilder();
-			return sb.append("zp").append(termId).append(traceNo).toString();
+			return "zp" + termId + traceNo;
 		}
 
 	}

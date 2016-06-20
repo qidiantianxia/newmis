@@ -28,13 +28,13 @@ public class Traner extends AbsTraner {
 			String batchNo, String serverIp, int serverPort, int timeout,
 			CheckSignin cs, TerminalAuth terminalAuth,
 			SequenceGenerator traceNoSeqGenerator,
-			SequenceGenerator cerNoSeqGenerator,ByteBuffer head,
+			SequenceGenerator cerNoSeqGenerator,byte[] head,
 			LinkedBlockingQueue<IMessage> queue) throws IOException,
 			ISOException {
 		super(merchantId, terminalId, tellerNo, batchNo,
-				new FixLenPackageSplitterFactory(2, false), new PospPacker(7),
+				new FixLenPackageSplitterFactory(2, false), new PospPacker(head),
 				serverIp, serverPort, timeout, terminalAuth,traceNoSeqGenerator,
-				cerNoSeqGenerator,head,queue);
+				cerNoSeqGenerator,queue);
 		this.cs = cs;
 	}
 

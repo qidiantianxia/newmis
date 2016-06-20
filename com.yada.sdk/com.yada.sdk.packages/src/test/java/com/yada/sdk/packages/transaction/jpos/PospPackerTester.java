@@ -5,8 +5,7 @@ import org.jpos.iso.ISOException;
 import junit.framework.TestCase;
 
 public class PospPackerTester extends TestCase {
-	public void test() throws ISOException
-	{
-		new PospPacker(8);
-	}
+  public void test() throws ISOException {
+    new PospPacker(new byte[]{0, 0, 0, 0, 0, 0, 0});
+  }
 }

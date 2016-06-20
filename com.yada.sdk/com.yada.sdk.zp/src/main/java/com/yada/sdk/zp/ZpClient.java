@@ -63,7 +63,7 @@ public class ZpClient implements IZpkChangeNotify, IBizSystemExitService {
 		this.traceNoService = traceNoService;
 		this.zpSystemConfigService = zpSystemConfigService;
 		try {
-			this.packer = new ZpPacker(0);
+			this.packer = new ZpPacker();
 		} catch (ISOException e) {
 			throw new RuntimeException(e);
 		}
@@ -72,7 +72,7 @@ public class ZpClient implements IZpkChangeNotify, IBizSystemExitService {
 
 		acqOrgId = zpSystemConfigService.getAcqOrgId();
 
-		if (encryptionIp != null && encryptionPort != 0 && zpSystemConfigService != null) {
+		if (encryptionIp != null && encryptionPort != 0) {
 			this.lmkZmk = zpSystemConfigService.getLmkZmk();
 			String zmkZpk = zpSystemConfigService.getPinKey();
 			initEncryption(encryptionIp, encryptionPort, zmkZpk);
@@ -323,8 +323,9 @@ public class ZpClient implements IZpkChangeNotify, IBizSystemExitService {
 	/**
 	 * 处理中国银行IST（ZP） 8583包的37域
 	 * 
-	 * @param date
-	 * @param traceNo
+	 * @param txnDate 交易日期
+	 * @param txnTime 交易时间
+	 * @param traceNo 跟踪号
 	 * @return
 	 */
 	public static String getField37(String txnDate, String txnTime, String traceNo) {

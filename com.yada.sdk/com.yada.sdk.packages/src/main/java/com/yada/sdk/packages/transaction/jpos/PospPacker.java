@@ -9,10 +9,12 @@ import com.yada.sdk.packages.transaction.IMessage;
 
 public class PospPacker extends JposPacker {
 	PospTranIdParser tranIdParser = new PospTranIdParser();
+  private byte[] header;
 
-	public PospPacker(int headLength) throws ISOException {
-		super(headLength, PospPacker.class.getResourceAsStream("/8583posp.xml"), "posp");
-	}
+  public PospPacker(byte[] header) throws ISOException {
+		super(header.length, PospPacker.class.getResourceAsStream("/8583posp.xml"), "posp");
+    this.header = header;
+  }
 
 	@Override
 	public IMessage unpack(ByteBuffer byteBuffer) throws PackagingException {
@@ -42,6 +44,7 @@ public class PospPacker extends JposPacker {
 	public JposMessage createEmpty() {
 		JposMessage jposMessage = super.createEmpty();
 		jposMessage.setTranIdParser(tranIdParser);
+		jposMessage.setHeader(header);
 		return jposMessage;
 	}
 }
