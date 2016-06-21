@@ -1,232 +1,229 @@
 package com.yada.sdk.device.pos.posp.params;
 
-import com.yada.sdk.device.pos.util.Utils;
+import java.nio.ByteBuffer;
 
 public class Block01 {
+  private byte[] flag;
+  private String additionInfo;
 
-    private byte[] raw;
-    private byte[] hex;
+  public Block01(String raw) {
+    flag = ByteBuffer.allocate(8).putLong(Long.parseLong(raw.substring(0, 8), 16) << 32).array();
+    additionInfo = raw.substring(8);
+  }
 
-    public Block01(byte[] raw) {
-        this.raw = raw;
-        byte[] bytes = new byte[8];
-        System.arraycopy(raw, 0, bytes, 0, 8);
-        this.hex = Utils.ASCII_To_BCD(bytes);
-    }
+  public boolean useMAC() {
+    return (flag[0] & 0X80) != 0;
+  }
 
-    public boolean useMAC() {
-        return (hex[0] & 0X80) != 0;
-    }
+  public boolean enable() {
+    return (flag[0] & 0X40) != 0;
+  }
 
-    public boolean enable() {
-        return (hex[0] & 0X40) != 0;
-    }
+  public boolean autoCheck() {
+    return (flag[0] & 0X20) != 0;
+  }
 
-    public boolean autoCheck() {
-        return (hex[0] & 0X20) != 0;
-    }
+  public boolean allowBatchUpdate() {
+    return (flag[0] & 0X10) != 0;
+  }
 
-    public boolean allowBatchUpdate() {
-        return (hex[0] & 0X10) != 0;
-    }
+  public boolean allowReturn() {
+    return (flag[0] & 0X08) != 0;
+  }
 
-    public boolean allowReturn() {
-        return (hex[0] & 0X08) != 0;
-    }
+  public boolean allowManuallyEnterCardNo() {
+    return (flag[0] & 0X04) != 0;
+  }
 
-    public boolean allowManuallyEnterCardNo() {
-        return (hex[0] & 0X04) != 0;
-    }
+  public boolean allowMOTO() {
+    return (flag[0] & 0X02) != 0;
+  }
 
-    public boolean allowMOTO() {
-        return (hex[0] & 0X02) != 0;
-    }
+  public boolean allOffline() {
+    return (flag[0] & 0X01) != 0;
+  }
 
-    public boolean allOffline() {
-        return (hex[0] & 0X01) != 0;
-    }
+  public boolean useTripleDES() {
+    return (flag[1] & 0X80) != 0;
+  }
 
-    public boolean useTripleDES() {
-        return (hex[1] & 0X80) != 0;
-    }
+  public boolean allowBalanceQuery() {
+    return (flag[1] & 0X40) != 0;
+  }
 
-    public boolean allowBalanceQuery() {
-        return (hex[1] & 0X40) != 0;
-    }
+  public boolean allowPay() {
+    return (flag[1] & 0X20) != 0;
+  }
 
-    public boolean allowPay() {
-        return (hex[1] & 0X20) != 0;
-    }
+  public boolean allowPreAuth() {
+    return (flag[1] & 0X10) != 0;
+  }
 
-    public boolean allowPreAuth() {
-        return (hex[1] & 0X10) != 0;
-    }
+  public boolean allowWithdrawals() {
+    return (flag[1] & 0X08) != 0;
+  }
 
-    public boolean allowWithdrawals() {
-        return (hex[1] & 0X08) != 0;
-    }
+  public boolean allowAdjust() {
+    return (flag[1] & 0X04) != 0;
+  }
 
-    public boolean allowAdjust() {
-        return (hex[1] & 0X04) != 0;
-    }
+  public boolean allowTip() {
+    return (flag[1] & 0X02) != 0;
+  }
 
-    public boolean allowTip() {
-        return (hex[1] & 0X02) != 0;
-    }
+  public boolean allowInstallment() {
+    return (flag[1] & 0X01) != 0;
+  }
 
-    public boolean allowInstallment() {
-        return (hex[1] & 0X01) != 0;
-    }
+  public boolean allowIntegral() {
+    return (flag[2] & 0X80) != 0;
+  }
 
-    public boolean allowIntegral() {
-        return (hex[2] & 0X80) != 0;
-    }
+  public boolean allowPaymentTransfer() {
+    return (flag[2] & 0X40) != 0;
+  }
 
-    public boolean allowPaymentTransfer() {
-        return (hex[2] & 0X40) != 0;
-    }
+  public boolean allowCollections() {
+    return (flag[2] & 0X20) != 0;
+  }
 
-    public boolean allowCollections() {
-        return (hex[2] & 0X20) != 0;
-    }
+  public boolean useOper() {
+    return (flag[2] & 0X10) != 0;
+  }
 
-    public boolean useOper() {
-        return (hex[2] & 0X10) != 0;
-    }
+  public boolean allowCNChar() {
+    return (flag[2] & 0X08) != 0;
+  }
 
-    public boolean allowCNChar() {
-        return (hex[2] & 0X08) != 0;
-    }
+  public boolean supportEMV() {
+    return (flag[2] & 0X04) != 0;
+  }
 
-    public boolean supportEMV() {
-        return (hex[2] & 0X04) != 0;
-    }
+  public boolean allowCardholderSelectApp() {
+    return (flag[2] & 0X02) != 0;
+  }
 
-    public boolean allowCardholderSelectApp() {
-        return (hex[2] & 0X02) != 0;
-    }
+  public boolean allowFallback() {
+    return (flag[2] & 0X01) != 0;
+  }
 
-    public boolean allowFallback() {
-        return (hex[2] & 0X01) != 0;
-    }
+  public boolean supportAppDownload() {
+    return (flag[3] & 0X80) != 0;
+  }
 
-    public boolean supportAppDownload() {
-        return (hex[3] & 0X80) != 0;
-    }
+  public boolean supportElectronicCash() {
+    return (flag[3] & 0X20) != 0;
+  }
 
-    public boolean supportElectronicCash() {
-        return (hex[3] & 0X20) != 0;
-    }
+  public boolean allowAssignLoad() {
+    return (flag[3] & 0X10) != 0;
+  }
 
-    public boolean allowAssignLoad() {
-        return (hex[3] & 0X10) != 0;
-    }
+  public boolean allowUnspecifiedLoad() {
+    return (flag[3] & 0X08) != 0;
+  }
 
-    public boolean allowUnspecifiedLoad() {
-        return (hex[3] & 0X08) != 0;
-    }
+  public boolean allowFillBoardLoad() {
+    return (flag[3] & 0X04) != 0;
+  }
 
-    public boolean allowFillBoardLoad() {
-        return (hex[3] & 0X04) != 0;
-    }
+  public int checkoutMethod() {
+    return additionInfo.charAt(0) - '0';
+  }
 
-    public char checkoutMethod() {
-        return (char) raw[8];
-    }
+  public int maxOfflineCount() {
+    return Integer.parseInt(additionInfo.substring(1, 3));
+  }
 
-    public int maxOfflineCount() {
-        return Integer.parseInt(new String(raw, 9, 2));
-    }
+  public long maxOfflineAmt() {
+    return Long.parseLong(additionInfo.substring(4, 16));
+  }
 
-    public long maxOfflineAmt() {
-        return Long.parseLong(new String(raw, 12, 12));
-    }
+  public int maxAdjustAmtPercentage() {
+    return Integer.parseInt(additionInfo.substring(16, 20));
+  }
 
-    public int maxAdjustAmtPercentage() {
-        return Integer.parseInt(new String(raw, 24, 4));
-    }
+  public int maxTip() {
+    return Integer.parseInt(additionInfo.substring(20, 24));
+  }
 
-    public int maxTip() {
-        return Integer.parseInt(new String(raw, 28, 4));
-    }
+  public String currency1() {
+    return additionInfo.substring(24, 27);
+  }
 
-    public String currency1() {
-        return new String(raw, 32, 3);
-    }
+  public String currency2() {
+    return additionInfo.substring(27, 30);
+  }
 
-    public String currency2() {
-        return new String(raw, 35, 3);
-    }
+  public String currency3() {
+    return additionInfo.substring(30, 33);
+  }
 
-    public String currency3() {
-        return new String(raw, 38, 3);
-    }
+  public String prefixOfDefaultPhone() {
+    return additionInfo.substring(33, 37);
+  }
 
-    public String prefixOfDefaultPhone() {
-        return new String(raw, 41, 4);
-    }
+  public String defaultPhone() {
+    return additionInfo.substring(37, 53);
+  }
 
-    public String defaultPhone() {
-        return new String(raw, 45, 16);
-    }
+  public String prefixOfSparePhone() {
+    return additionInfo.substring(53, 57);
+  }
 
-    public String prefixOfSparePhone() {
-        return new String(raw, 61, 4);
-    }
+  public String sparePhone() {
+    return additionInfo.substring(57, 73);
+  }
 
-    public String sparePhone() {
-        return new String(raw, 65, 16);
-    }
+  public int billPrintCount() {
+    return Integer.parseInt(additionInfo.substring(73, 75));
+  }
 
-    public int billPrintCount() {
-        return Integer.parseInt(new String(raw, 81, 2));
-    }
+  public String plant1() {
+    return additionInfo.substring(75, 79);
+  }
 
-    public String plant1() {
-        return new String(raw, 83, 4);
-    }
+  public String plant2() {
+    return additionInfo.substring(79, 83);
+  }
 
-    public String plant2() {
-        return new String(raw, 87, 4);
-    }
+  public String plant3() {
+    return additionInfo.substring(83, 87);
+  }
 
-    public String plant3() {
-        return new String(raw, 91, 4);
-    }
+  public String plant4() {
+    return additionInfo.substring(87, 91);
+  }
 
-    public String plant4() {
-        return new String(raw, 95, 4);
-    }
+  public String plant5() {
+    return additionInfo.substring(91, 95);
+  }
 
-    public String plant5() {
-        return new String(raw, 99, 4);
-    }
+  public String plant6() {
+    return additionInfo.substring(95, 99);
+  }
 
-    public String plant6() {
-        return new String(raw, 103, 4);
-    }
+  public String plant7() {
+    return additionInfo.substring(99, 103);
+  }
 
-    public String plant7() {
-        return new String(raw, 107, 4);
-    }
+  public String plant8() {
+    return additionInfo.substring(103, 107);
+  }
 
-    public String plant8() {
-        return new String(raw, 111, 4);
-    }
+  public String plant9() {
+    return additionInfo.substring(107, 111);
+  }
 
-    public String plant9() {
-        return new String(raw, 115, 4);
-    }
+  public int timeout() {
+    return Integer.parseInt(additionInfo.substring(111, 113));
+  }
 
-    public int timeout() {
-        return Integer.parseInt(new String(raw, 119, 2));
-    }
+  public String enMerName() {
+    return additionInfo.substring(113, 138).trim();
+  }
 
-    public String enMerName() {
-        return (new String(raw, 121, 25)).trim();
-    }
-
-    public String cnMerName() {
-        return (new String(raw, 146, 25)).trim();
-    }
+  public String cnMerName() {
+    return additionInfo.substring(138).trim();
+  }
 }

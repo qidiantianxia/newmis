@@ -122,6 +122,11 @@
                 <artifactId>commons-codec</artifactId>
                 <version>1.10</version>
             </dependency>
+            <dependency>
+                <groupId>com.payneteasy</groupId>
+                <artifactId>ber-tlv</artifactId>
+                <version>1.0-7</version>
+            </dependency>
         </dependencies>
     </dependencyManagement>
 </project>

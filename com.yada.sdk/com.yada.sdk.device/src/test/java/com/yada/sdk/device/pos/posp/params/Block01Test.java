@@ -11,7 +11,7 @@ public class Block01Test {
     @Before
     public void before() {
         String param01 = "ff7fffFF002000000010000000500050156156156    1554                1554            01IP01IP02IP03IP04IP05IP06IP07IP08IP0950TEST MERCHANT            测试商户                 ";
-        block01 = new Block01(param01.getBytes());
+        block01 = new Block01(param01);
     }
 
     @Test
@@ -161,7 +161,7 @@ public class Block01Test {
 
     @Test
     public void checkoutMethod() throws Exception {
-        Assert.assertEquals('0', block01.checkoutMethod());
+        Assert.assertEquals(0, block01.checkoutMethod());
     }
 
     @Test
