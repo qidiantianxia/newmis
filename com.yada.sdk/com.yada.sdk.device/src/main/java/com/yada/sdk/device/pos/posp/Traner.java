@@ -5,6 +5,7 @@ import java.nio.ByteBuffer;
 import java.nio.charset.Charset;
 import java.util.concurrent.LinkedBlockingQueue;
 
+import com.payneteasy.tlv.HexUtil;
 import org.jpos.iso.ISOException;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -12,7 +13,6 @@ import org.slf4j.LoggerFactory;
 import com.yada.sdk.device.encryption.TerminalAuth;
 import com.yada.sdk.device.pos.AbsTraner;
 import com.yada.sdk.device.pos.SequenceGenerator;
-import com.yada.sdk.device.pos.util.Utils;
 import com.yada.sdk.net.FixLenPackageSplitterFactory;
 import com.yada.sdk.packages.PackagingException;
 import com.yada.sdk.packages.transaction.IMessage;
@@ -150,7 +150,7 @@ public class Traner extends AbsTraner {
 			reqMessage.setFieldString(48, field48);
 			reqMessage.setFieldString(49, currency);
 //			reqMessage.setFieldString(52, getPin(cardNo, pin).substring(0, 8));
-			reqMessage.setField(52, ByteBuffer.wrap(Utils.ASCII_To_BCD(getPin(cardNo, pin).getBytes())));
+			reqMessage.setField(52, ByteBuffer.wrap(HexUtil.parseHex(getPin(cardNo, pin))));
 			reqMessage.setFieldString(61, getBatchNo() + getTellerNo() + getCerNo());
 			StringBuilder macData = new StringBuilder();
 			macData.append(cardNo.length() % 2 == 0 ? cardNo : "0" + cardNo);
@@ -159,7 +159,7 @@ public class Traner extends AbsTraner {
 			macData.append(traceNo);
 			macData.append("0" + currency);
 			
-			byte[] bcdMacData = Utils.ASCII_To_BCD(macData.toString().getBytes());
+			byte[] bcdMacData =HexUtil.parseHex(macData.toString());
 			byte[] terminalByte = getTerminalId().getBytes();
 			
 			ByteBuffer buf = ByteBuffer.allocate(bcdMacData.length+terminalByte.length);

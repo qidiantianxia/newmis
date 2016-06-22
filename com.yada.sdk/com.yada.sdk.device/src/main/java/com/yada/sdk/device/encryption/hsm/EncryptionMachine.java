@@ -4,8 +4,8 @@ import java.io.IOException;
 import java.net.InetSocketAddress;
 import java.nio.ByteBuffer;
 
+import com.payneteasy.tlv.HexUtil;
 import com.yada.sdk.device.encryption.IEncryption;
-import com.yada.sdk.device.pos.util.Utils;
 import com.yada.sdk.net.FixLenPackageSplitterFactory;
 import com.yada.sdk.net.TcpClient;
 
@@ -200,7 +200,7 @@ public class EncryptionMachine implements IEncryption {
 
 		String mac = respMessage.substring(startIndex, startIndex + 16);
 
-		byte[] macByte = Utils.decodeHex(mac.toCharArray());
+		byte[] macByte = HexUtil.parseHex(mac);
 
 		return ByteBuffer.wrap(macByte);
 	}
