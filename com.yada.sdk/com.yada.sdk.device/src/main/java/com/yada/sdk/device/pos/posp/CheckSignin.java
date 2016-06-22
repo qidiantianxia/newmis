@@ -13,15 +13,17 @@ class CheckSignin {
 		String processCode = responseMessage.getFieldString(3);
 		char c = processCode.charAt(5);
 		String respCode = responseMessage.getFieldString(39);
+		boolean needParamDownload = false;
+		boolean needSingin = false;
 
 		switch (c) {
 		case '1':
-			vp.resetParamDownload();
+			needParamDownload = true;
 			break;
 		case '4':
 		case '5':
 		case '6':
-			vp.resetSingin();
+			needSingin = true;
 			break;
 		}
 
@@ -29,8 +31,13 @@ class CheckSignin {
 		case "Z1":
 		case "88":
 		case "89":
-			vp.resetSingin();
+			needSingin = true;
 			break;
 		}
+
+		if(needSingin)
+			vp.resetSingin();
+		else if(needParamDownload)
+			vp.resetParamDownload();
 	}
 }
