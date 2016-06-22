@@ -45,7 +45,6 @@ public class TestMain {
 		System.out.println();
 
 		strData = "DF22381906228480316038946869000486123111120846C728CEA5D1478640020300008004E0001907080103602002010A010000000000A1E91A73DF23020200";
-		bs = new BigInteger(strData, 16).toByteArray();
 		bs = HexUtil.parseHex(strData);
 		tlvs = parser.parse(bs, 0, bs.length);
 		for(BerTlv tlv : tlvs.getList()) {
