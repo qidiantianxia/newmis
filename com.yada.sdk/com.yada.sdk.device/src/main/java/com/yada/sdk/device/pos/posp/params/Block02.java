@@ -33,18 +33,18 @@ public class Block02 {
     BerTlvs params = new BerTlvParser().parse(raw);
     appParams = params.find(appParamTag).getBytesValue();
     paramVersion = params.find(paramVersionTag).getHexValue();
-    int postion = 0;
-    tmsfpuDefaultPhone = new String(appParams, postion, paramLengths[0], charset).trim(); postion += paramLengths[0];
-    tmsfpuReservePhone = new String(appParams, postion, paramLengths[1], charset).trim(); postion += paramLengths[1];
-    tmsfpuNetworkAddress = new String(appParams, postion, paramLengths[2], charset).trim(); postion += paramLengths[2];
-    TmsfpuReserveNetworkAddress = new String(appParams, postion, paramLengths[3], charset).trim(); postion += paramLengths[3];
-    termDownloadDate = HexUtil.toHexString(appParams, postion, paramLengths[4]); postion += paramLengths[4];
-    termDownloadLimitDate = HexUtil.toHexString(appParams, postion, paramLengths[5]); postion += paramLengths[5];
-    communication = new String(appParams, postion, paramLengths[6], charset); postion += paramLengths[6];
-    downloadIdleTime = Integer.parseInt(HexUtil.toHexString(appParams, postion, paramLengths[7])); postion += paramLengths[7];
-    tmsFlag = appParams[postion]; postion += paramLengths[8];
-    username = new String(appParams, postion, paramLengths[9], charset).trim(); postion += paramLengths[9];
-    password = new String(appParams, postion, paramLengths[10], charset).trim();
+    int position = 0;
+    tmsfpuDefaultPhone = new String(appParams, position, paramLengths[0], charset).trim(); position += paramLengths[0];
+    tmsfpuReservePhone = new String(appParams, position, paramLengths[1], charset).trim(); position += paramLengths[1];
+    tmsfpuNetworkAddress = new String(appParams, position, paramLengths[2], charset).trim(); position += paramLengths[2];
+    TmsfpuReserveNetworkAddress = new String(appParams, position, paramLengths[3], charset).trim(); position += paramLengths[3];
+    termDownloadDate = HexUtil.toHexString(appParams, position, paramLengths[4]); position += paramLengths[4];
+    termDownloadLimitDate = HexUtil.toHexString(appParams, position, paramLengths[5]); position += paramLengths[5];
+    communication = new String(appParams, position, paramLengths[6], charset); position += paramLengths[6];
+    downloadIdleTime = Integer.parseInt(HexUtil.toHexString(appParams, position, paramLengths[7])); position += paramLengths[7];
+    tmsFlag = appParams[position]; position += paramLengths[8];
+    username = new String(appParams, position, paramLengths[9], charset).trim(); position += paramLengths[9];
+    password = new String(appParams, position, paramLengths[10], charset).trim();
   }
 
 
