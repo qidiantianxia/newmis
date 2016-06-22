@@ -160,19 +160,19 @@ public class Block01 {
   }
 
   public String prefixOfDefaultPhone() {
-    return additionInfo.substring(33, 37);
+    return additionInfo.substring(33, 37).trim();
   }
 
   public String defaultPhone() {
-    return additionInfo.substring(37, 53);
+    return additionInfo.substring(37, 53).trim();
   }
 
   public String prefixOfSparePhone() {
-    return additionInfo.substring(53, 57);
+    return additionInfo.substring(53, 57).trim();
   }
 
   public String sparePhone() {
-    return additionInfo.substring(57, 73);
+    return additionInfo.substring(57, 73).trim();
   }
 
   public int billPrintCount() {

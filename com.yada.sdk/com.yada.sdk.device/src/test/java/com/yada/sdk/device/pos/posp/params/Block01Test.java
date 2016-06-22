@@ -201,22 +201,22 @@ public class Block01Test {
 
     @Test
     public void prefixOfDefaultPhone() throws Exception {
-        Assert.assertEquals("    ", block01.prefixOfDefaultPhone());
+        Assert.assertEquals("", block01.prefixOfDefaultPhone());
     }
 
     @Test
     public void defaultPhone() throws Exception {
-        Assert.assertEquals("1554            ", block01.defaultPhone());
+        Assert.assertEquals("1554", block01.defaultPhone());
     }
 
     @Test
     public void prefixOfSparePhone() throws Exception {
-        Assert.assertEquals("    ", block01.prefixOfSparePhone());
+        Assert.assertEquals("", block01.prefixOfSparePhone());
     }
 
     @Test
     public void sparePhone() throws Exception {
-        Assert.assertEquals("1554            ", block01.sparePhone());
+        Assert.assertEquals("1554", block01.sparePhone());
     }
 
     @Test
