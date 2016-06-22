@@ -18,16 +18,16 @@ public class Block03Test {
     @Test
     public void test() {
         Assert.assertEquals("A0000000031010", HexUtil.toHexString(block.aid));
-        Assert.assertEquals("01", HexUtil.toHexString(new byte[]{block.asi}));
+        Assert.assertEquals((byte)0x01, block.asi);
         Assert.assertEquals("14E9", HexUtil.toHexString(block.appVersion));
         Assert.assertEquals("D84000A800", HexUtil.toHexString(block.tacDefault));
         Assert.assertEquals("D84004F800", HexUtil.toHexString(block.tacOnLine));
         Assert.assertEquals("0010000000", HexUtil.toHexString(block.tacReject));
         Assert.assertEquals(0, block.terminalFloorLimit);
         Assert.assertEquals("00000000", HexUtil.toHexString(block.biasRandomlySelectedThreshold));
-        Assert.assertEquals(0, block.biasRandomlySelectedMaxPercentage);
-        Assert.assertEquals(0, block.randomlySelectedPercentage);
-        Assert.assertEquals("03", HexUtil.toHexString(new byte[]{block.appFlag}));
+        Assert.assertEquals((byte)0x00, block.biasRandomlySelectedMaxPercentage);
+        Assert.assertEquals((byte)0x00, block.randomlySelectedPercentage);
+        Assert.assertEquals((byte)0x03, block.appFlag);
         Assert.assertEquals("9F37", HexUtil.toHexString(block.ddol));
         Assert.assertEquals(22, block.terminalCategoryCode);
         Assert.assertEquals(8398, block.merchantCategoryCode);

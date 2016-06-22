@@ -9,7 +9,7 @@ import com.payneteasy.tlv.BerTlvs;
  */
 public class Block04_2 {
   private final static BerTag serviceIdTag = new BerTag(0xdf, 0x36);
-  private final static BerTag ridTag = new BerTag(0xdf, 0x06);
+  private final static BerTag ridTag = new BerTag(0x9f, 0x06);
   private final static BerTag publicKeyIndexTag = new BerTag(0x9f, 0x22);
   private final static BerTag expiryDateTag = new BerTag(0xdf, 0x37);
   private final static BerTag hashAlgorithmIndicatorTag = new BerTag(0xdf, 0x07);
