@@ -3,7 +3,6 @@ package com.yada.sdk.packages.transaction.jpos;
 import java.math.BigInteger;
 
 import com.payneteasy.tlv.*;
-import com.yada.sdk.packages.comm.Tlv;
 
 public class TestMain {
 
