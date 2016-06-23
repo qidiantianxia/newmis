@@ -5,9 +5,10 @@ import com.payneteasy.tlv.BerTlvParser;
 import com.payneteasy.tlv.BerTlvs;
 
 /**
- * Created by cuitao-pc on 16/6/22.
+ * 6.1.4	POS下装参数—国际算法公钥参数--参数块第04块处理
  */
 public class Block04_1 {
+
   private final static BerTag ridTag = new BerTag(0x9f, 0x06);
   private final static BerTag publicKeyStoreIndexTag = new BerTag(0xdf, 0x28);
   private final static BerTag publicKeyIndexTag = new BerTag(0x9f, 0x22);
@@ -18,16 +19,17 @@ public class Block04_1 {
   private final static BerTag publicKeyExponentTag = new BerTag(0xdf, 0x04);
   private final static BerTag publicKeyHashTag = new BerTag(0xdf, 0x03);
   private final static BerTag paramVersionTag = new BerTag(0xdf, 0x25);
-  public final byte[] rid;
-  public final byte publicKeyStoreIndex;
-  public final byte publicKeyIndex;
-  public final String expiryDate;
-  public final byte hashAlgorithmIndicator;
-  public final byte publicKeyAlgorithmIndicator;
-  public final byte[] publicKeyModulus;
-  public final byte[] publicKeyExponent;
-  public final byte[] publicKeyHash;
-  public final String paramVersion;
+
+  public final byte[] rid; // 注册应用提供者标识符
+  public final byte publicKeyStoreIndex; // 公钥存储位置索引
+  public final byte publicKeyIndex; // 认证中心公钥索引
+  public final String expiryDate; // 认证中心公钥失效期(YYYYMMDD)
+  public final byte hashAlgorithmIndicator; // 认证中心哈什算法标识
+  public final byte publicKeyAlgorithmIndicator; // 认证中心公钥算法标识
+  public final byte[] publicKeyModulus; // 认证中心公钥模
+  public final byte[] publicKeyExponent; // 认证中心公钥指数
+  public final byte[] publicKeyHash; // 认证中心公钥校验值
+  public final String paramVersion; // 参数版本号
 
   public Block04_1(byte[] raw) {
     BerTlvParser p = new BerTlvParser();
