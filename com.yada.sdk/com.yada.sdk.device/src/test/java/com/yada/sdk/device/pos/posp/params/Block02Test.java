@@ -19,7 +19,7 @@ public class Block02Test {
         Assert.assertEquals("", block.tmsfpuDefaultPhone);
         Assert.assertEquals("", block.tmsfpuReservePhone);
         Assert.assertEquals("", block.tmsfpuNetworkAddress);
-        Assert.assertEquals("", block.TmsfpuReserveNetworkAddress);
+        Assert.assertEquals("", block.tmsfpuReserveNetworkAddress);
         Assert.assertEquals("20080101000000", block.termDownloadDate);
         Assert.assertEquals("20080101000000", block.termDownloadLimitDate);
         Assert.assertEquals("2", block.communication);

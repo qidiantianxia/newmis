@@ -4,70 +4,301 @@ import java.nio.ByteBuffer;
 
 /**
  * POS下装参数---终端基本参数--参数块第01块处理
+ * 注释出自IST-v3.0.6的第6.1.1章节
  */
 public class Block01 {
+
+    /**
+     * 参数长度的数组
+     * 前26个参数是由32个bit组成用8个16进制数来表示，数组从第27个参数开始记录参数的长度
+     */
     private static final int[] paramLengths = new int[]{1, 2, 1, 12, 4, 4, 3, 3, 3, 4, 16, 4, 16, 2, 4, 4, 4, 4, 4, 4, 4, 4, 4, 2, 25, 20};
 
-    public final boolean useMAC; // 终端是否使用MAC标志
-    public final boolean enable; // 是否允许终端使用标志
-    public final boolean autoCheck; // 终端自动结帐标志
-    public final boolean allowBatchUpdate; // 批上送标志
-    public final boolean allowReturn; // 允许退货标志
-    public final boolean allowManuallyEnterCardNo; // 手工键入卡号标志
-    public final boolean allowMOTO; // 允许MO/TO交易标志
-    public final boolean allOffline; // 离线交易标志
+    /**
+     * 终端是否使用MAC标志
+     * 设置POS在与主机的交易中是否送入MAC:false-不送、true-送
+     */
+    public final boolean useMAC;
+    /**
+     * 是否允许终端使用标志
+     * 设置POS是否可以允许授权和金融交易：false-不允许、true-允许
+     */
+    public final boolean enable;
+    /**
+     * 终端自动结帐标志
+     * false-非自动结帐POS、true-自动结帐POS
+     */
+    public final boolean autoCheck;
 
-    public final boolean useTripleDES; // 使用3DES加密标志
-    public final boolean allowBalanceQuery; // 允许余额查询交易标志
-    public final boolean allowPay;  // 允许消费交易标志
-    public final boolean allowPreAuth; // 允许预授权标志
-    public final boolean allowWithdrawals; // 允许取现交易标志
-    public final boolean allowAdjust; // 允许调整交易标志
-    public final boolean allowTip; // 允许小费交易标志
-    public final boolean allowInstallment; // 允许分期付款交易标志
+    /**
+     * 批上送标志
+     * false-不批上送、true-批上送
+     */
+    public final boolean allowBatchUpdate;
+    /**
+     * 允许退货标志
+     * false-不允许退货、true-允许退货
+     */
+    public final boolean allowReturn;
+    /**
+     * 手工键入卡号标志
+     * false-不允许手工键入卡号、true-允许手工键入卡号
+     */
+    public final boolean allowManuallyEnterCardNo;
+    /**
+     * 允许MO/TO交易标志
+     * false-不允许MO/TO交易、true-允许MO/TO交易
+     */
+    public final boolean allowMOTO;
+    /**
+     * 离线交易标志
+     * false-不允许离线交易、true-允许离线交易
+     */
+    public final boolean allOffline;
 
-    public final boolean allowIntegral; // 允许积分交易标志
-    public final boolean allowPaymentTransfer; // 允许代付交易标志
-    public final boolean allowCollections; // 允许代收交易标志
-    public final boolean useOper; // 终端使用操作员标志
-    public final boolean allowCNChar; // POS汉字类型
-    public final boolean supportEMV; // 标志终端是否支持EMV终端
-    public final boolean allowCardholderSelectApp; // 标志终端是否允许持卡人自己选择应用
-    public final boolean allowFallback; // 是否支持FALLBACK
+    /**
+     * 使用3DES加密标志
+     * false-不使用3DES加密、true-使用3DES加密
+     */
+    public final boolean useTripleDES;
+    /**
+     * 允许余额查询交易标志
+     * false-不允许余额查询交易、true-允许余额查询交易
+     */
+    public final boolean allowBalanceQuery;
+    /**
+     * 允许消费交易标志
+     * false-不允许消费交易、true-允许消费交易
+     */
+    public final boolean allowPay;
+    /**
+     * 允许预授权标志
+     * false-不允许预授权(及其完成)、true-允许预授权(及其完成)
+     */
+    public final boolean allowPreAuth;
+    /**
+     * 允许取现交易标志
+     * false-不允许取现交易、true-允许取现交易
+     */
+    public final boolean allowWithdrawals;
+    /**
+     * 允许调整交易标志
+     * false-不允许调整交易、true-允许调整交易
+     */
+    public final boolean allowAdjust;
+    /**
+     * 允许小费交易标志
+     * false-不允许小费交易、true-允许小费交易
+     */
+    public final boolean allowTip;
+    /**
+     * 允许分期付款交易标志
+     * false-不允许分期付款交易、true-允许分期付款交易
+     */
+    public final boolean allowInstallment;
 
-    public final boolean supportAppDownload; // 终端是否支持程序下装
-    public final boolean supportElectronicCash; // 终端是否支持PBOC电子现金（同时具有电子现金余额查询功能和电子现金交易明细查询）
-    public final boolean allowAssignLoad; // 指定账户圈存（同时具有电子现金余额查询功能和电子现金交易明细查询）
-    public final boolean allowUnspecifiedLoad; // 非指定账户圈存（同时具有电子现金余额查询功能和电子现金交易明细查询）
-    public final boolean allowFillBoardLoad; // 补登圈存（同时支持补登余额查询、电子现金余额查询功能和电子现金交易明细查询）
+    /**
+     * 允许积分交易标志
+     * false-不允许积分交易、true-允许积分交易
+     */
+    public final boolean allowIntegral;
+    /**
+     * 允许代付交易标志
+     * false-不允许代付交易、true-允许代付交易
+     */
+    public final boolean allowPaymentTransfer;
+    /**
+     * 允许代收交易标志
+     * false-不允许代收交易、true-允许代收交易
+     */
+    public final boolean allowCollections;
+    /**
+     * 终端使用操作员标志
+     * 本标志指示是否在本终端上使用操作员,false-不使用操作员、true-使用操作员
+     */
+    public final boolean useOper;
+    /**
+     * POS汉字类型
+     * 设置POS终端是否允许汉字,false-不允许汉字的POS终端、true-允许汉字的POS终端
+     */
+    public final boolean allowCNChar;
+    /**
+     * 标志终端是否支持EMV终端
+     * 设置POS终端是否EMV终端,false-不是EMV终端、true-是EMV终端
+     */
+    public final boolean supportEMV;
+    /**
+     * 标志终端是否允许持卡人自己选择应用
+     * 设置POS终端是否允许持卡人自己选择应用,false-不允许、true-允许
+     */
+    public final boolean allowCardholderSelectApp;
+    /**
+     * 是否支持FALLBACK
+     * false-不支持、true-支持
+     */
+    public final boolean allowFallback;
 
-    public final int checkoutMethod; // 结帐方式,POS结帐时 0:以主机为主、1:以终端为主、2:不平不结
+    /**
+     * 终端是否支持程序下装
+     * 设置POS终端是否支持程序下装,false-不支持、true-支持
+     */
+    public final boolean supportAppDownload;
+    /**
+     * 终端是否支持PBOC电子现金（同时具有电子现金余额查询功能和电子现金交易明细查询）
+     * false-不支持、true-支持
+     */
+    public final boolean supportElectronicCash;
+    /**
+     * 指定账户圈存（同时具有电子现金余额查询功能和电子现金交易明细查询）
+     * 终端是否支持,false-不支持、true-支持
+     */
+    public final boolean allowAssignLoad;
+    /**
+     * 非指定账户圈存（同时具有电子现金余额查询功能和电子现金交易明细查询）
+     * 终端是否支持,false-不支持、true-支持
+     */
+    public final boolean allowUnspecifiedLoad;
+    /**
+     * 补登圈存（同时支持补登余额查询、电子现金余额查询功能和电子现金交易明细查询）
+     * 终端是否支持,false-不支持、true-支持
+     */
+    public final boolean allowFillBoardLoad;
 
-    public final int maxOfflineCount; // POS中允许保存的未上送交易笔数
-    // 跳过一个备用标志
-    public final long maxOfflineAmt; // 离线交易金额上限
-    public final int maxAdjustAmtPercentage; // 调整交易上限
-    public final int maxTip; // 小费交易上限
-    public final String currency1; // POS终端允许的第一个交易币种
-    public final String currency2; // POS终端允许的第二个交易币种
-    public final String currency3; // POS终端允许的第三个交易币种
-    public final String prefixOfDefaultPhone; // 电话拨号前缀
-    public final String defaultPhone; // 缺省电话号码
-    public final String prefixOfSparePhone; // 备用电话前缀
-    public final String sparePhone; // 备用电话号码
-    public final int billPrintCount; // 票据打印份数
-    public final String plant1; // 分期付款计划ID1
-    public final String plant2; // 分期付款计划ID2
-    public final String plant3; // 分期付款计划ID3
-    public final String plant4; // 分期付款计划ID4
-    public final String plant5; // 分期付款计划ID5
-    public final String plant6; // 分期付款计划ID6
-    public final String plant7; // 分期付款计划ID7
-    public final String plant8; // 分期付款计划ID8
-    public final String plant9; // 分期付款计划ID9
-    public final int timeout; // 超时时间
-    public final String enMerName; // 商户名称的英文(拼音)简称
-    public final String cnMerName; // 商户名称的中文简称
+    /**
+     * 结帐方式
+     * POS结帐时 0:以主机为主、1:以终端为主、2:不平不结
+     */
+    public final int checkoutMethod;
+
+    /**
+     * POS中允许保存的未上送交易笔数
+     * 值的范围是00-99，如果为00，表示允许保存0笔交易（每笔脱机交易完成后必须立即上送）
+     * 04，表示允许POS中保存4笔未上送交易，如果第5笔是脱机交易，则必须在脱机交易完成后，将所有未上送交易上送
+     */
+    public final int maxOfflineCount;
+    /**
+     * 离线交易金额上限
+     * 离线交易时最大允许交易金额
+     */
+    public final long maxOfflineAmt;
+    /**
+     * 调整交易上限
+     * 调整交易金额最大允许的值，值为原交易金额的百分比。
+     * 例如，如果原交易金额为300元，设置的上限值为200，则调整交易最多可以将交易金额调整为900元。
+     * 不需要检查下限
+     */
+    public final int maxAdjustAmtPercentage;
+    /**
+     * 小费交易上限
+     * 小费交易金额最大允许的值，值为原交易金额的百分比。
+     * 例如，如果原交易金额为300元，设置的上限值为20，则小费交易最大可以将交易金额调整为360元，即小费金额最多可以为60元。
+     * 不需要检查下限。
+     */
+    public final int maxTip;
+    /**
+     * 交易币种1
+     * POS终端允许的第一个交易币种
+     */
+    public final String currency1;
+    /**
+     * 交易币种2
+     * POS终端允许的第二个交易币种
+     */
+    public final String currency2;
+    /**
+     * 交易币种3
+     * POS终端允许的第三个交易币种
+     */
+    public final String currency3;
+    /**
+     * 电话拨号前缀
+     * 拨号电话号码的前缀号码
+     */
+    public final String prefixOfDefaultPhone;
+    /**
+     * 缺省电话号码
+     * 要求POS终端正常交易时所拨的缺省电话号码。
+     * POS终端初始安装时会设置另一个初始电话号码，并在第一次拨号的时候拨此初始电话号码。
+     * 第一次拨号后POS将从主机下装参数，其中就有本域的电话号码。
+     * POS然后将此电话号码设置为缺省的电话号码，即正常交易所使用的电话号码。
+     */
+    public final String defaultPhone;
+    /**
+     * 备用电话前缀
+     * 备用电话号码的前缀号码
+     */
+    public final String prefixOfSparePhone;
+    /**
+     * 备用电话号码
+     * POS将从主机下装参数，将此电话号码设置为备用电话号码。
+     * 如果正常交易过程中拨号不通，POS可使用此备用电话号码进行拨号。
+     */
+    public final String sparePhone;
+    /**
+     * 票据打印份数
+     * POS签购单打印的份数
+     */
+    public final int billPrintCount;
+    /**
+     * 分期付款计划ID1
+     * 缺省的分期付款计划ID
+     */
+    public final String plant1;
+    /**
+     * 分期付款计划ID2
+     * 允许的分期付款计划ID2
+     */
+    public final String plant2;
+    /**
+     * 分期付款计划ID3
+     * 允许的分期付款计划ID3
+     */
+    public final String plant3;
+    /**
+     * 分期付款计划ID4
+     * 允许的分期付款计划ID4
+     */
+    public final String plant4;
+    /**
+     * 分期付款计划ID5
+     * 允许的分期付款计划ID5
+     */
+    public final String plant5;
+    /**
+     * 分期付款计划ID6
+     * 允许的分期付款计划ID6
+     */
+    public final String plant6;
+    /**
+     * 分期付款计划ID7
+     * 允许的分期付款计划ID7
+     */
+    public final String plant7;
+    /**
+     * 分期付款计划ID8
+     * 允许的分期付款计划ID8
+     */
+    public final String plant8;
+    /**
+     * 分期付款计划ID9
+     * 允许的分期付款计划ID9
+     */
+    public final String plant9;
+    /**
+     * 超时时间
+     * POS超时时间，由IST设置
+     */
+    public final int timeout;
+    /**
+     * 商户名称的英文(拼音)简称
+     * 用于交易成功后打印在签购单上
+     */
+    public final String enMerName;
+    /**
+     * 商户名称的中文简称
+     * 用于交易成功后打印在签购单上
+     */
+    public final String cnMerName;
 
     public Block01(String raw) {
         byte[] flag = ByteBuffer.allocate(8).putLong(Long.parseLong(raw.substring(0, 8), 16) << 32).array();
