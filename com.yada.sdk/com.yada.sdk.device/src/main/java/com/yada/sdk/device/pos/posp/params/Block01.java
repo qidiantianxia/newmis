@@ -1,6 +1,7 @@
 package com.yada.sdk.device.pos.posp.params;
 
 import java.nio.ByteBuffer;
+import java.nio.charset.Charset;
 
 /**
  * POS下装参数---终端基本参数--参数块第01块处理
@@ -12,7 +13,8 @@ public class Block01 {
      * 参数长度的数组
      * 前26个参数是由32个bit组成用8个16进制数来表示，数组从第27个参数开始记录参数的长度
      */
-    private static final int[] paramLengths = new int[]{1, 2, 1, 12, 4, 4, 3, 3, 3, 4, 16, 4, 16, 2, 4, 4, 4, 4, 4, 4, 4, 4, 4, 2, 25, 20};
+    private static final int[] paramLengths = new int[]{1, 2, 1, 12, 4, 4, 3, 3, 3, 4, 16, 4, 16, 2, 4, 4, 4, 4, 4, 4, 4, 4, 4, 2, 50, 12, 12, 1};
+    private static final Charset charset = Charset.forName("GBK");
 
     /**
      * 终端是否使用MAC标志
@@ -286,7 +288,7 @@ public class Block01 {
     public final String plant9;
     /**
      * 超时时间
-     * POS超时时间，由IST设置
+     * POS超时时间，由IST设置，单位为秒
      */
     public final int timeout;
     /**
@@ -299,6 +301,53 @@ public class Block01 {
      * 用于交易成功后打印在签购单上
      */
     public final String cnMerName;
+
+    /**
+     * 免密限额
+     * 用于银联卡非接快速小额交易的免密交易限额，如果超过该限额，则不允许发起免密交易。
+     * 下载的参数中没有非接参数，设置默认值为0
+     */
+    public final long nonPinLimit;
+
+    /**
+     * 免签限额
+     * 用于银联卡非接快速小额交易的免签交易限额，如果超过该限额，则终端不允许交易凭证免除签名。
+     * 下载的参数中没有非接参数，设置默认值为0
+     */
+    public final long nonSignatureLimit;
+
+    /**
+     * 非接快速启用标识
+     * 标识终端是否可以使用银联卡的非接快速业务功能，对于银联卡只有打开该标识，才允许使用免密功能；
+     * false-表示关闭,true-表示启用
+     * 下载的参数中没有非接参数，设置默认值为false
+     */
+    public final boolean contactLessStartFlag;
+
+    /**
+     * BIN表B启用参数
+     * 标识银联卡非接快速免密免签业务是否处于试点阶段二，即贷记卡实现全面支持，但此时境内借记卡尚未实现全面支持，借记卡依然根据BIN表B判断。
+     * true-表示启用BIN表B，借记卡根据BIN表B来决定卡是否允许使用非接快速业务
+     * false-表示不启用BIN表B，即所有银联非接芯片卡都可以支持非接快速业务
+     * 下载的参数中没有非接参数，设置默认值为false
+     */
+    public final boolean binTableStartParam;
+
+    /**
+     * CDCVM参数
+     * 终端使用此数据元作为对于银联卡是否将卡片CDCVM执行情况作为免密的判断条件。
+     * false-关闭、true-启用
+     * 下载的参数中没有非接参数，设置默认值为false
+     */
+    public final boolean cdcvmParam;
+
+    /**
+     * 免签标识
+     * 终端使用此数据元作为对于银联卡是否支持交易凭证免签处理的判断条件
+     * false-关闭、true-启用
+     * 下载的参数中没有非接参数，设置默认值为false
+     */
+    public final boolean nonSignatureFlag;
 
     public Block01(String raw) {
         byte[] flag = ByteBuffer.allocate(8).putLong(Long.parseLong(raw.substring(0, 8), 16) << 32).array();
@@ -363,7 +412,34 @@ public class Block01 {
         plant8 = additionInfo.substring(position, position += paramLengths[21]);
         plant9 = additionInfo.substring(position, position += paramLengths[22]);
         timeout = Integer.parseInt(additionInfo.substring(position, position += paramLengths[23]));
-        enMerName = additionInfo.substring(position, position += paramLengths[24]).trim();
-        cnMerName = additionInfo.substring(position, position + paramLengths[25]).trim();
+
+        // 一个中文占两个字节，先转成字节在截取50个
+        byte[] rawBytes = additionInfo.getBytes(charset);
+        String merName = new String(rawBytes, position, paramLengths[24], charset).trim();
+        position += paramLengths[24];
+        // 文档标明商户名称的长度是50，前25为英文、后20为中文简称
+        enMerName = merName.substring(0, 25).trim();
+        cnMerName = merName.substring(25).trim();
+
+        // 第一块的参数长度大于171，说明带的有非接的参数
+        if (raw.length() > 171) {
+            nonPinLimit = Long.parseLong(new String(rawBytes, position, paramLengths[25], charset));
+            position += paramLengths[25];
+            nonSignatureLimit = Long.parseLong(new String(rawBytes, position, paramLengths[26], charset));
+            position += paramLengths[26];
+            long contactLess = Long.parseLong(new String(rawBytes, position, paramLengths[27], charset), 16);
+            contactLessStartFlag = (contactLess & 0x08) != 0;
+            binTableStartParam = (contactLess & 0x04) != 0;
+            cdcvmParam = (contactLess & 0x02) != 0;
+            nonSignatureFlag = (contactLess & 0x01) != 0;
+        } else {
+            // 没有非接参数，设置默认值
+            nonPinLimit = 0;
+            nonSignatureLimit = 0;
+            contactLessStartFlag = false;
+            binTableStartParam = false;
+            cdcvmParam = false;
+            nonSignatureFlag = false;
+        }
     }
 }

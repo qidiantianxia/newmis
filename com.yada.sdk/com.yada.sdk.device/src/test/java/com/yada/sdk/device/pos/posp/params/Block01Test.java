@@ -10,7 +10,8 @@ public class Block01Test {
 
     @Before
     public void before() {
-        String param01 = "6dffff80000000000010000001500150156156156    1554                1554            01IP01IP02IP03IP04IP05IP06IP07IP08IP0950WEE                      POS 厂商测试商户          ";
+        // TODO 暂时没有取到非接的参数，先手动添加上非接的参数做测试，后续拿到非接的参数在补全
+        String param01 = "6dffff80000000000010000001500150156156156    1554                1554            01IP01IP02IP03IP04IP05IP06IP07IP08IP0950WEE                      POS 厂商测试商户         000000010000000000010000A";
         block01 = new Block01(param01);
     }
 
@@ -70,5 +71,11 @@ public class Block01Test {
         Assert.assertEquals(50, block01.timeout);
         Assert.assertEquals("WEE", block01.enMerName);
         Assert.assertEquals("POS 厂商测试商户", block01.cnMerName);
+        Assert.assertEquals(10000, block01.nonPinLimit);
+        Assert.assertEquals(10000, block01.nonSignatureLimit);
+        Assert.assertTrue(block01.contactLessStartFlag);
+        Assert.assertFalse(block01.binTableStartParam);
+        Assert.assertTrue(block01.cdcvmParam);
+        Assert.assertFalse(block01.nonSignatureFlag);
     }
 }
