@@ -121,5 +121,25 @@ public interface IEncryption {
 	 * @author ZhangYaMin
 	 */
 	public String getZakMac(String lmkZak, String macData);
-	
+	/***
+	 * 获取DEK密钥对
+	 * 指令 A0	模式1 密钥类型000 密钥方案LMK/ZMK  X
+	 *
+	 * @param lmkZmk
+	 *            受本地主密钥（LMK）保护的区域密钥（ZMK）
+	 * @return [DekZMK,DekLMK,DekKCV]
+	 * @author TX
+	 */
+	public String[] getDekKeyArray(String lmkZmk);
+	/***
+	 * 获取ZEK密钥对
+	 * 指令 FI	模式1 密钥类型000 密钥方案LMK/ZMK  X 分隔符 :
+	 *
+	 * @param lmkDek
+	 *            受本地主密钥（LMK）保护的设备主密钥（DEK）
+	 * @return [ZekDEK,ZekLMK,ZekKCV]
+	 * @author TX
+	 */
+	public String[] getZekKeyArray(String lmkDek);
+
 }
