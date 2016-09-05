@@ -18,6 +18,18 @@ public class EncryptionMachine implements IEncryption {
     private String messageHead = "-------";
     private String RESP_CODE_OK = "00";
 
+
+    //报文头长度
+    private final int headIndex = messageHead.length() + 4;
+    //截取字段一Z类型索引16位密钥
+    private final int oneParagraphZIndex = headIndex + 8 * 2;
+    //截取字段二Z类型索引
+    private final int twoParagraphZIndex = oneParagraphZIndex + 8 * 2;
+    //截取字段一X类型索引
+    private final int oneParagraphXIndex = headIndex + 1 + 16 * 2;
+    //截取字段二X类型索引
+    private final int twoParagraphXIndex = oneParagraphXIndex + 1 + 16 * 2;
+
     public EncryptionMachine(String serverIp, int port, String lmkZmk) {
         this.lmkZmk = lmkZmk;
         this.endPoint = new InetSocketAddress(serverIp, port);
@@ -399,79 +411,168 @@ public class EncryptionMachine implements IEncryption {
         sb.append(type).append(lmkZmk).append(type);
         String respMessage = send(sb.toString());
 
-        return unpackA0A1(type, type, respMessage.substring(messageHead.length()).getBytes());
+        int dataIndex = messageHead.length() + 2 + 2;
 
+        String respCode = respMessage.substring(messageHead.length() + 2, dataIndex);
+        if (!respCode.equals("00")) {
+            throw new RuntimeException("加密机返回失败！" + respCode);
+        }
+        if (lmkZmk.length() == 16) {
+            return unpackZ(respMessage, true);
+        } else {
+            return unpackX(respMessage, true);
+        }
     }
 
 
     public String[] getZekKeyArray(String lmkDek) {
-        return null;
+        StringBuilder sb = new StringBuilder();
+        // 1.消息头 2.命令代码 标志(1位) 3.ZMK
+        sb.append(messageHead).append("FI").append("0").append("X+" + lmkDek);
+        // 4.分隔符 ;5.Key scheme LMK  6.Key scheme ZMK 7.密钥校验值
+        sb.append(";").append("X").append("X").append("0");
+
+        String respMessage = send(sb.toString());
+
+
+        String respCode = respMessage.substring(messageHead.length() + 2, headIndex);
+        if (!respCode.equals("00")) {
+            throw new RuntimeException("加密机返回失败！" + respCode);
+        }
+        return unpackX(respMessage, true);
+    }
+
+    @Override
+    public String[] getTmkKeyArray(String zmkTmk, String lmkZmk) {
+        StringBuilder sb = new StringBuilder();
+        // 1.消息头 2.命令代码 3.密钥类型（3位）
+        sb.append(messageHead).append("A6").append("000");
+        // 4. ZMK 5. ZMK加密过的密钥 6.Key scheme LMK
+        sb.append("X" + lmkZmk).append("X" + zmkTmk).append("X");
+
+        String respMessage = send(sb.toString());
+
+        String respCode = respMessage.substring(messageHead.length() + 2, headIndex);
+        if (!respCode.equals("00")) {
+            throw new RuntimeException("加密机返回失败！" + respCode);
+        }
+        return unpackX(respMessage, false);
+    }
+
+    @Override
+    public String getDekTmk(String lmkDek, String lmkTmk) {
+        StringBuilder sb = new StringBuilder();
+        // 1.消息头 2.命令代码 3.密钥类型（3位）
+        sb.append(messageHead).append("A8").append("000");
+        // 4. ZMK 5. LMK加密过的密钥 6.Key scheme ZMK
+        sb.append("X" + lmkDek).append("X" + lmkTmk).append("X");
+
+        String respMessage = send(sb.toString());
+
+        String respCode = respMessage.substring(messageHead.length() + 2, headIndex);
+        if (!respCode.equals("00")) {
+            throw new RuntimeException("加密机返回失败！" + respCode);
+        }
+        return unpackX(respMessage, false)[0];
+    }
+
+    @Override
+    public String getDataByDecryption(String zekData, String lmkZek) {
+        StringBuilder sb = new StringBuilder();
+        // 1.消息头 2.命令代码 3,消息块编号0 4,加解密类型1 5.算法1 6.密钥类型 0(zek)
+        sb.append(messageHead).append("E0").append("0110");
+        // 7.ZEK 8,导入数据结构 1  9.导出数据结构 1 10,填充模式0 11,填充字符 0000 12. 填充计数类型0
+        sb.append("X" + lmkZek).append("11000000");
+        //  13 加密数据长度 14加密数据
+        String lenStrHex = Integer.toHexString(zekData.getBytes().length);
+        lenStrHex = StringUtils.leftPad(lenStrHex, 3, "0");
+        sb.append(lenStrHex).append(lenStrHex.getBytes());
+        String respMessage = send(sb.toString());
+
+        String respCode = respMessage.substring(messageHead.length() + 2, headIndex);
+        if (!respCode.equals("00")) {
+            throw new RuntimeException("加密机返回失败！" + respCode);
+        }
+        String result = null;
+        int index;
+        String outputDataFormat = respMessage.substring(headIndex, headIndex + 1);
+        String msgLen = respMessage.substring(headIndex, headIndex + 1 + 3);
+        index = headIndex + 1 + 3;
+        int len = Integer.parseInt("0" + msgLen, 16);
+        if (outputDataFormat.equals("0")) {//binary
+            result = respMessage.substring(index, index + len);
+        } else if (outputDataFormat.equals("1")) {//expend hex
+            result = respMessage.substring(index, index + len * 2);
+        }
+        return result;
+    }
+
+    @Override
+    public String getZekPwd(String mtmsPwd, String lmkZek) {
+        StringBuilder sb = new StringBuilder();
+        // 1.消息头 2.命令代码 3,消息块编号0 4,加解密类型0 5.算法1 6.密钥类型 0(zek)
+        sb.append(messageHead).append("E0").append("0010");
+        // 7.ZEK 8,导入数据结构 1  9.导出数据结构 1 10,填充模式0 11,填充字符 0000 12. 填充计数类型0
+        sb.append("X" + lmkZek).append("11000000");
+        //  13 加密数据长度 14加密数据
+        String lenStrHex = Integer.toHexString(mtmsPwd.getBytes().length);
+        lenStrHex = StringUtils.leftPad(lenStrHex, 3, "0");
+        sb.append(lenStrHex).append(lenStrHex.getBytes());
+        String respMessage = send(sb.toString());
+
+        String respCode = respMessage.substring(messageHead.length() + 2, headIndex);
+        if (!respCode.equals("00")) {
+            throw new RuntimeException("加密机返回失败！" + respCode);
+        }
+        String result = null;
+        int index;
+        String outputDataFormat = respMessage.substring(headIndex, headIndex + 1);
+        String msgLen = respMessage.substring(headIndex, headIndex + 1 + 3);
+        index = headIndex + 1 + 3;
+        int len = Integer.parseInt("0" + msgLen, 16);
+        if (outputDataFormat.equals("0")) {//binary
+            result = respMessage.substring(index, index + len);
+        } else if (outputDataFormat.equals("1")) {//expend hex
+            result = respMessage.substring(index, index + len * 2);
+        }
+        return result;
     }
 
 
     /**
-     * 解析加密机返回内容
+     * 解析加密机Z类型(16长度)内容
      *
-     * @param lmkSolutionType LMK下加密密钥的方案。
-     * @param zmkSolutionType 加密输出密钥的密钥方案
-     * @param b               返回数据
-     * @return
+     * @param data 返回数据
+     * @return [第一段数据, 第二段数据(如不包含第二段密钥则为空, kcv]
      */
-    public String[] unpackA0A1(String lmkSolutionType, String zmkSolutionType, byte[] b) {
-        int offset = 0;
-        offset = offset + 2;//跳过命令代码
-        String errorCode = new String(ArrayUtils.subarray(b, offset, offset + 2));
-        offset = offset + 2;
-        if (!RESP_CODE_OK.equals(errorCode)) {
-            throw new RuntimeException("加密机返回失败！" + errorCode);
-        }
-        String keyEncryptByLmk = "";
-        String keyEncryptByZmk = "";
-        String[] returnResult;
-        switch (lmkSolutionType) {
-            case "Z":
-                keyEncryptByLmk = new String(ArrayUtils.subarray(b, offset, offset + 8 * 2));
-                offset = offset + 8 * 2;
-                break;
-            case "X":
-            case "U":
-                keyEncryptByLmk = new String(ArrayUtils.subarray(b, offset, offset + 1 + 16 * 2)).substring(1);
-                offset = offset + 1 + 16 * 2;
-                break;
-            case "Y":
-            case "T":
-                keyEncryptByLmk = new String(ArrayUtils.subarray(b, offset, offset + 1 + 24 * 2)).substring(1);
-                offset = offset + 1 + 24 * 2;
-                break;
-            default:
-                break;
-        }
-        if (zmkSolutionType != null) {
-            switch (zmkSolutionType) {
-                case "Z":
-                    keyEncryptByZmk = new String(ArrayUtils.subarray(b, offset, offset + 8 * 2));
-                    offset = offset + 8 * 2;
-                    break;
-                case "X":
-                case "U":
-                    keyEncryptByZmk = new String(ArrayUtils.subarray(b, offset, offset + 1 + 16 * 2)).substring(1);
-                    offset = offset + 1 + 16 * 2;
-                    break;
-                case "Y":
-                case "T":
-                    offset = offset + 1;
-                    keyEncryptByZmk = new String(ArrayUtils.subarray(b, offset, offset + 1 + 24 * 2)).substring(1);
-                    offset = offset + 1 + 24 * 2;
-                    break;
-                default:
-                    break;
-            }
-
-            returnResult = new String[]{keyEncryptByLmk, keyEncryptByZmk, new String(ArrayUtils.subarray(b, offset, offset + 16))};
+    public String[] unpackZ(String data, boolean isContainTwoKey) {
+        String[] returnoneKey = new String[3];
+        returnoneKey[0] = data.substring(headIndex, oneParagraphZIndex);
+        if (isContainTwoKey) {
+            returnoneKey[1] = data.substring(oneParagraphZIndex, twoParagraphZIndex);
+            returnoneKey[2] = data.substring(twoParagraphZIndex, twoParagraphZIndex + 16);
         } else {
-            returnResult = new String[]{keyEncryptByLmk, new String(ArrayUtils.subarray(b, offset, offset + 16))};
+            returnoneKey[1] = data.substring(oneParagraphZIndex, oneParagraphZIndex + 16);
         }
-        return returnResult;
+        return returnoneKey;
+    }
+
+    /**
+     * 解析加密机X类型(32长度)内容
+     *
+     * @param data 返回数据
+     * @return [第一段数据, 第二段数据(如不包含第二段密钥则为空, kcv]
+     */
+    public String[] unpackX(String data, boolean isContainTwoKey) {
+        String[] returnoneKey = new String[3];
+        returnoneKey[0] = data.substring(headIndex, oneParagraphXIndex).substring(1);
+        if (isContainTwoKey) {
+            returnoneKey[1] = data.substring(oneParagraphXIndex, twoParagraphXIndex).substring(1);
+            returnoneKey[1] = data.substring(twoParagraphXIndex, twoParagraphXIndex + 16);
+        } else {
+            returnoneKey[1] = data.substring(oneParagraphXIndex, oneParagraphXIndex + 16);
+        }
+        return returnoneKey;
     }
 
 }
