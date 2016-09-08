@@ -111,7 +111,7 @@ public interface IEncryption {
      * 指令 A0	模式1 密钥类型000 密钥方案LMK/ZMK  X
      *
      * @param lmkZmk 受本地主密钥（LMK）保护的区域密钥（ZMK）
-     * @return [DekZMK, DekLMK, DekKCV]
+     * @return [DekLMK, DekZMK,DekKCV]
      * @author TX
      */
     public String[] getDekKeyArray(String lmkZmk);
