@@ -502,16 +502,16 @@ public class EncryptionMachine implements IEncryption {
     }
 
     @Override
-    public String getZekPwd(String mtmsPwd, String lmkZek) {
+    public String getDataByEncryption(String data, String lmkZek) {
         StringBuilder sb = new StringBuilder();
         // 1.消息头 2.命令代码 3,消息块编号0 4,加解密类型0 5.算法1 6.密钥类型 0(zek)
         sb.append(messageHead).append("E0").append("0010");
         // 7.ZEK 8,导入数据结构 1  9.导出数据结构 1 10,填充模式0 11,填充字符 0000 12. 填充计数类型0
         sb.append("X" + lmkZek).append("111FFFF1");
         //  13 加密数据长度 14加密数据
-        String lenStrHex = Integer.toHexString(mtmsPwd.length()/2);
+        String lenStrHex = Integer.toHexString(data.length()/2);
         lenStrHex = StringUtils.leftPad(lenStrHex, 3, "0");
-        sb.append(lenStrHex).append(mtmsPwd);
+        sb.append(lenStrHex).append(data);
         String  respMessage = send(sb.toString());
 
         String respCode = respMessage.substring(9,headIndex);

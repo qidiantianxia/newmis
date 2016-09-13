@@ -118,7 +118,7 @@ public interface IEncryption {
 
     /***
      * 获取ZEK密钥对
-     * 指令 FI	标志0  分隔符 :
+     * 指令 FI	标志0  分隔符 ;
      *
      * @param lmkDek 受本地主密钥（LMK）保护的设备主密钥（DEK）
      * @return [ZekDEK, ZekLMK, ZekKCV]
@@ -128,18 +128,18 @@ public interface IEncryption {
 
     /***
      * 获取TMK密钥对密钥对
-     * /指令 A6 密钥类型 000 密钥方案LMK/ZMK  X
-     *
+     * 指令 A6 密钥类型 000 密钥方案LMK/ZMK  X
+     *d
      * @param zmkTmk 受区域主密钥（ZMK）保护的终端主密钥（TMK）
      * @param lmkZmk 受本地主密钥（LMK）保护的区域主密钥（ZMK）
-     * @return [zmkTmk, kcv]
+     * @return [lmkTmk, kcv]
      * @author TX
      */
     public String[] getTmkKeyArray(String zmkTmk, String lmkZmk);
 
     /***
      * 使用设备主密钥保护终端主秘钥
-     * /指令 A8	密钥类型000 密钥方案LMK/ZMK  X
+     * 指令 A8	密钥类型000 密钥方案LMK/ZMK  X
      *
      * @param lmkDek 受本地主密钥（LMK）保护的设备主密钥（DEK）
      * @param lmkTmk 受本地主密钥（LMK）保护的终端主密钥（TMK）
@@ -150,7 +150,7 @@ public interface IEncryption {
 
     /***
      * 解密通讯密钥加密的数据
-     * 指令 E0	加解密类型 1 密钥类型0
+     * 指令 E0	加解密类型 1 密钥类型0 数据格式 1
      *
      * @param zekData 受通讯主密钥（LMK）保护的数据
      * @param lmkZek  受本地主密钥（LMK）保护的终端主密钥（TMK）
@@ -160,14 +160,14 @@ public interface IEncryption {
     public String getDataByDecryption(String zekData, String lmkZek);
 
     /***
-     * 通过Zek保护mtms客户端密码
-     * 指令 E0	加解密类型 0 密钥类型0
+     * 通过Zek保护数据
+     * 指令 E0	加解密类型 0 密钥类型0 数据格式 1
      *
-     * @param mtmsPwd 受本地主密钥（LMK）保护的设备主密钥（DEK）
-     * @param lmmkZek 受本地主密钥（LMK）保护的通讯主密钥（ZEK）
+     * @param data 数据
+     * @param lmkZek 受本地主密钥（LMK）保护的通讯主密钥（ZEK）
      * @return
      * @author TX
      */
-    public String getZekPwd(String mtmsPwd, String lmmkZek);
+    public String getDataByEncryption(String data, String lmkZek);
 
 }

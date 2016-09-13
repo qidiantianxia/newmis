@@ -26,13 +26,12 @@ public class HSMTest {
         ip = "22.188.41.19";
         port = 8;
         lmkZmk = "8E54EEECCC1EB00E779FCF84AC794C7C";
-        lmkDek = "1FB9F63A7159E4BF5FC795E23F168E5E";
+        lmkDek = "B5A754C1926BF597536671364E597C65";
         zmkTmk = "620D2892F9189CA30BDA03DADB6B1B88";
         lmkTmk = "B6F0F9262F4C535DC45348A551EE419F";
-        lmkZek = "AD8D264E6F9CCA2E1284061F57F1B003";
+        lmkZek = "EC1F355EEDF8A75544150A49FC106A74";
         sposPWD = "12345678";
         key = "2DB6ECBE24CBECC8";
-
 
     }
 
@@ -40,7 +39,7 @@ public class HSMTest {
     public void GetDekLmk() {
         EncryptionMachine e = new EncryptionMachine(ip, port, null);
         for (String temp : e.getDekKeyArray(lmkZmk)) {
-            System.out.println(temp);
+            System.out.println("---"+temp);
         }
     }
 
@@ -76,7 +75,7 @@ public class HSMTest {
     @Test
     public void GetZekPwd() {
         EncryptionMachine e = new EncryptionMachine(ip, port, null);
-        System.out.println(e.getZekPwd(sposPWD, lmkZek));
+        System.out.println(e.getDataByEncryption(sposPWD, lmkZek));
     }
 }
 
