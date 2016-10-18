@@ -1,5 +1,6 @@
 package com.yada.sdk.device.encryption;
 
+import java.io.IOException;
 import java.nio.ByteBuffer;
 
 public interface IEncryption {
@@ -111,7 +112,7 @@ public interface IEncryption {
      * 指令 A0	模式1 密钥类型000 密钥方案LMK/ZMK  X
      *
      * @param lmkZmk 受本地主密钥（LMK）保护的区域密钥（ZMK）
-     * @return [DekLMK, DekZMK,DekKCV]
+     * @return [LmKDek, ZmKDek,DekKCV]
      * @author TX
      */
     public String[] getDekKeyArray(String lmkZmk);
@@ -121,7 +122,7 @@ public interface IEncryption {
      * 指令 FI	标志0  分隔符 ;
      *
      * @param lmkDek 受本地主密钥（LMK）保护的设备主密钥（DEK）
-     * @return [ZekDEK, ZekLMK, ZekKCV]
+     * @return [DekZek, LmkZek, ZekKCV]
      * @author TX
      */
     public String[] getZekKeyArray(String lmkDek);
@@ -149,25 +150,25 @@ public interface IEncryption {
     public String getDekTmk(String lmkDek, String lmkTmk);
 
     /***
-     * 解密通讯密钥加密的数据
+     * 解密通讯密钥加密的数据(二进制数据)
      * 指令 E0	加解密类型 1 密钥类型0 数据格式 1
      *
-     * @param zekData 受通讯主密钥（LMK）保护的数据
-     * @param lmkZek  受本地主密钥（LMK）保护的终端主密钥（TMK）
+     * @param zekData 受通讯主密钥（ZEK）保护的数据
+     * @param lmkZek  受本地主密钥（LMK）保护的终端主密钥（ZEK）
      * @return data
      * @author TX
      */
-    public String getDataByDecryption(String zekData, String lmkZek);
+    public byte[] getDataByDecryption(byte[] zekData, String lmkZek) throws IOException;
 
     /***
-     * 通过Zek保护数据
+     * 通过Zek保护数据(二进制数据)
      * 指令 E0	加解密类型 0 密钥类型0 数据格式 1
      *
      * @param data 数据
      * @param lmkZek 受本地主密钥（LMK）保护的通讯主密钥（ZEK）
-     * @return
+     * @return 加密数据
      * @author TX
      */
-    public String getDataByEncryption(String data, String lmkZek);
+    public byte[] getDataByEncryption(byte[] data, String lmkZek) throws IOException;
 
 }
