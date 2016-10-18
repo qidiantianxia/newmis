@@ -1,15 +1,14 @@
 package com.yada.sdk.device.encryption.hsm;
 
-import java.io.IOException;
-import java.net.InetSocketAddress;
-import java.nio.ByteBuffer;
-
 import com.payneteasy.tlv.HexUtil;
 import com.yada.sdk.device.encryption.IEncryption;
 import com.yada.sdk.net.FixLenPackageSplitterFactory;
 import com.yada.sdk.net.TcpClient;
-import org.apache.commons.lang3.ArrayUtils;
 import org.apache.commons.lang3.StringUtils;
+
+import java.io.IOException;
+import java.net.InetSocketAddress;
+import java.nio.ByteBuffer;
 
 public class EncryptionMachine implements IEncryption {
 
@@ -42,19 +41,7 @@ public class EncryptionMachine implements IEncryption {
 
     private String send(String reqMessage) {
         ByteBuffer reqBuffer = ByteBuffer.wrap(reqMessage.getBytes());
-        TcpClient client = new TcpClient(endPoint,
-                new FixLenPackageSplitterFactory(2, false), 2000);
-        try {
-            client.open();
-            ByteBuffer respBuffer = client.send(reqBuffer);
-            return new String(respBuffer.array());
-        } catch (IOException e) {
-            throw new RuntimeException(e);
-        } finally {
-            if (client.isOpen()) {
-                client.close();
-            }
-        }
+        return send(reqBuffer);
     }
 
     // 用于直接发送字节
@@ -65,23 +52,6 @@ public class EncryptionMachine implements IEncryption {
             client.open();
             ByteBuffer respBuffer = client.send(reqBuffer);
             return new String(respBuffer.array());
-        } catch (IOException e) {
-            throw new RuntimeException(e);
-        } finally {
-            if (client.isOpen()) {
-                client.close();
-            }
-        }
-    }
-    // 发送字节
-    private byte[] sendBytes(String reqMessage) {
-        ByteBuffer reqBuffer = ByteBuffer.wrap(reqMessage.getBytes());
-        TcpClient client = new TcpClient(endPoint,
-                new FixLenPackageSplitterFactory(2, false), 2000);
-        try {
-            client.open();
-            ByteBuffer respBuffer = client.send(reqBuffer);
-            return respBuffer.array();
         } catch (IOException e) {
             throw new RuntimeException(e);
         } finally {
@@ -110,9 +80,8 @@ public class EncryptionMachine implements IEncryption {
         if (zmkTmk.length() != 16) {
             startIndex = startIndex + 1;
         }
-        String lmkTmk = respMessage.substring(startIndex,
+        return respMessage.substring(startIndex,
                 startIndex + zmkTmk.length());
-        return lmkTmk;
     }
 
     @Override
@@ -138,9 +107,8 @@ public class EncryptionMachine implements IEncryption {
         if (tmkTak.length() != 16) {
             startIndex = startIndex + 1;
         }
-        String lmkTak = respMessage.substring(startIndex,
+        return respMessage.substring(startIndex,
                 startIndex + tmkTak.length());
-        return lmkTak;
     }
 
     @Override
@@ -166,9 +134,8 @@ public class EncryptionMachine implements IEncryption {
         if (tmkTpk.length() != 16) {
             startIndex = startIndex + 1;
         }
-        String lmkTpk = respMessage.substring(startIndex,
+        return respMessage.substring(startIndex,
                 startIndex + tmkTpk.length());
-        return lmkTpk;
     }
 
     @Override
@@ -199,8 +166,7 @@ public class EncryptionMachine implements IEncryption {
         sb.append("");
         sb.append("");
         respMessage = send(sb.toString());
-        String tmkPin = respMessage.substring(startIndex, startIndex + 8 + 8);
-        return tmkPin;
+        return respMessage.substring(startIndex, startIndex + 8 + 8);
     }
 
     @Override
@@ -263,9 +229,8 @@ public class EncryptionMachine implements IEncryption {
         if (!respCode.equals("00")) {
             throw new RuntimeException("加密机返回失败！" + respCode);
         }
-        String lmkPin = respMessage.substring(messageHead.length() + 2 + 2);
 
-        return lmkPin;
+        return respMessage.substring(messageHead.length() + 2 + 2);
     }
 
     @Override
@@ -287,9 +252,8 @@ public class EncryptionMachine implements IEncryption {
             throw new RuntimeException("加密机返回失败！" + respCode);
         }
         //去F
-        String unClassifiedPin = respMessage.substring(messageHead.length() + 2 + 2, messageHead.length() + 2 + 2 + 6).replace("F", "");
 
-        return unClassifiedPin;
+        return respMessage.substring(messageHead.length() + 2 + 2, messageHead.length() + 2 + 2 + 6).replace("F", "");
     }
 
     @Override
@@ -311,9 +275,8 @@ public class EncryptionMachine implements IEncryption {
         if (!respCode.equals("00")) {
             throw new RuntimeException("加密机返回失败！" + respCode);
         }
-        String pinKeyInfo = respMessage.substring(messageHead.length() + 2 + 2);
 
-        return pinKeyInfo;
+        return respMessage.substring(messageHead.length() + 2 + 2);
     }
 
     @Override
@@ -340,9 +303,8 @@ public class EncryptionMachine implements IEncryption {
         if (!respCode.equals("00")) {
             throw new RuntimeException("加密机返回失败！" + respCode);
         }
-        String macKeyInfo = respMessage.substring(messageHead.length() + 2 + 2);
 
-        return macKeyInfo;
+        return respMessage.substring(messageHead.length() + 2 + 2);
     }
 
     @Override
@@ -364,9 +326,8 @@ public class EncryptionMachine implements IEncryption {
         if (!respCode.equals("00")) {
             throw new RuntimeException("加密机返回失败！" + respCode);
         }
-        String zekKeyInfo = respMessage.substring(messageHead.length() + 2 + 2);
 
-        return zekKeyInfo;
+        return respMessage.substring(messageHead.length() + 2 + 2);
     }
 
     @Override
@@ -405,8 +366,7 @@ public class EncryptionMachine implements IEncryption {
             throw new RuntimeException("加密机返回失败！" + respCode);
         }
 
-        String macInfo = respMessage.substring(messageHead.length() + 2 + 2);
-        return macInfo;
+        return respMessage.substring(messageHead.length() + 2 + 2);
     }
 
     @Override
@@ -416,7 +376,7 @@ public class EncryptionMachine implements IEncryption {
         sb.append(messageHead).append("A0").append("1000");
         // 4.Key scheme LMK 5.ZMK 6.Key scheme ZMK
 
-        sb.append("X").append("X" + lmkZmk).append("X");
+        sb.append("X").append("X").append(lmkZmk).append("X");
         String respMessage = send(sb.toString());
 
         String respCode = respMessage.substring(messageHead.length() + 2, headIndex);
@@ -430,7 +390,7 @@ public class EncryptionMachine implements IEncryption {
     public String[] getZekKeyArray(String lmkDek) {
         StringBuilder sb = new StringBuilder();
         // 1.消息头 2.命令代码 3标志(1位) 4.ZMK
-        sb.append(messageHead).append("FI").append("0").append("X" + lmkDek);
+        sb.append(messageHead).append("FI").append("0").append("X").append(lmkDek);
         // 5.分隔符 ;6.Key scheme LMK  7.Key scheme ZMK 8.密钥校验值
         sb.append(";").append("X").append("X").append("1");
 
@@ -450,7 +410,7 @@ public class EncryptionMachine implements IEncryption {
         // 1.消息头 2.命令代码 3.密钥类型（3位）
         sb.append(messageHead).append("A6").append("000");
         // 4. ZMK 5. ZMK加密过的密钥 6.Key scheme LMK
-        sb.append("X" + lmkZmk).append("X" + zmkTmk).append("X");
+        sb.append("X").append(lmkZmk).append("X").append(zmkTmk).append("X");
 
         String respMessage = send(sb.toString());
 
@@ -467,7 +427,7 @@ public class EncryptionMachine implements IEncryption {
         // 1.消息头 2.命令代码 3.密钥类型（3位）
         sb.append(messageHead).append("A8").append("000");
         // 4. ZMK 5. LMK加密过的密钥 6.Key scheme ZMK
-        sb.append("X" + lmkDek).append("X" + lmkTmk).append("X");
+        sb.append("X").append(lmkDek).append("X").append(lmkTmk).append("X");
 
         String respMessage = send(sb.toString());
 
@@ -484,14 +444,14 @@ public class EncryptionMachine implements IEncryption {
         // 1.消息头 2.命令代码 3,消息块编号0 4,加解密类型0 5.算法1 6.密钥类型 0(zek)
         sb.append(messageHead).append("E0").append("0110");
         // 7.ZEK 8,导入数据结构 1  9.导出数据结构 1 10,填充模式0 11,填充字符 0000 12. 填充计数类型0
-        sb.append("X" + lmkZek).append("111FFFF1");
+        sb.append("X").append(lmkZek).append("111FFFF1");
         //  13 加密数据长度 14加密数据
-        String lenStrHex = Integer.toHexString(zekData.length()/2);
+        String lenStrHex = Integer.toHexString(zekData.length() / 2);
         lenStrHex = StringUtils.leftPad(lenStrHex, 3, "0");
         sb.append(lenStrHex).append(zekData);
-        String  respMessage = send(sb.toString());
+        String respMessage = send(sb.toString());
 
-        String respCode = respMessage.substring(9,headIndex);
+        String respCode = respMessage.substring(9, headIndex);
         if (!"00".equals(respCode)) {
             throw new RuntimeException("加密机返回失败！" + respCode);
         }
@@ -507,14 +467,14 @@ public class EncryptionMachine implements IEncryption {
         // 1.消息头 2.命令代码 3,消息块编号0 4,加解密类型0 5.算法1 6.密钥类型 0(zek)
         sb.append(messageHead).append("E0").append("0010");
         // 7.ZEK 8,导入数据结构 1  9.导出数据结构 1 10,填充模式0 11,填充字符 0000 12. 填充计数类型0
-        sb.append("X" + lmkZek).append("111FFFF1");
+        sb.append("X").append(lmkZek).append("111FFFF1");
         //  13 加密数据长度 14加密数据
-        String lenStrHex = Integer.toHexString(data.length()/2);
+        String lenStrHex = Integer.toHexString(data.length() / 2);
         lenStrHex = StringUtils.leftPad(lenStrHex, 3, "0");
         sb.append(lenStrHex).append(data);
-        String  respMessage = send(sb.toString());
+        String respMessage = send(sb.toString());
 
-        String respCode = respMessage.substring(9,headIndex);
+        String respCode = respMessage.substring(9, headIndex);
         if (!"00".equals(respCode)) {
             throw new RuntimeException("加密机返回失败！" + respCode);
         }
