@@ -4,6 +4,7 @@ import com.payneteasy.tlv.HexUtil;
 import com.yada.sdk.device.encryption.IEncryption;
 import com.yada.sdk.net.FixLenPackageSplitterFactory;
 import com.yada.sdk.net.TcpClient;
+
 import java.io.IOException;
 import java.net.InetSocketAddress;
 import java.nio.ByteBuffer;
@@ -449,16 +450,17 @@ public class EncryptionMachine implements IEncryption {
     }
 
     @Override
-    public byte[] getDataByDecryption(byte[] zekData, String lmkZek) throws IOException {
+    public byte[] getByteDataByDecryption(byte[] zekData, String lmkZek) throws IOException {
         StringBuilder sb = new StringBuilder();
         // 1.消息头 2.命令代码 3,消息块编号0 4,加解密类型0 5.算法1 6.密钥类型 0(zek)
         sb.append(messageHead).append("E0").append("0110");
-        // 7.ZEK 8,导入数据结构 1  9.导出数据结构 0 10,填充模式0 11,填充字符 FFFF 12. 填充计数类型1
+        // 7.ZEK 8,导入数据结构 0  9.导出数据结构 0 10,填充模式1 11,填充字符 FFFF 12. 填充计数类型1
         sb.append("X" + lmkZek).append("001FFFF1");
         //  13 加密数据长度 14加密数据
         String lenStrHex = Integer.toHexString(zekData.length);
         lenStrHex = "000".substring(0, 3 - lenStrHex.length()) + lenStrHex;
         sb.append(lenStrHex.toUpperCase());
+
         byte[] respMessage = sendBiary(sb.toString(),zekData);
 
         //发送
@@ -478,11 +480,11 @@ public class EncryptionMachine implements IEncryption {
     }
 
     @Override
-    public byte[] getDataByEncryption(byte[] data, String lmkZek) throws IOException {
+    public byte[] getByteDataByEncryption(byte[] data, String lmkZek) throws IOException {
         StringBuilder sb = new StringBuilder();
         // 1.消息头 2.命令代码 3,消息块编号0 4,加解密类型0 5.算法1 6.密钥类型 0(zek)
         sb.append(messageHead).append("E0").append("0010");
-        // 7.ZEK 8,导入数据结构 1  9.导出数据结构 0 10,填充模式0 11,填充字符 FFFF 12. 填充计数类型1
+        // 7.ZEK 8,导入数据结构 0  9.导出数据结构 0 10,填充模式1 11,填充字符 FFFF 12. 填充计数类型1
         sb.append("X" + lmkZek).append("001FFFF1");
         //  13 加密数据长度 14加密数据
         String lenStrHex = Integer.toHexString(data.length);
@@ -505,7 +507,6 @@ public class EncryptionMachine implements IEncryption {
         System.arraycopy(respMessage, 15, retByte, 0, count);
         return retByte;
     }
-
     /**
      * 解析加密机Z类型(16长度)内容
      *

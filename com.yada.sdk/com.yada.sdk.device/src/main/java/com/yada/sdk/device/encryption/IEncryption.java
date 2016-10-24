@@ -158,7 +158,7 @@ public interface IEncryption {
      * @return data
      * @author TX
      */
-    public byte[] getDataByDecryption(byte[] zekData, String lmkZek) throws IOException;
+    public byte[] getByteDataByDecryption(byte[] zekData, String lmkZek) throws IOException;
 
     /***
      * 通过Zek保护数据(二进制数据)
@@ -169,6 +169,5 @@ public interface IEncryption {
      * @return 加密数据
      * @author TX
      */
-    public byte[] getDataByEncryption(byte[] data, String lmkZek) throws IOException;
-
+    public byte[] getByteDataByEncryption(byte[] data, String lmkZek) throws IOException;
 }
