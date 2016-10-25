@@ -19,10 +19,6 @@ public class EncryptionMachine implements IEncryption {
 
     //报文头长度
     private final int headIndex = messageHead.length() + 4;
-    //截取字段一Z类型索引16位密钥
-    private final int oneParagraphZIndex = headIndex + 8 * 2;
-    //截取字段二Z类型索引
-    private final int twoParagraphZIndex = oneParagraphZIndex + 8 * 2;
     //截取字段一X类型索引
     private final int oneParagraphXIndex = headIndex + 1 + 16 * 2;
     //截取字段二X类型索引
@@ -455,13 +451,13 @@ public class EncryptionMachine implements IEncryption {
         // 1.消息头 2.命令代码 3,消息块编号0 4,加解密类型0 5.算法1 6.密钥类型 0(zek)
         sb.append(messageHead).append("E0").append("0110");
         // 7.ZEK 8,导入数据结构 0  9.导出数据结构 0 10,填充模式1 11,填充字符 FFFF 12. 填充计数类型1
-        sb.append("X" + lmkZek).append("001FFFF1");
+        sb.append("X").append(lmkZek).append("001FFFF1");
         //  13 加密数据长度 14加密数据
         String lenStrHex = Integer.toHexString(zekData.length);
         lenStrHex = "000".substring(0, 3 - lenStrHex.length()) + lenStrHex;
         sb.append(lenStrHex.toUpperCase());
 
-        byte[] respMessage = sendBiary(sb.toString(),zekData);
+        byte[] respMessage = buildDataAlsoSend(sb.toString(),zekData);
 
         //发送
         byte[] retCodeByte = new byte[2];
@@ -485,12 +481,12 @@ public class EncryptionMachine implements IEncryption {
         // 1.消息头 2.命令代码 3,消息块编号0 4,加解密类型0 5.算法1 6.密钥类型 0(zek)
         sb.append(messageHead).append("E0").append("0010");
         // 7.ZEK 8,导入数据结构 0  9.导出数据结构 0 10,填充模式1 11,填充字符 FFFF 12. 填充计数类型1
-        sb.append("X" + lmkZek).append("001FFFF1");
+        sb.append("X").append(lmkZek).append("001FFFF1");
         //  13 加密数据长度 14加密数据
         String lenStrHex = Integer.toHexString(data.length);
         lenStrHex = "000".substring(0, 3 - lenStrHex.length()) + lenStrHex;
         sb.append(lenStrHex.toUpperCase());
-        byte[] respMessage = sendBiary(sb.toString(),data);
+        byte[] respMessage = buildDataAlsoSend(sb.toString(),data);
 
         //发送
         byte[] retCodeByte = new byte[2];
@@ -507,23 +503,6 @@ public class EncryptionMachine implements IEncryption {
         System.arraycopy(respMessage, 15, retByte, 0, count);
         return retByte;
     }
-    /**
-     * 解析加密机Z类型(16长度)内容
-     *
-     * @param data 返回数据
-     * @return [第一段数据, 第二段数据(如不包含第二段密钥则为空, kcv]
-     */
-    public String[] unpackZ(String data, boolean isContainTwoKey) {
-        String[] returnoneKey = new String[3];
-        returnoneKey[0] = data.substring(headIndex, oneParagraphZIndex);
-        if (isContainTwoKey) {
-            returnoneKey[1] = data.substring(oneParagraphZIndex, twoParagraphZIndex);
-            returnoneKey[2] = data.substring(twoParagraphZIndex, twoParagraphZIndex + 16);
-        } else {
-            returnoneKey[1] = data.substring(oneParagraphZIndex, oneParagraphZIndex + 16);
-        }
-        return returnoneKey;
-    }
 
     /**
      * 解析加密机X类型(32长度)内容
@@ -531,7 +510,7 @@ public class EncryptionMachine implements IEncryption {
      * @param data 返回数据
      * @return [第一段数据, 第二段数据(如不包含第二段密钥则为空, kcv]
      */
-    public String[] unpackX(String data, boolean isContainTwoKey) {
+    private String[] unpackX(String data, boolean isContainTwoKey) {
         String[] returnoneKey = new String[3];
         returnoneKey[0] = data.substring(headIndex, oneParagraphXIndex).substring(1);
         if (isContainTwoKey) {
@@ -544,7 +523,7 @@ public class EncryptionMachine implements IEncryption {
     }
 
     /**
-     * 向加密机发送二进制数据
+     * 将数据进行组装并发送至加密机
      *
      * @param reqMessage
      *            报文非加密/解密部分
@@ -554,7 +533,7 @@ public class EncryptionMachine implements IEncryption {
      * @throws IOException
      *             IO异常抛出
      */
-    private byte[] sendBiary(String reqMessage, byte[] data) throws IOException {
+    private byte[] buildDataAlsoSend(String reqMessage, byte[] data) throws IOException {
         byte[] b = reqMessage.getBytes();
         int i = b.length;
         // 扩容数组
