@@ -240,7 +240,7 @@ public class EncryptionMachine implements IEncryption {
         String respMessage = send(sb.toString());
         String respCode = respMessage.substring(messageHead.length() + 2, messageHead.length() + 2 + 2);
         if (!respCode.equals("00")) {
-            throw new RuntimeException("加密机返回失败！" + respCode);
+            throw new HSMException("加密机返回失败！错误码:" + respCode);
         }
 
         return respMessage.substring(messageHead.length() + 2 + 2);
@@ -262,7 +262,7 @@ public class EncryptionMachine implements IEncryption {
         String respMessage = send(sb.toString());
         String respCode = respMessage.substring(messageHead.length() + 2, messageHead.length() + 2 + 2);
         if (!respCode.equals("00")) {
-            throw new RuntimeException("加密机返回失败！" + respCode);
+            throw new HSMException("加密机返回失败！错误码:" + respCode);
         }
         //去F
 
@@ -286,7 +286,7 @@ public class EncryptionMachine implements IEncryption {
         String respMessage = send(sb.toString());
         String respCode = respMessage.substring(messageHead.length() + 2, messageHead.length() + 2 + 2);
         if (!respCode.equals("00")) {
-            throw new RuntimeException("加密机返回失败！" + respCode);
+            throw new HSMException("加密机返回失败！错误码:" + respCode);
         }
 
         return respMessage.substring(messageHead.length() + 2 + 2);
@@ -314,7 +314,7 @@ public class EncryptionMachine implements IEncryption {
 
         String respCode = respMessage.substring(messageHead.length() + 2, messageHead.length() + 2 + 2);
         if (!respCode.equals("00")) {
-            throw new RuntimeException("加密机返回失败！" + respCode);
+            throw new HSMException("加密机返回失败！错误码:" + respCode);
         }
 
         return respMessage.substring(messageHead.length() + 2 + 2);
@@ -337,7 +337,7 @@ public class EncryptionMachine implements IEncryption {
         String respMessage = send(sb.toString());
         String respCode = respMessage.substring(messageHead.length() + 2, messageHead.length() + 2 + 2);
         if (!respCode.equals("00")) {
-            throw new RuntimeException("加密机返回失败！" + respCode);
+            throw new HSMException("加密机返回失败！错误码:" + respCode);
         }
 
         return respMessage.substring(messageHead.length() + 2 + 2);
@@ -376,7 +376,7 @@ public class EncryptionMachine implements IEncryption {
 		String respCode = respMessage.substring(messageHead.length()+2, messageHead.length()+2+2);*/
 
         if (!respCode.equals("00")) {
-            throw new RuntimeException("加密机返回失败！" + respCode);
+            throw new HSMException("加密机返回失败！错误码:" + respCode);
         }
 
         return respMessage.substring(messageHead.length() + 2 + 2);
@@ -393,7 +393,7 @@ public class EncryptionMachine implements IEncryption {
 
         String respCode = respMessage.substring(messageHead.length() + 2, headIndex);
         if (!respCode.equals("00")) {
-            throw new RuntimeException("加密机返回失败！" + respCode);
+            throw new HSMException("加密机返回失败！错误码:" + respCode);
         }
         return unpackX(respMessage, true);
     }
@@ -408,7 +408,7 @@ public class EncryptionMachine implements IEncryption {
 
         String respCode = respMessage.substring(messageHead.length() + 2, headIndex);
         if (!respCode.equals("00")) {
-            throw new RuntimeException("加密机返回失败！" + respCode);
+            throw new HSMException("加密机返回失败！错误码:" + respCode);
         }
         return unpackX(respMessage, true);
     }
@@ -424,7 +424,7 @@ public class EncryptionMachine implements IEncryption {
 
         String respCode = respMessage.substring(messageHead.length() + 2, headIndex);
         if (!respCode.equals("00")) {
-            throw new RuntimeException("加密机返回失败！" + respCode);
+            throw new HSMException("加密机返回失败！错误码:" + respCode);
         }
         return unpackX(respMessage, false);
     }
@@ -440,7 +440,7 @@ public class EncryptionMachine implements IEncryption {
 
         String respCode = respMessage.substring(messageHead.length() + 2, headIndex);
         if (!respCode.equals("00")) {
-            throw new RuntimeException("加密机返回失败！" + respCode);
+            throw new HSMException("加密机返回失败！错误码:" + respCode);
         }
         return unpackX(respMessage, false)[0];
     }
@@ -464,7 +464,7 @@ public class EncryptionMachine implements IEncryption {
         System.arraycopy(respMessage, 9, retCodeByte, 0, 2);
         String respCode = new String(retCodeByte);
         if (!"00".equals(respCode)) {
-            throw new RuntimeException("加密机返回失败！" + respCode);
+            throw new HSMException("加密机返回失败！错误码:" + respCode);
         }
         // 截取应返回数据的长度
         byte[] lengthCount = new byte[3];
@@ -493,7 +493,7 @@ public class EncryptionMachine implements IEncryption {
         System.arraycopy(respMessage, 9, retCodeByte, 0, 2);
         String respCode = new String(retCodeByte);
         if (!"00".equals(respCode)) {
-            throw new RuntimeException("加密机返回失败！" + respCode);
+            throw new HSMException("加密机返回失败！错误码:" + respCode);
         }
         // 截取应返回数据的长度
         byte[] lengthCount = new byte[3];
