@@ -21,6 +21,11 @@ public class EncryptionMachine implements IEncryption {
     private final int headIndex = messageHead.length() + 4;
     //截取字段一X类型索引
     private final int oneParagraphXIndex = headIndex + 1 + 16 * 2;
+    //截取字段一Z类型索引16位密钥
+    private final int oneParagraphZIndex = headIndex + 8 * 2;
+    //截取字段二Z类型索引
+    private final int twoParagraphZIndex = oneParagraphZIndex + 8 * 2;
+
     //截取字段二X类型索引
     private final int twoParagraphXIndex = oneParagraphXIndex + 1 + 16 * 2;
 
@@ -405,7 +410,6 @@ public class EncryptionMachine implements IEncryption {
         String sb = messageHead + "FI" + "0" + "X" + lmkDek +
                 ";" + "X" + "X" + "1";
         String respMessage = send(sb);
-
         String respCode = respMessage.substring(messageHead.length() + 2, headIndex);
         if (!respCode.equals("00")) {
             throw new HSMException("加密机返回失败！错误码:" + respCode);
@@ -415,34 +419,61 @@ public class EncryptionMachine implements IEncryption {
 
     @Override
     public String[] getTmkKeyArray(String zmkTmk, String lmkZmk) {
+        int desType = zmkTmk.length() / 16;
         // 1.消息头 2.命令代码 3.密钥类型（3位）
-        // 4. ZMK 5. ZMK加密过的密钥 6.Key scheme LMK
-        String sb = messageHead + "A6" + "000" +
-                "X" + lmkZmk + "X" + zmkTmk + "X";
+        // 4. ZMK
+        StringBuilder sb = new StringBuilder();
+        sb.append(messageHead).append("A6").append("000").append("X").append(lmkZmk);
+        if (desType == 1) {
+            // 5.zmkTmk 6.tmk加密方案
+            sb.append(zmkTmk).append("Z");
+        } else if (desType == 2) {
+            // 5.1A + zmkTmk 6.tmk加密方案
+            sb.append("X").append(zmkTmk).append("X");
+        } else {
+            throw new RuntimeException(String.format("unsupport desType[%s]zmkTmk[%s]", desType, zmkTmk));
+        }
 
-        String respMessage = send(sb);
+        String respMessage = send(sb.toString());
 
         String respCode = respMessage.substring(messageHead.length() + 2, headIndex);
         if (!respCode.equals("00")) {
             throw new HSMException("加密机返回失败！错误码:" + respCode);
         }
-        return unpackX(respMessage, false);
+        if (zmkTmk.length() == 16) {
+            return unpackZ(respMessage, false);
+        } else {
+            return unpackX(respMessage, false);
+        }
     }
 
     @Override
     public String getDekTmk(String lmkDek, String lmkTmk) {
+        int desType = lmkTmk.length() / 16;
         // 1.消息头 2.命令代码 3.密钥类型（3位）
         // 4. ZMK 5. LMK加密过的密钥 6.Key scheme ZMK
-        String sb = messageHead + "A8" + "000" +
-                "X" + lmkDek + "X" + lmkTmk + "X";
-
-        String respMessage = send(sb);
+        StringBuilder sb = new StringBuilder();
+        sb.append(messageHead).append("A8").append("000").append("X").append(lmkDek);
+        if (desType == 1) {
+            // 5.zmkTmk 6.tmk加密方案
+            sb.append(lmkTmk).append("Z");
+        } else if (desType == 2) {
+            // 5.1A + zmkTmk 6.tmk加密方案
+            sb.append("X").append(lmkTmk).append("X");
+        } else {
+            throw new RuntimeException(String.format("unsupport desType[%s]zmkTmk[%s]", desType, lmkTmk));
+        }
+        String respMessage = send(sb.toString());
 
         String respCode = respMessage.substring(messageHead.length() + 2, headIndex);
         if (!respCode.equals("00")) {
             throw new HSMException("加密机返回失败！错误码:" + respCode);
         }
-        return unpackX(respMessage, false)[0];
+        if (lmkTmk.length() == 16) {
+            return unpackZ(respMessage, false)[0];
+        } else {
+            return unpackX(respMessage, false)[0];
+        }
     }
 
     @Override
@@ -457,7 +488,7 @@ public class EncryptionMachine implements IEncryption {
         lenStrHex = "000".substring(0, 3 - lenStrHex.length()) + lenStrHex;
         sb.append(lenStrHex.toUpperCase());
 
-        byte[] respMessage = buildDataAlsoSend(sb.toString(),zekData);
+        byte[] respMessage = buildDataAlsoSend(sb.toString(), zekData);
 
         //发送
         byte[] retCodeByte = new byte[2];
@@ -486,7 +517,7 @@ public class EncryptionMachine implements IEncryption {
         String lenStrHex = Integer.toHexString(data.length);
         lenStrHex = "000".substring(0, 3 - lenStrHex.length()) + lenStrHex;
         sb.append(lenStrHex.toUpperCase());
-        byte[] respMessage = buildDataAlsoSend(sb.toString(),data);
+        byte[] respMessage = buildDataAlsoSend(sb.toString(), data);
 
         //发送
         byte[] retCodeByte = new byte[2];
@@ -502,6 +533,24 @@ public class EncryptionMachine implements IEncryption {
         byte[] retByte = new byte[respMessage.length - 15];
         System.arraycopy(respMessage, 15, retByte, 0, count);
         return retByte;
+    }
+
+    /**
+     * 解析加密机Z类型(16长度)内容
+     *
+     * @param data 返回数据
+     * @return [第一段数据, 第二段数据(如不包含第二段密钥则为空, kcv]
+     */
+    private String[] unpackZ(String data, boolean isContainTwoKey) {
+        String[] returnoneKey = new String[3];
+        returnoneKey[0] = data.substring(headIndex, oneParagraphZIndex);
+        if (isContainTwoKey) {
+            returnoneKey[1] = data.substring(oneParagraphZIndex, twoParagraphZIndex);
+            returnoneKey[2] = data.substring(twoParagraphZIndex, twoParagraphZIndex + 6);
+        } else {
+            returnoneKey[1] = data.substring(oneParagraphZIndex, oneParagraphZIndex + 6);
+        }
+        return returnoneKey;
     }
 
     /**
@@ -525,13 +574,10 @@ public class EncryptionMachine implements IEncryption {
     /**
      * 将数据进行组装并发送至加密机
      *
-     * @param reqMessage
-     *            报文非加密/解密部分
-     * @param data
-     *            加密/解密内容
+     * @param reqMessage 报文非加密/解密部分
+     * @param data       加密/解密内容
      * @return 加密机返回信息
-     * @throws IOException
-     *             IO异常抛出
+     * @throws IOException IO异常抛出
      */
     private byte[] buildDataAlsoSend(String reqMessage, byte[] data) throws IOException {
         byte[] b = reqMessage.getBytes();
