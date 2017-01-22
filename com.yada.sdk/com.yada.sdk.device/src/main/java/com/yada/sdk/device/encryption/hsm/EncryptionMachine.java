@@ -47,7 +47,7 @@ public class EncryptionMachine implements IEncryption {
     // 用于直接发送字节
     private String send(ByteBuffer reqBuffer) {
         TcpClient client = new TcpClient(endPoint,
-                new FixLenPackageSplitterFactory(2, false), 2000);
+                new FixLenPackageSplitterFactory(2, false), 5000);
         try {
             client.open();
             ByteBuffer respBuffer = client.send(reqBuffer);
@@ -65,7 +65,7 @@ public class EncryptionMachine implements IEncryption {
     private byte[] sendBytes(byte[] reqMessage) {
         ByteBuffer reqBuffer = ByteBuffer.wrap(reqMessage);
         TcpClient client = new TcpClient(endPoint,
-                new FixLenPackageSplitterFactory(2, false), 2000);
+                new FixLenPackageSplitterFactory(2, false), 5000);
         try {
             client.open();
             ByteBuffer respBuffer = client.send(reqBuffer);
