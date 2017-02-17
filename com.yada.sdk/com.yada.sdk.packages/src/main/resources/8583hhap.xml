@@ -79,7 +79,7 @@
             class="org.jpos.iso.IFB_NUMERIC"/>
     <isofield
             id="13"
-            length="4"
+            length="8"
             name="DATE, LOCAL TRANSACTION"
             class="org.jpos.iso.IFB_NUMERIC"/>
     <isofield
