@@ -177,6 +177,11 @@
             name="RESPONSE CODE"
             class="com.yada.sdk.packages.transaction.jpos.extend.IF_GBK_CHAR"/>
     <isofield
+            id="40"
+            length="99"
+            name="响应码中文描述"
+            class="com.yada.sdk.packages.transaction.jpos.extend.IFB_GBK_LLCHAR"/>
+    <isofield
             id="41"
             length="8"
             name="CARD ACCEPTOR TERMINAL ID"
