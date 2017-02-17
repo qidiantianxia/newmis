@@ -15,6 +15,7 @@ public class EncryptionMachine implements IEncryption {
     private String lmkZmk;
     private InetSocketAddress endPoint;
     private String messageHead = "-------";
+    private int timeout = 2000;
 
 
     //报文头长度
@@ -38,6 +39,17 @@ public class EncryptionMachine implements IEncryption {
         this.endPoint = new InetSocketAddress(serverIp, port);
     }
 
+    /**
+     *  增加加密机超时参数
+     * @param serverIp 加密机IP
+     * @param port     加密机端口
+     * @param timeout 与加密机的超时时间
+     */
+    public EncryptionMachine(String serverIp, int port,int timeout) {
+        this.timeout=timeout;
+        this.endPoint = new InetSocketAddress(serverIp, port);
+    }
+
 
     private String send(String reqMessage) {
         ByteBuffer reqBuffer = ByteBuffer.wrap(reqMessage.getBytes());
@@ -47,7 +59,7 @@ public class EncryptionMachine implements IEncryption {
     // 用于直接发送字节
     private String send(ByteBuffer reqBuffer) {
         TcpClient client = new TcpClient(endPoint,
-                new FixLenPackageSplitterFactory(2, false), 2000);
+                new FixLenPackageSplitterFactory(2, false), timeout);
         try {
             client.open();
             ByteBuffer respBuffer = client.send(reqBuffer);
@@ -65,7 +77,7 @@ public class EncryptionMachine implements IEncryption {
     private byte[] sendBytes(byte[] reqMessage) {
         ByteBuffer reqBuffer = ByteBuffer.wrap(reqMessage);
         TcpClient client = new TcpClient(endPoint,
-                new FixLenPackageSplitterFactory(2, false), 2000);
+                new FixLenPackageSplitterFactory(2, false), timeout);
         try {
             client.open();
             ByteBuffer respBuffer = client.send(reqBuffer);
