@@ -200,10 +200,9 @@
             class="com.yada.sdk.packages.transaction.jpos.extend.IF_GBK_CHAR"/>
     <isofield
             id="44"
-            length="26"
+            length="60"
             name="唯一支付流水号"
-            pad="true"
-            class="com.yada.sdk.packages.transaction.jpos.extend.IF_GBK_CHAR"/>
+            class="com.yada.sdk.packages.transaction.jpos.extend.IFB_GBK_LLCHAR"/>
     <isofield
             id="45"
             length="40"
