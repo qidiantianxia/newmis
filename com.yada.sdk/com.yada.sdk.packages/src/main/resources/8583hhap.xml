@@ -135,6 +135,10 @@
               length="9"
               name="交易手续费"
               class="org.jpos.iso.IF_CHAR"/>
+    <isofield id="31"
+              length="4"
+              name="接入机构类型"
+              class="org.jpos.iso.IF_CHAR"/>
     <isofield
             id="32"
             length="11"
