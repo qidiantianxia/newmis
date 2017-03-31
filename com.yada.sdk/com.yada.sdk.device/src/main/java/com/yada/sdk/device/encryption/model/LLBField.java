@@ -12,9 +12,14 @@ public class LLBField implements IHsmField {
 
     private byte[] head;
     private byte[] body = null;
+    private byte[] fullData = null;
 
     public LLBField(int headLength) {
-        head = new byte[headLength];
+        this.head = new byte[headLength];
+    }
+
+    public LLBField(int headLength, byte[] body) {
+        setBody(headLength, body);
     }
 
     @Override
@@ -42,6 +47,16 @@ public class LLBField implements IHsmField {
     }
 
     @Override
+    public byte[] fullValue() {
+        return fullData;
+    }
+
+    @Override
+    public int fullLength() {
+        return fullData.length;
+    }
+
+    @Override
     public String type() {
         return "LLB";
     }
@@ -52,5 +67,21 @@ public class LLBField implements IHsmField {
         int dataLength = Integer.valueOf(new String(head));
         this.body = new byte[dataLength];
         data.get(body);
+        setBody(head.length, body);
+    }
+
+    private void setBody(int headLength, byte[] body) {
+        this.body = body;
+        final String length = String.valueOf(body.length);
+        final StringBuilder sb = new StringBuilder();
+        for (int i = 0; i < headLength; i++) {
+            sb.append("0");
+        }
+        sb.append(length);
+        this.head = sb.toString().getBytes();
+        final ByteBuffer allocate = ByteBuffer.allocate(this.head.length + this.body.length);
+        allocate.put(this.head);
+        allocate.put(this.body);
+        this.fullData = allocate.array();
     }
 }

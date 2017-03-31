@@ -15,5 +15,12 @@ public interface IRsaEncryption {
      */
     RsaKey genKey();
 
-
+    /**
+     * 使用公钥加密数据
+     *
+     * @param pubKey 公钥
+     * @param data   数据
+     * @return
+     */
+    byte[] encrypt(byte[] pubKey, byte[] data);
 }

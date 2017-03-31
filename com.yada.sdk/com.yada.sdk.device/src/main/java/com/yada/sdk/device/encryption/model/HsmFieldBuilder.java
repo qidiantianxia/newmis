@@ -17,14 +17,19 @@ public class HsmFieldBuilder {
         return this;
     }
 
+    public HsmFieldBuilder appendLLB(int headLength, byte[] data) {
+        this.fields.add(new LLBField(headLength, data));
+        return this;
+    }
+
     public ByteBuffer build() {
         int length = 0;
         for (IHsmField field : fields) {
-            length = length + field.length();
+            length = length + field.fullLength();
         }
         ByteBuffer data = ByteBuffer.allocate(length);
         for (IHsmField field : fields) {
-            data.put(field.value());
+            data.put(field.fullValue());
         }
         data.flip();
         return data;

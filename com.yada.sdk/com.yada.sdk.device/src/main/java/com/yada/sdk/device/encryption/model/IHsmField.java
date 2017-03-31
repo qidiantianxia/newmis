@@ -30,6 +30,20 @@ public interface IHsmField {
     byte[] value();
 
     /**
+     * 该域完整数据，如果有长度必须包含长度
+     *
+     * @return （头）+值的字节数组
+     */
+    byte[] fullValue();
+
+    /**
+     * 该域完整数据长度
+     *
+     * @return 完整长度
+     */
+    int fullLength();
+
+    /**
      * 域的类型
      *
      * @return 返回类型

@@ -64,6 +64,16 @@ public class BField implements IHsmField {
     }
 
     @Override
+    public byte[] fullValue() {
+        return value();
+    }
+
+    @Override
+    public int fullLength() {
+        return length();
+    }
+
+    @Override
     public String type() {
         return "B";
     }
