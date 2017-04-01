@@ -42,19 +42,12 @@ public class RsaMachine implements IRsaEncryption {
                 .appendLLB(4)
                 .appendLastB()
                 .parse(rece);
-        if (fields.size() < 3) {
-            logger.warn("parse fields size < 2. rece data is :{}", Hex.encodeHexString(rece.array()));
+        if (fields == null) {
             return null;
-        } else if (fields.size() == 3) {
-            logger.warn("respCode has a error. {}", fields.get(2).sValue());
-            return null;
-        } else if (fields.size() == 5) {
+        } else {
             byte[] priKey = fields.get(3).value();
             byte[] pubKey = fields.get(4).value();
             return new RsaKey(priKey, pubKey);
-        } else {
-            logger.warn("parse has a unKnow error. rece data is:{}", Hex.encodeHexString(rece.array()));
-            return null;
         }
     }
 
@@ -67,6 +60,31 @@ public class RsaMachine implements IRsaEncryption {
                 .appendAN("99")
                 .appendLLB(4, data)
                 .appendLastB(pubKey)
+                .build();
+        ByteBuffer rece = hsmClient.send(req);
+        List<IHsmField> fields = new HsmFieldParser()
+                .appendAN(7)
+                .appendAN(2)
+                .appendAN(2)
+                .appendLLB(4)
+                .parse(rece);
+        if (fields == null) {
+            return null;
+        } else {
+            return fields.get(3).value();
+        }
+    }
+
+    @Override
+    public byte[] decrypt(byte[] priKey, byte[] data) {
+        ByteBuffer req = new HsmFieldBuilder()
+                .appendAN(hsmHead)
+                .appendAN("33")
+                .appendAN("1")
+                .appendAN("99")
+                .appendLLB(4, priKey)
+                .appendLLB(4, data)
+//                .appendLastB(priKey)
                 .build();
         ByteBuffer rece = hsmClient.send(req);
         List<IHsmField> fields = new HsmFieldParser()

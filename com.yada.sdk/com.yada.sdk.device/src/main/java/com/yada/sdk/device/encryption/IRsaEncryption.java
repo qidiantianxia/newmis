@@ -19,8 +19,17 @@ public interface IRsaEncryption {
      * 使用公钥加密数据
      *
      * @param pubKey 公钥
-     * @param data   数据
-     * @return
+     * @param data   明文数据
+     * @return 加密后的数据
      */
     byte[] encrypt(byte[] pubKey, byte[] data);
+
+    /**
+     * 使用私钥解密
+     *
+     * @param priKey 私钥
+     * @param data   要解密数据
+     * @return 明文数据
+     */
+    byte[] decrypt(byte[] priKey, byte[] data);
 }
