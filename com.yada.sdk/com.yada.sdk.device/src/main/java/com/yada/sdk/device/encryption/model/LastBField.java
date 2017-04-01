@@ -12,11 +12,11 @@ public class LastBField implements IHsmField {
 
     private byte[] data = null;
 
-    public LastBField() {
+    LastBField() {
 
     }
 
-    public LastBField(byte[] data) {
+    LastBField(byte[] data) {
         this.data = data;
     }
 
@@ -25,7 +25,7 @@ public class LastBField implements IHsmField {
         if (data == null) {
             throw new RuntimeException("must exec setValue before exec length");
         }
-        return 0;
+        return data.length;
     }
 
     @Override

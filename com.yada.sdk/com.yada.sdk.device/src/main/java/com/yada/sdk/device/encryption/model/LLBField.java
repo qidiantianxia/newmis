@@ -14,11 +14,11 @@ public class LLBField implements IHsmField {
     private byte[] body = null;
     private byte[] fullData = null;
 
-    public LLBField(int headLength) {
+    LLBField(int headLength) {
         this.head = new byte[headLength];
     }
 
-    public LLBField(int headLength, byte[] body) {
+    LLBField(int headLength, byte[] body) {
         setBody(headLength, body);
     }
 
@@ -74,7 +74,7 @@ public class LLBField implements IHsmField {
         this.body = body;
         final String length = String.valueOf(body.length);
         final StringBuilder sb = new StringBuilder();
-        for (int i = 0; i < headLength; i++) {
+        for (int i = 0; i < headLength - length.length(); i++) {
             sb.append("0");
         }
         sb.append(length);

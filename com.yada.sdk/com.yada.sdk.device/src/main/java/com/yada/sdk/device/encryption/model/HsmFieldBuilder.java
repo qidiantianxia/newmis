@@ -22,6 +22,11 @@ public class HsmFieldBuilder {
         return this;
     }
 
+    public HsmFieldBuilder appendLastB(byte[] data) {
+        this.fields.add(new LastBField(data));
+        return this;
+    }
+
     public ByteBuffer build() {
         int length = 0;
         for (IHsmField field : fields) {

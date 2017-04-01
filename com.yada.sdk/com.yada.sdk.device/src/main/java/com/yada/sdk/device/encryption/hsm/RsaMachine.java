@@ -35,13 +35,13 @@ public class RsaMachine implements IRsaEncryption {
         if (rece == null) {
             return null;
         }
-        HsmFieldParser parser = new HsmFieldParser()
-                .build(new ANField(7))
-                .build(new ANField(2))
-                .build(new ANField(2))
-                .build(new LLBField(4))
-                .build(new LastBField());
-        List<IHsmField> fields = parser.parse(rece);
+        List<IHsmField> fields = new HsmFieldParser()
+                .appendAN(7)
+                .appendAN(2)
+                .appendAN(2)
+                .appendLLB(4)
+                .appendLastB()
+                .parse(rece);
         if (fields.size() < 3) {
             logger.warn("parse fields size < 2. rece data is :{}", Hex.encodeHexString(rece.array()));
             return null;
@@ -65,27 +65,20 @@ public class RsaMachine implements IRsaEncryption {
                 .appendAN("30")
                 .appendAN("1")
                 .appendAN("99")
-                .appendLLB(4, pubKey)
                 .appendLLB(4, data)
+                .appendLastB(pubKey)
                 .build();
         ByteBuffer rece = hsmClient.send(req);
         List<IHsmField> fields = new HsmFieldParser()
-                .build(new ANField(7))
-                .build(new ANField(2))
-                .build(new ANField(2))
-                .build(new LLBField(4))
+                .appendAN(7)
+                .appendAN(2)
+                .appendAN(2)
+                .appendLLB(4)
                 .parse(rece);
-        if (fields.size() < 3) {
-            logger.warn("parse fields size < 2. rece data is :{}", Hex.encodeHexString(rece.array()));
+        if (fields == null) {
             return null;
-        } else if (fields.size() == 3) {
-            logger.warn("respCode has a error. {}", fields.get(2).sValue());
-            return null;
-        } else if (fields.size() == 5) {
-            return fields.get(4).value();
         } else {
-            logger.warn("parse has a unKnow error. rece data is:{}", Hex.encodeHexString(rece.array()));
-            return null;
+            return fields.get(3).value();
         }
     }
 }
