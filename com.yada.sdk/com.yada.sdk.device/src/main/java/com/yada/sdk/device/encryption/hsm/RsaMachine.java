@@ -76,13 +76,13 @@ public class RsaMachine implements IRsaEncryption {
     }
 
     @Override
-    public byte[] decrypt(byte[] priKey, byte[] data) {
+    public byte[] decrypt(byte[] priKeyLmk, byte[] data) {
         ByteBuffer req = new HsmFieldBuilder()
                 .appendAN(hsmHead)
                 .appendAN("33")
                 .appendAN("1")
                 .appendAN("99")
-                .appendLLB(4, priKey)
+                .appendLLB(4, priKeyLmk)
                 .appendLLB(4, data)
 //                .appendLastB(priKey)
                 .build();

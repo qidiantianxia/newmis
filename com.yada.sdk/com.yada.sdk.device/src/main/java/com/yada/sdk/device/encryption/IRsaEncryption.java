@@ -27,9 +27,9 @@ public interface IRsaEncryption {
     /**
      * 使用私钥解密
      *
-     * @param priKey 私钥
-     * @param data   要解密数据
+     * @param priKeyLmk 本地主密钥保护的私钥
+     * @param data      要解密数据
      * @return 明文数据
      */
-    byte[] decrypt(byte[] priKey, byte[] data);
+    byte[] decrypt(byte[] priKeyLmk, byte[] data);
 }
