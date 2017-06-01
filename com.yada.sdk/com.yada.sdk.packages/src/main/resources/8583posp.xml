@@ -251,7 +251,7 @@
             id="59"
             length="999"
             name="BUSINESS FEATURE ELEMENTS"
-            class="com.yada.sdk.packages.transaction.jpos.extend.IFB_GBK_LLLCHAR"/>
+            class="org.jpos.iso.IFB_LLLBINARY"/>
     <isofield
             id="60"
             length="999"
