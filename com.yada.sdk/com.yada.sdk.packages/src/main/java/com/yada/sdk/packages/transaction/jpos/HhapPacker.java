@@ -8,12 +8,14 @@ import org.jpos.iso.ISOException;
 public class HhapPacker extends CustomPacker<JposMessage> {
 
     public HhapPacker() throws ISOException {
-        super(0, "/8583hhap.xml", "hhap");
+        super(7, "/8583hhap.xml", "hhap");
     }
 
     @Override
     protected JposMessage generateJposMessage() {
-        return new JposMessage();
+        JposMessage msg = new JposMessage();
+        msg.setHeader(new byte[]{0x60, 0x12, 0x34, 0x56, 0x78, 0x10, 0x00});
+        return msg;
     }
 
     @Override
