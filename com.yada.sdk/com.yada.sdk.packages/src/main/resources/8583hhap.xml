@@ -211,7 +211,7 @@
             id="45"
             length="40"
             name="二级商户名称"
-            class="com.yada.sdk.packages.transaction.jpos.extend.IFB_GBK_LLCHAR"/>
+            class="com.yada.sdk.packages.transaction.jpos.extend.IF_GBK_CHAR"/>
     <isofield
             id="48"
             length="999"
