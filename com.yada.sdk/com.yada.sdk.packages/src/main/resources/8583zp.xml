@@ -37,6 +37,12 @@
             pad="true"
             class="org.jpos.iso.IFA_NUMERIC"/>
     <isofield
+            id="6"
+            length="12"
+            name="以持卡人帐户货币表示的收取持卡人的金额"
+            pad="true"
+            class="org.jpos.iso.IFA_NUMERIC"/>
+    <isofield
             id="7"
             length="10"
             name="交易日期时间"
@@ -202,6 +208,12 @@
             pad="true"
             class="org.jpos.iso.IFA_NUMERIC"/>
     <isofield
+            id="51"
+            length="3"
+            name="Currency Code,Cardholder Billing"
+            pad="true"
+            class="org.jpos.iso.IFA_NUMERIC"/>
+    <isofield
             id="52"
             length="16"
             name="PIN DATA"
@@ -240,7 +252,7 @@
             id="61"
             length="999"
             name="RESERVED PRIVATE"
-            class="org.jpos.iso.IFA_LLLCHAR"/>
+            class="com.yada.sdk.packages.transaction.jpos.extend.IFA_GBK_LLLCHAR"/>
     <isofield
             id="62"
             length="999"
